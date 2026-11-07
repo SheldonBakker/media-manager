@@ -3022,19 +3022,16 @@ a.bar-label:hover { color: var(--accent); }
 .side-menu a > svg { color: var(--text-dim); flex: none; }
 .side-tip { position: fixed; z-index: 1000; transform: translate(-50%, calc(-100% - 8px)); max-width: 260px; padding: 6px 10px; border-radius: 8px; background: var(--text); color: var(--bg); font-size: 0.78rem; font-weight: 600; line-height: 1.35; text-align: center; pointer-events: none; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
 
-/* The bottom buttons are links or buttons; keep both identical and still:
-   none of the sidebar link styles (padding, half-rounded corners, the slide
-   on hover) apply to them. */
-.sidebar .side-tools .side-tool,
-.sidebar .side-tools a.side-tool:not(.active):hover {
+/* The bottom buttons stay still: none of the sidebar link styles (padding,
+   half-rounded corners, the slide on hover) apply to them. */
+.sidebar .side-tools .side-tool {
   display: grid; place-items: center; box-sizing: border-box;
   width: 34px; height: 34px; min-width: 34px; min-height: 34px;
   padding: 0; margin: 0; gap: 0; line-height: 0;
   border-radius: 10px; transform: none; box-shadow: none;
 }
 .sidebar .side-tools .side-tool:hover,
-.sidebar .side-tools .side-tool:focus-visible,
-.sidebar .side-tools a.side-tool:not(.active):hover {
+.sidebar .side-tools .side-tool:focus-visible {
   color: var(--text); background: var(--surface-2);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
