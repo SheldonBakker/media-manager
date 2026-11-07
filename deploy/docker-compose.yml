@@ -1,0 +1,39 @@
+# Media Manager on the VM. Lives in /opt/docker/<VM_DOCKER_FOLDER> (default
+# /opt/docker/media-manager). .github/workflows/deploy.yml rewrites .env next to it
+# from the STACK_ENV variable on every deploy and pins MEDIA_MANAGER_IMAGE to the
+# image built from that commit.
+#
+# STACK_ENV example (one KEY=value per line):
+#   PUID=1000
+#   PGID=1000
+#   TZ=Africa/Johannesburg
+#   MEDIA_CONFIG_DIR=/home/noodle/media-manager/config
+#   MEDIA_DATA_DIR=/home/noodle/media
+
+services:
+  media-manager:
+    image: ${MEDIA_MANAGER_IMAGE:-ghcr.io/sheldonbakker/media-manager:latest}
+    container_name: media-manager
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    env_file:
+      - .env
+    environment:
+      DOWNLOADS_DIR: ${DOWNLOADS_DIR:-/data/downloads}
+      MOVIES_DIR: ${MOVIES_DIR:-/data/movies}
+      TV_DIR: ${TV_DIR:-/data/tv}
+    ports:
+      - "${MEDIA_MANAGER_BIND_ADDRESS:-0.0.0.0}:${MEDIA_MANAGER_PORT:-8264}:8264"
+      - "58264:58264/tcp"
+      - "58264:58264/udp"
+    volumes:
+      # Settings and database: keep on a local disk and back it up.
+      - ${MEDIA_CONFIG_DIR:-./config}:/config
+      # One folder holding downloads, movies and TV, so imports are instant hardlinks.
+      - ${MEDIA_DATA_DIR:-./data}:/data

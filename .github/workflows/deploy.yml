@@ -1,0 +1,92 @@
+name: Build and Deploy
+
+# On every push to main: rebrand the checkout (rebrand/apply.sh), build the image, push it
+# to GHCR as :latest and :<sha>, then deploy that exact :<sha> image to the VM over
+# Tailscale. The VM folder /opt/docker/<VM_DOCKER_FOLDER> holds deploy/docker-compose.yml;
+# its .env is rewritten from the STACK_ENV variable on every deploy.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time, so an older build never overwrites a newer one's .env mid-flight.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: sheldonbakker/${{ vars.IMAGE_NAME || 'media-manager' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Rebrand
+        run: rebrand/apply.sh .
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=AGPL-3.0
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci-cd
+          ping: ${{ secrets.VM_HOST }}
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          envs: STACK_ENV,DEPLOY_IMAGE,DOCKER_FOLDER
+          script: |
+            set -euo pipefail
+            cd "/opt/docker/$DOCKER_FOLDER"
+            if [ -z "${STACK_ENV:-}" ]; then
+              echo "STACK_ENV is empty; refusing to overwrite .env" >&2
+              exit 1
+            fi
+            printf '%s\n' "$STACK_ENV" | sed '/^MEDIA_MANAGER_IMAGE=/d' > .env.new
+            printf 'MEDIA_MANAGER_IMAGE=%s\n' "$DEPLOY_IMAGE" >> .env.new
+            chmod 640 .env.new
+            mv .env.new .env
+            chgrp docker .env
+            docker compose pull
+            docker compose up -d
+        env:
+          STACK_ENV: ${{ vars.STACK_ENV }}
+          DEPLOY_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          DOCKER_FOLDER: ${{ vars.VM_DOCKER_FOLDER || 'media-manager' }}
