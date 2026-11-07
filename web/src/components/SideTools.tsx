@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { AppLink, WatchLink } from '../api'
 import { openBookApp } from '../bookshelf/open'
-import { REPO_URL } from '../docs'
 import { t } from '../i18n'
 import Icon, { type IconName, ICON_NAMES } from './Icon'
 import { useMusicPlayer } from './MusicPlayer'
@@ -131,10 +130,9 @@ function PlayMenu({ homes, apps, ebooksOn, audiobooksOn, musicOn, at, onClose, b
 
 // One round button with a tooltip that floats above the page, so the
 // sidebar's edge never cuts it off.
-function Tool({ label, className = '', href, onClick, children, expanded, showTip, hideTip }: {
+function Tool({ label, className = '', onClick, children, expanded, showTip, hideTip }: {
   label: string
   className?: string
-  href?: string
   onClick?: (el: HTMLElement) => void
   children: ReactNode
   expanded?: boolean
@@ -147,26 +145,6 @@ function Tool({ label, className = '', href, onClick, children, expanded, showTi
     onFocus: (e: React.FocusEvent<HTMLElement>) => showTip(label, e.currentTarget),
     onMouseLeave: hideTip,
     onBlur: hideTip,
-  }
-  if (href) {
-    return (
-      <a
-        className={`side-tool ${className}`}
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        onClick={(e) => {
-          hideTip()
-          if (onClick) {
-            e.preventDefault()
-            onClick(e.currentTarget)
-          }
-        }}
-        {...events}
-      >
-        {children}
-      </a>
-    )
   }
   return (
     <button
@@ -186,7 +164,7 @@ function Tool({ label, className = '', href, onClick, children, expanded, showTi
 }
 
 // The row of small buttons at the bottom of the sidebar: the players menu
-// (books, music, media servers) and GitHub.
+// (books, music, media servers). Nothing is drawn when there is nothing to show.
 export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps = [], variant = 'side', children }: { ebooksOn: boolean; audiobooksOn: boolean; musicOn: boolean; homes: WatchLink[]; apps?: AppLink[]; variant?: 'side' | 'top'; children?: ReactNode }) {
   const [tip, setTip] = useState<Tip | null>(null)
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null)
@@ -200,6 +178,7 @@ export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps
   }
   const hideTip = () => setTip(null)
   const props = { showTip, hideTip }
+  if (!anyPlayer && !children) return null
 
   return (
     <div className={top ? 'top-tools' : 'side-tools'} role="group" aria-label={t('Apps and links')}>
@@ -218,9 +197,6 @@ export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps
         </Tool>
       )}
       {menuAt && <PlayMenu homes={homes} apps={apps} ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} at={menuAt} onClose={() => setMenuAt(null)} below={top} />}
-      <Tool label={t('Star Mediarium on GitHub')} href={REPO_URL} className="github" {...props}>
-        <Icon name="github" size={16} />
-      </Tool>
       {children}
       {tip &&
         !menuAt &&

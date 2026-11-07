@@ -24,6 +24,7 @@ project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](
 - The "Report a problem or share an idea" window (sidebar bug button, profile menu item, the
   nudge's "Send an idea") and its `POST /api/feedback` relay to mediarium.app.
 - The ko-fi "Support Mediarium" sidebar link.
+- The "Star Mediarium on GitHub" sidebar and top-bar button.
 - The in-app user guide (`/help`, the `?` key and buttons, "Learn more" links, the
   docs-to-guide build step). The pages in `docs/` stay as documentation.
 - Settings > System > About and credits (`/settings/about`, `/about`), including its credits,
