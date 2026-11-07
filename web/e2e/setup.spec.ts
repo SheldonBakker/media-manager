@@ -38,17 +38,6 @@ test('first run: setup wizard to the dashboard', async ({ page }) => {
   }
   await expect(nav).toBeVisible()
 
-  // A new install asks about anonymous usage numbers, and nothing is sent
-  // before the answer. Answer No, so the other tests are not in its way.
-  const ask = page.getByRole('dialog', { name: 'Help Mediarium with anonymous numbers?' })
-  await expect(ask).toBeVisible({ timeout: 20_000 })
-  await ask.getByText('See exactly what is sent').click()
-  await expect(ask.locator('pre')).toContainText('"schema": 1')
-  await ask.getByRole('button', { name: 'No thanks' }).click()
-  await expect(ask).toHaveCount(0)
-  const answered = await page.request.get('/api/usage-stats')
-  expect((await answered.json()).choice).toBe('no')
-
   mkdirSync('e2e/.auth', { recursive: true })
   writeFileSync(CREDS_FILE, JSON.stringify({ username, password }))
   await page.context().storageState({ path: AUTH_FILE })

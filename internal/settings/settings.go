@@ -278,9 +278,6 @@ const (
 	KeyModulesEbooks     = "modules.ebooks"     // "1" switches it on; unset or "0" leaves it off
 
 	// Updates and restarts (Settings > System). See docs/security.md.
-	KeyStatsChoice        = "stats.choice"                   // the administrator's answer about sharing anonymous usage numbers: "yes", "no", or unset when not asked yet. Nothing is sent unless it is "yes" (see docs/usage-stats.md)
-	KeyStatsInstallID     = "stats.install_id"               // a random number made when the answer is yes, sent with the numbers so one install counts once; set by the app, cleared on "no" and by "Reset my ID"
-	KeyStatsLastSent      = "stats.last_sent"                // the day (UTC) the numbers were last sent; set by the app, not user-editable
 	KeyUpdatesCheck       = "updates.check"                  // "0" turns the daily check for a new version off; anything else (including unset) leaves it on
 	KeyUpdatesAutoInstall = "updates.auto_install"           // "1" installs a new, signed release overnight when nothing is downloading; unset or "0" leaves updating to you
 	KeyUpdatesAllowPush   = "updates.allow_push"             // "1" lets an administrator replace the program by uploading a file through the API; unset or "0" refuses. Only a signed-in browser session can switch it on, not an API key

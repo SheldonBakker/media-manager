@@ -180,10 +180,9 @@ type Server struct {
 	arrFillState                   // reading missing TVDB ids for the Sonarr-style API (arr_series.go)
 	anime        animeState        // scene and anime numbering of shows (anime_numbering.go)
 
-	offered       offeredURLs       // download URLs recently handed out in search results (see grab_urls.go)
-	flareProbe    flareSolverrProbe // last answer from the Cloudflare helper (see flaresolverr.go)
-	statsEndpoint string            // where the anonymous usage numbers go; empty means usagestats.URL (tests set it)
-	stats         sysinfoSampler    // CPU and memory readings for the server card (see handlers_stats.go)
+	offered    offeredURLs       // download URLs recently handed out in search results (see grab_urls.go)
+	flareProbe flareSolverrProbe // last answer from the Cloudflare helper (see flaresolverr.go)
+	stats      sysinfoSampler    // CPU and memory readings for the server card (see handlers_stats.go)
 
 	Monitor *monitor.Monitor // connectivity monitor (Usenet servers, indexers)
 
@@ -942,9 +941,6 @@ func (s *Server) protectedRoutes() *routeTable {
 	admin.HandleFunc("GET /api/system/stats", s.handleSystemStats)
 	admin.HandleFunc("POST /api/stats/reset", s.handleResetStats)
 	admin.HandleFunc("GET /api/system/diagnostics", s.handleDiagnostics)
-	admin.HandleFunc("GET /api/usage-stats", s.handleGetStats)
-	admin.HandleFunc("PUT /api/usage-stats", s.handlePutStats)
-	admin.HandleFunc("POST /api/usage-stats/reset-id", s.handleResetStatsID)
 	admin.HandleFunc("GET /api/system/problems", s.handleProblems)
 	admin.HandleFunc("POST /api/system/problems/read", s.handleProblemsRead)
 	admin.HandleFunc("GET /api/system/problems/export", s.handleProblemsExport)

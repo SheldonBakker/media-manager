@@ -24,7 +24,6 @@ The screenshots in these pages come from demo mode: the movies, shows, artists, 
 | Seed the same files on more than one tracker (cross-seeding) next to Mediarium, with Qui or cross-seed | [cross-seeding.md](./cross-seeding.md) |
 | Choose a quality profile (the built-in presets, cutoffs, upgrades, fallback profiles) | [quality-profiles.md](./quality-profiles.md) |
 | Use Mediarium in Spanish, German, French, Italian, Dutch, Polish, Russian, Ukrainian or Portuguese (Brazil or Portugal), or help with a translation | [languages.md](./languages.md) |
-| Know what the optional anonymous usage numbers are, what is sent, where it goes, and how to switch it off or use the survey instead | [usage-stats.md](./usage-stats.md) |
 | See who suggested what, and how to suggest something yourself | [community.md](./community.md) |
 | Tell others about Mediarium or star it (the profile menu has **Share Mediarium** with ready-made posts and pictures) | [README.md](#sharing-and-feedback) |
 | See why a title has not downloaded, read the Activity page, pause, resume or stop a download, retry without downloading again | [activity.md](./activity.md) |

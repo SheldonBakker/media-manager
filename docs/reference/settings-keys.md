@@ -155,9 +155,6 @@ The keys the app stores in its settings table. You normally change these from th
 | `search.delay_profile` | delay profile (JSON: preferredProtocol, usenetMinutes, torrentMinutes, bypassIfHighestQuality): automatic searches hold back releases of the less liked protocol for that many minutes; unset or 0 minutes = no wait |
 | `search.min_size_check` | "0" turns the built-in minimum size per quality off (Settings > Library > Quality > Size limits); anything else, including unset, leaves it on |
 | `server.public_url` | the address you open Mediarium at from your own devices (like https://mediarium.example.com); links in notification messages use it; unset = no links |
-| `stats.choice` | the administrator's answer about sharing anonymous usage numbers: "yes", "no", or unset when not asked yet. Nothing is sent unless it is "yes" (see docs/usage-stats.md) |
-| `stats.install_id` | a random number made when the answer is yes, sent with the numbers so one install counts once; set by the app, cleared on "no" and by "Reset my ID" |
-| `stats.last_sent` | the day (UTC) the numbers were last sent; set by the app, not user-editable |
 | `subtitles.addons` | subtitle add-ons (JSON list of {id, name, url}; the url can hold the person's own key for a site, so it is stored encrypted) |
 | `subtitles.addons_enabled` | "0" switches every subtitle add-on off at once; on by default, and it only runs while at least one add-on is added |
 | `subtitles.auto_download` | "1" fetches subtitles automatically; unset or "0" only offers them ("ask me") |

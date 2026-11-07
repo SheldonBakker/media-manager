@@ -26,7 +26,6 @@ import ProfileMenu from './ProfileMenu'
 import SideTools from './SideTools'
 import SearchBox from './SearchBox'
 import ThemeToggle from './ThemeToggle'
-import UsageStatsPrompt from './UsageStats'
 import WhatsNew from './WhatsNew'
 import { t, tc } from '../i18n'
 import AmbientBackdrop from './AmbientBackdrop'
@@ -292,15 +291,11 @@ function Shell() {
     return () => watch.disconnect()
   }, [location.pathname])
   const [version, setVersion] = useState('')
-  // What's new goes first; the usage-numbers question waits until it is closed
-  // (or has nothing to show), so the two never open on top of each other.
-  const [notesDone, setNotesDone] = useState(false)
-  const onNotesDone = useCallback(() => setNotesDone(true), [])
   useEffect(() => {
     api
       .version()
       .then((v) => setVersion(v.version))
-      .catch(() => setNotesDone(true))
+      .catch(() => undefined)
   }, [])
   // A dot on the version when a newer release is waiting (administrators only).
   const [updateReady, setUpdateReady] = useState(false)
@@ -560,8 +555,7 @@ function Shell() {
         </main>
         <BackToTop target={mainRef} />
         <MiniPlayer />
-        {!demoEnabled() && <WhatsNew version={version} onDone={onNotesDone} />}
-        {!demoEnabled() && admin && notesDone && <UsageStatsPrompt />}
+        {!demoEnabled() && <WhatsNew version={version} />}
         <FeedbackNudge />
       </div>
     </div>

@@ -3080,32 +3080,6 @@ export interface UpdateJob {
 }
 
 // GET /api/system/update/latest and POST /api/system/update/check.
-// The anonymous usage numbers (Settings > General; docs/usage-stats.md).
-export interface UsageStatsMessage {
-  schema: number
-  id: string
-  version: string
-  arch: string
-  docker: boolean
-  cores: string
-  memory: string
-  age: string
-  library: string
-  accounts: string
-  indexers: string
-  media: string[]
-  features: string[]
-  servers: string[]
-}
-export interface UsageStatsState {
-  choice: '' | 'yes' | 'no'
-  disabled: boolean
-  url: string
-  lastSent: string
-  hasId: boolean
-  preview: UsageStatsMessage
-}
-
 export interface UpdateNotice {
   enabled: boolean // the daily check is on
   running: string
@@ -3934,9 +3908,6 @@ export const api = {
   migrateStatus: () => get<MigrateStatus>('/migrate/status'),
   systemStats: () => get<SystemStats>('/system/stats'),
   diagnostics: () => get<Diagnostics>('/system/diagnostics'),
-  usageStats: () => get<UsageStatsState>('/usage-stats'),
-  setUsageStats: (choice: 'yes' | 'no') => put<UsageStatsState>('/usage-stats', { choice }),
-  resetUsageStatsId: () => post<UsageStatsState>('/usage-stats/reset-id'),
   problems: (query = '') => get<ProblemList>(`/system/problems${query}`),
   problemCounts: () => get<{ counts: ProblemCounts }>('/system/problems?summary=1').then((r) => r.counts),
   // With all: true, `query` (the page's filters, as problemQuery makes them) limits it to what matches; without one it is every problem.

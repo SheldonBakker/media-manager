@@ -825,14 +825,6 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 |---|---|---|---|
 | GET | `/api/usage` | admin | reports, per third-party service, how much Mediarium used it in the last 24 hours and whether it refused because a limit was reached. |
 
-## usage-stats
-
-| Method | Path | Access | What it does |
-|---|---|---|---|
-| GET | `/api/usage-stats` | admin |  |
-| PUT | `/api/usage-stats` | admin |  |
-| POST | `/api/usage-stats/reset-id` | admin |  |
-
 ## usenet-client
 
 | Method | Path | Access | What it does |
@@ -901,4 +893,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-556 routes.
+553 routes.

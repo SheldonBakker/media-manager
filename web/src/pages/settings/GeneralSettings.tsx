@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { api, isAdmin } from '../../api'
 import { useAuth } from '../../AuthContext'
 import Icon from '../../components/Icon'
-import { UsageStatsCard } from '../../components/UsageStats'
 import PublicAddress from '../../components/PublicAddress'
 import ThemeToggle from '../../components/ThemeToggle'
 import { PushCard, UpdatesCard } from '../../components/UpdateCards'
@@ -109,7 +108,6 @@ export default function GeneralSettings() {
           <PushCard />
         </details>
       )}
-      {admin && <UsageStatsCard />}
       {admin && <LegalCard />}
     </div>
   )

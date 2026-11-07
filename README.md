@@ -29,6 +29,9 @@ project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](
   docs-to-guide build step). The pages in `docs/` stay as documentation.
 - Settings > System > About and credits (`/settings/about`, `/about`), including its credits,
   thank-you list, TMDB logo and legal notice.
+- Anonymous usage numbers: the consent window, the Settings > General card, the daily
+  message to mediarium.app/stats, `/api/usage-stats`, `MEDIARIUM_DISABLE_STATS` and the
+  `tools/stats-receiver` server code.
 
 ## Deploy setup
 

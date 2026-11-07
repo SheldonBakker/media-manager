@@ -245,9 +245,6 @@ func run() error {
 	stopUpdates := server.StartUpdates()
 	defer stopUpdates()
 
-	stopUsageStats := server.StartUsageStats()
-	defer stopUsageStats()
-
 	stopWatchdog := server.StartWatchdog()
 	defer stopWatchdog()
 

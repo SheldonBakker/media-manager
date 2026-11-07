@@ -63,10 +63,6 @@ type Config struct {
 	// settings apply again.
 	DisableSSO bool
 
-	// DisableStats is MEDIARIUM_DISABLE_STATS=1: no anonymous usage numbers are
-	// ever sent, whatever the saved answer is, and the question is not asked.
-	DisableStats bool
-
 	// ImageVersion is the version of the program inside the container image.
 	// The image's entrypoint sets it before starting the app, which is how the
 	// app knows it was started by that entrypoint and so can restart into an
@@ -101,8 +97,7 @@ func Load() Config {
 		BundledFlareSolverr: truthy(envStr("BUNDLED_FLARESOLVERR", "")),
 		PauseAutomation:     truthy(envStr("MEDIARIUM_PAUSE_AUTOMATION", "")),
 
-		DisableSSO:   truthy(envStr("MEDIARIUM_DISABLE_SSO", "")),
-		DisableStats: truthy(envStr("MEDIARIUM_DISABLE_STATS", "")),
+		DisableSSO: truthy(envStr("MEDIARIUM_DISABLE_SSO", "")),
 
 		ImageVersion: envStr("MEDIARIUM_IMAGE_VERSION", ""),
 		Supervised:   truthy(envStr("MEDIARIUM_SUPERVISED", "")),

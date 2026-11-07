@@ -1544,15 +1544,6 @@ fieldset.group { border-radius: 6px 26px 26px 26px; }
 @media (max-width: 900px) { .hero-welcome .hero-server .info-card.open { grid-template-columns: minmax(0, 1fr); } .hero-welcome .hero-server .info-card.open .info-details { grid-template-columns: minmax(0, 1fr); } }
 .hero-welcome .hero-server .info-card.open .info-disk small { font-size: 0.76rem; }
 
-/* The anonymous-numbers question: the buttons stay in view while the text scrolls, and the sample message is a small code box. */
-.modal.stats-ask { width: min(720px, 100%); }
-.stats-ask .modal-foot { position: sticky; bottom: 0; background: var(--surface); }
-.stats-ask h3 { margin: 16px 0 6px; font-size: 1rem; }
-.stats-ask ul { margin: 0 0 4px; padding-left: 20px; display: grid; gap: 4px; }
-.stats-preview { margin: 10px 0; }
-.stats-preview summary { cursor: pointer; font-weight: 600; }
-.stats-preview pre { margin: 8px 0; padding: 10px 12px; max-height: 220px; overflow: auto; border-radius: 10px; font: 0.8rem/1.45 var(--font-mono); background: color-mix(in srgb, var(--surface-2) 80%, transparent); border: 1px solid var(--border); }
-
 /* ==== Layout pass 2: scrollbars, header title, dashboard folders ============ */
 /* Scrollbars in the app's own look: thin, a dark track and a rounded thumb that brightens on hover. Firefox and current Chromium use the two standard properties; older Chromium and Safari get the ::-webkit-scrollbar version. */
 :root {
