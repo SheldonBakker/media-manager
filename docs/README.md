@@ -25,10 +25,9 @@ The screenshots in these pages come from demo mode: the movies, shows, artists, 
 | Seed the same files on more than one tracker (cross-seeding) next to Mediarium, with Qui or cross-seed | [cross-seeding.md](./cross-seeding.md) |
 | Choose a quality profile (the built-in presets, cutoffs, upgrades, fallback profiles) | [quality-profiles.md](./quality-profiles.md) |
 | Use Mediarium in Spanish, German, French, Italian, Dutch, Polish, Russian, Ukrainian or Portuguese (Brazil or Portugal), or help with a translation | [languages.md](./languages.md) |
-| Report a problem or share an idea from inside Mediarium, privately or on GitHub, with a screenshot and the support report | [report-a-problem.md](./report-a-problem.md) |
 | Know what the optional anonymous usage numbers are, what is sent, where it goes, and how to switch it off or use the survey instead | [usage-stats.md](./usage-stats.md) |
 | See who suggested what, and how to suggest something yourself | [community.md](./community.md) |
-| Tell others about Mediarium, star it or send an idea (the profile menu has **Share Mediarium** with ready-made posts and pictures) | [README.md](#sharing-and-feedback) |
+| Tell others about Mediarium or star it (the profile menu has **Share Mediarium** with ready-made posts and pictures) | [README.md](#sharing-and-feedback) |
 | See why a title has not downloaded, read the Activity page, pause, resume or stop a download, retry without downloading again | [activity.md](./activity.md) |
 | Subtitles: the on/off switch, release subtitles, offers, daily limits, dismissing | [subtitles.md](./subtitles.md) |
 | Switch movies, TV, music, ebooks and audiobooks on or off (Settings > Media types) | [modules.md](./modules.md) |
@@ -87,6 +86,6 @@ Mediarium has these pages built in. Open **User guide** from the profile menu (y
 
 ## Sharing and feedback
 
-The profile menu (your initial, top right) links to the website, this documentation and the GitHub page, where a star helps others find Mediarium. **Report a problem or share an idea** opens the [report window](report-a-problem.md), and **Questions and discussions** opens GitHub Discussions. **Share Mediarium** has a ready-made post for Reddit, X, Bluesky, Facebook, WhatsApp, Instagram and forums, with buttons to copy it or open the site, and three pictures to download (1200 × 630 for links, 1080 × 1080 square, 1080 × 1920 for stories). The pictures use made-up titles.
+The profile menu (your initial, top right) links to the website, this documentation and the GitHub page, where a star helps others find Mediarium. **Questions and discussions** opens GitHub Discussions. **Share Mediarium** has a ready-made post for Reddit, X, Bluesky, Facebook, WhatsApp, Instagram and forums, with buttons to copy it or open the site, and three pictures to download (1200 × 630 for links, 1080 × 1080 square, 1080 × 1920 for stories). The pictures use made-up titles.
 
-After two weeks of use, a small card in the corner asks once whether you'd like to star, send an idea or share. It comes back at most every three months, never in demo mode, and **Don't ask again** stops it for that browser. Nothing is sent anywhere unless you click a link.
+After two weeks of use, a small card in the corner asks once whether you'd like to star or share. It comes back at most every three months, never in demo mode, and **Don't ask again** stops it for that browser. Nothing is sent anywhere unless you click a link.

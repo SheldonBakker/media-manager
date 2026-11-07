@@ -5,7 +5,6 @@ import { useAuth } from '../AuthContext'
 import { demoEnabled, setDemo } from '../demo'
 import { DOCS_URL, FEEDBACK_URL, REDDIT_URL, REPO_URL, WEBSITE_URL } from '../docs'
 import { LANGUAGES, chooseLanguage, currentLanguage, t } from '../i18n'
-import { openReport } from '../report'
 import { QUEUE_STORAGE_KEY } from '../musicQueue'
 import { SKIP_ONCE_KEY } from '../autoSignIn'
 import Icon from './Icon'
@@ -112,15 +111,6 @@ export default function ProfileMenu() {
           <a href={REPO_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="star" size={16} /> {t('Star on GitHub')}
           </a>
-          <button
-            role="menuitem"
-            onClick={() => {
-              setOpen(false)
-              openReport()
-            }}
-          >
-            <Icon name="bug" size={16} /> {t('Report a problem or share an idea')}
-          </button>
           <a href={FEEDBACK_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="chat" size={16} /> {t('Questions and discussions')}
           </a>

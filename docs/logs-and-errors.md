@@ -49,7 +49,7 @@ The same problem happening again within 10 minutes is counted on the same row ("
 - **Copy for support** copies the report you attach to a support request: version, database, setup warnings, the latest problems from this page and the last 500 lines of the log.
 - **Download log file** saves the problems as a plain text file. It holds every problem that matches your filters, not only the ones loaded on the page, so to save everything, clear the filters first.
 
-Passwords, API keys and tokens are taken out before anything is stored, so what you copy or download is safe to send. To send it straight from Mediarium, use the bug button at the bottom of the sidebar ([Report a problem or share an idea](report-a-problem.md)).
+Passwords, API keys and tokens are taken out before anything is stored, so what you copy or download is safe to send.
 
 ## Messages about errors
 

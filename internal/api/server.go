@@ -503,7 +503,6 @@ func (s *Server) protectedRoutes() *routeTable {
 	member.HandleFunc("DELETE /api/exclusions/{kind}/{tmdbId}", s.handleRemoveExclusion)
 	member.HandleFunc("GET /api/calendar/feed", s.handleGetCalendarFeed)
 	member.HandleFunc("POST /api/calendar/feed", s.handleNewCalendarFeed)
-	member.HandleFunc("POST /api/feedback", s.handleSendFeedback)
 	member.HandleFunc("DELETE /api/calendar/feed", s.handleRemoveCalendarFeed)
 	member.HandleFunc("GET /api/wanted", revalidated(s.handleWanted))
 	member.HandleFunc("GET /api/activity", revalidated(s.handleListActivity))

@@ -159,7 +159,6 @@ export const TOPICS: TopicDef[] = [
     group: 'Looking after it',
     sources: [
       { file: 'logs-and-errors.md' },
-      { file: 'report-a-problem.md', title: 'Report a problem or share an idea' },
       { file: 'INSTALL.md', title: 'Install and container problems', only: ['Troubleshooting'] },
     ],
   },
