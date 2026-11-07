@@ -201,7 +201,7 @@ function LibrarySection({ part, onSettings }: { part: 'folders' | 'naming'; onSe
     <>
       <fieldset className="group folders span-all">
         <legend>
-          <Icon name="folder" size={14} /> <TipLabel text={t('Keep downloads and libraries inside one shared parent folder, such as /data. Finished files are then hardlinked: instant, with no extra disk space.')} learnMore="install-docker#why-one-data-folder-hardlinks">{t('Library folders')}</TipLabel>
+          <Icon name="folder" size={14} /> <TipLabel text={t('Keep downloads and libraries inside one shared parent folder, such as /data. Finished files are then hardlinked: instant, with no extra disk space.')}>{t('Library folders')}</TipLabel>
         </legend>
         <div className="path-cols">
           <div className="path-col">
@@ -330,7 +330,7 @@ function LibrarySection({ part, onSettings }: { part: 'folders' | 'naming'; onSe
         <div className="triple-cols">
           <div className="grid-form">
             <label>
-              <TipLabel text={t('How imported files are named and filed, to suit your media player. Files already in the library keep their names until you rename them.')} learnMore="library#file-names">{t('Naming preset')}</TipLabel>
+              <TipLabel text={t('How imported files are named and filed, to suit your media player. Files already in the library keep their names until you rename them.')}>{t('Naming preset')}</TipLabel>
               <select value={namingPreset} onChange={(e) => setNamingPreset(e.target.value)}>
                 <option value="plex">Plex</option>
                 <option value="jellyfin">Jellyfin / Emby</option>

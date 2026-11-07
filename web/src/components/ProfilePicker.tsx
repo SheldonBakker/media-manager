@@ -6,7 +6,6 @@ import MoveToFolderDialog from './MoveToFolderDialog'
 import { useAuth } from '../AuthContext'
 import { t } from '../i18n'
 import InfoTip from './InfoTip'
-import HelpLink from './HelpLink'
 import { useToast } from './Toast'
 
 const SOURCE_NAME: Record<string, string> = { both: t('Usenet and torrents'), usenet: t('Usenet only'), torrent: t('Torrents only') }
@@ -155,7 +154,7 @@ function Picker({ kind, itemId, onMoved, children }: { kind: 'movie' | 'series';
       <label>
         <span className="has-tip">
           {t('Quality profile')}
-          <HelpLink topic="quality" text={t('Decides which releases are good enough for this title. Moving it to a higher profile than the file you have makes Mediarium look for that quality straight away.')} />
+          <InfoTip text={t('Decides which releases are good enough for this title. Moving it to a higher profile than the file you have makes Mediarium look for that quality straight away.')} />
         </span>
         <select value={current} onChange={(e) => void chooseProfile(Number(e.target.value))}>
           <option value={0}>{t('Default ({name})', { name: defaultName })}</option>

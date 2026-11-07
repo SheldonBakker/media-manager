@@ -25,6 +25,6 @@ export function sectionFor(pathname: string): SectionKey {
   if (pathname.startsWith('/queue')) return 'activity'
   if (pathname.startsWith('/settings')) return 'settings'
   if (pathname.startsWith('/profile')) return 'profile'
-  if (pathname.startsWith('/about') || pathname.startsWith('/help')) return 'about'
+  if (pathname.startsWith('/about')) return 'about'
   return 'dashboard'
 }

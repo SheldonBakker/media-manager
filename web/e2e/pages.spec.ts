@@ -38,7 +38,6 @@ const PAGES: [string, RegExp][] = [
   ['/settings/logs', /Logs and errors/],
   ['/settings/migrate', /Move from other apps/],
   ['/settings/about', /About and credits/],
-  ['/help', /User guide/],
 ]
 
 for (const [path, title] of PAGES) {

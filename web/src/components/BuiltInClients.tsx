@@ -7,7 +7,7 @@ import { RUNNING, sortQueue } from '../queueView'
 import { useLive } from '../useLive'
 import { useUrlState } from '../useUrlState'
 import Icon, { type IconName } from './Icon'
-import HelpLink from './HelpLink'
+import InfoTip from './InfoTip'
 import { useToast } from './Toast'
 import TorrentOptionsPanel from './TorrentOptionsPanel'
 
@@ -160,8 +160,7 @@ function ClientSection({ kind, status, items, renderRows, onChanged }: { kind: K
       <div className="rail-head">
         <h2 className="client-title">
           <Icon name={icon} size={18} /> {name}
-          <HelpLink
-            topic="activity#download-clients"
+          <InfoTip
             text={
               usenet
                 ? t("The Usenet downloader built into Mediarium. All it needs is your Usenet provider's login. Pause all and Resume all here only touch Usenet downloads.")

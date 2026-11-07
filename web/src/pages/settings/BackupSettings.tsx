@@ -7,7 +7,6 @@ import { useConfirm } from '../../components/ConfirmProvider'
 import { FieldError, useValidation } from '../../useValidation'
 import { st, t, tx } from '../../i18n'
 import { withBase } from '../../base'
-import TipLabel from '../../components/TipLabel'
 import { forgetRestored, markRestored } from '../../restoreNotice'
 
 // Saved copies of everything, the cloud copies, and putting one back.
@@ -89,7 +88,7 @@ export default function BackupSettings() {
 
       <fieldset className="group alerts">
         <legend>
-          <Icon name="refresh" size={14} /> <TipLabel help="backups-updates#backup-and-restore">{t('Restore')}</TipLabel>
+          <Icon name="refresh" size={14} /> {t('Restore')}
         </legend>
         <p style={{ marginTop: 0 }}>
           {tx('Choose a backup file, or a cloud copy ({ext}) with its passphrase. Mediarium restarts to load it, and your current data moves to a {folder} folder in your config folder.', {

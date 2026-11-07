@@ -6,7 +6,6 @@ import Switch from './Switch'
 import { useToast } from './Toast'
 import { locale, t, tx } from '../i18n'
 import { withBase } from '../base'
-import TipLabel from './TipLabel'
 
 // Settings > System > Backup and restore: download one now, and the backups Mediarium
 // saves by itself every night and before each update.
@@ -50,7 +49,7 @@ export default function BackupCard() {
   return (
     <fieldset className="group folders">
       <legend>
-        <Icon name="hard" size={14} /> <TipLabel help="backups-updates#backup-and-restore">{t('Backup')}</TipLabel>
+        <Icon name="hard" size={14} /> {t('Backup')}
       </legend>
       <p style={{ marginTop: 0 }}>
         {t('One file with your library, accounts, indexers, provider logins and settings, but not your media files. It also holds the key to your saved passwords, so keep it private.')}

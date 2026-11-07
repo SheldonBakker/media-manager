@@ -3,7 +3,6 @@ import { api, TORRENT_ROUTE_EVENT, type DownloadClientInput, type DownloadClient
 import { t } from '../i18n'
 import Icon from './Icon'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 import { reloadForm } from './downloadClientForm'
 
 const LABEL: Record<Exclude<DownloadClientKind, ''>, string> = {
@@ -124,7 +123,7 @@ export default function DownloadClientCard() {
   return (
     <fieldset className="group torrent">
       <legend>
-        <Icon name="server" size={14} /> <TipLabel help="downloads#download-clients-qbittorrent-transmission-rdt-client-decypharr">{t('Use your own torrent client')}</TipLabel>
+        <Icon name="server" size={14} /> {t('Use your own torrent client')}
       </legend>
       <p style={{ marginTop: 0 }}>
         {t('Hand torrent releases to a download client you already run: qBittorrent, Transmission, or a program that works like qBittorrent, such as RDT-Client or Decypharr. The client downloads and seeds, and Mediarium imports the finished files from its folder without moving them.')}
@@ -189,7 +188,7 @@ export default function DownloadClientCard() {
       </div>
       {form.kind && (
         <>
-          <h3 style={{ margin: '18px 0 4px', fontSize: '1rem' }}><TipLabel help="downloads#path-mapping">{t('Path mapping')}</TipLabel></h3>
+          <h3 style={{ margin: '18px 0 4px', fontSize: '1rem' }}>{t('Path mapping')}</h3>
           <p className="field-help">
             {t('Only needed when the client runs in another container or on another computer and sees its download folder under another path. Example: the client saves to /downloads, and Mediarium sees the same folder as /data/torrents.')}
           </p>

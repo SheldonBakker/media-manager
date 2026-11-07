@@ -102,9 +102,6 @@ export default function ProfileMenu() {
           <a href={WEBSITE_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="globe" size={16} /> {t('Website')}
           </a>
-          <Link to="/help" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="book" size={16} /> {t('User guide')}
-          </Link>
           <a href={DOCS_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="external" size={16} /> {t('Documentation')}
           </a>

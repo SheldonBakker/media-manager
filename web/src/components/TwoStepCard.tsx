@@ -4,7 +4,6 @@ import { plural, t, tx } from '../i18n'
 import Icon from './Icon'
 import { copyText } from './CopyBox'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 
 // The QR code as an SVG: one path for the dark modules, a light square behind
 // with the four-module quiet zone scanners need.
@@ -129,7 +128,7 @@ export default function TwoStepCard() {
   return (
     <fieldset className="group two-step">
       <legend>
-        <Icon name="shield" size={14} /> <TipLabel help="accounts#two-step-sign-in">{t('Two-step sign-in')}</TipLabel>
+        <Icon name="shield" size={14} /> {t('Two-step sign-in')}
       </legend>
       {error && <p className="error-text">{error}</p>}
       {codes ? (

@@ -4,7 +4,7 @@ import { formatBytes, timeAgo } from '../format'
 import { useConfirm } from './ConfirmProvider'
 import { plural, t } from '../i18n'
 import Icon from './Icon'
-import HelpLink from './HelpLink'
+import InfoTip from './InfoTip'
 import { useToast } from './Toast'
 
 // Activity > Recycle bin: files of titles removed "with their files", kept a
@@ -45,7 +45,7 @@ export default function RecycleBin() {
         {days > 0
           ? plural(days, 'When you remove a title with its files, the files wait here for {n} day before they are deleted for good. Put them back if it was a mistake.', 'When you remove a title with its files, the files wait here for {n} days before they are deleted for good. Put them back if it was a mistake.')
           : t('The recycle bin is off: removed files are deleted straight away. Switch it on under Settings > System > Server.')}
-        <HelpLink topic="downloads#the-recycle-bin" text={t('Put back moves the files into their old folder. It does not add the title to your library again; use Import for that. Delete now removes them for good.')} />
+        <InfoTip text={t('Put back moves the files into their old folder. It does not add the title to your library again; use Import for that. Delete now removes them for good.')} />
       </p>
       {bin.items.length === 0 ? (
         <div className="empty-state">

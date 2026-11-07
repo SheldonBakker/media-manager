@@ -6,7 +6,6 @@ import { useAuth } from '../AuthContext'
 import CalendarGrid, { KindBadge } from '../components/CalendarGrid'
 import Icon, { type IconName } from '../components/Icon'
 import InfoTip from '../components/InfoTip'
-import HelpLink from '../components/HelpLink'
 import Loading from '../components/Loading'
 import PosterCard, { PosterFallback } from '../components/PosterCard'
 import { describeState, type ItemStateKey } from '../components/state'
@@ -670,7 +669,7 @@ export default function Dashboard() {
             <Icon name="folder" size={18} />
           </span>
           <h2>{t('Connected folders')}</h2>
-          <HelpLink topic="install-docker#why-one-data-folder-hardlinks" text={t('The folders Mediarium uses, whether it can write to them and how much room is left. "Hardlinks on" means an import takes no extra space, because Downloads and the library are on the same drive.')} />
+          <InfoTip text={t('The folders Mediarium uses, whether it can write to them and how much room is left. "Hardlinks on" means an import takes no extra space, because Downloads and the library are on the same drive.')} />
           {admin && (
             <Link className="tile-link" to="/settings/media">
               {t('Change')} <Icon name="open" size={13} />

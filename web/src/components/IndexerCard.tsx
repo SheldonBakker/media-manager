@@ -179,7 +179,7 @@ export default function IndexerCard({ indexer: i, onChanged, onToggle, onRemove 
           </small>
           {paused && pausedUntil && (
             <small className="indexer-health bad">
-              <TipLabel text={t('After 3 failures in a row an indexer is left out of searches for 5 minutes, then 10, 20, 40 and so on, up to 6 hours. Try again now clears it.')} learnMore="indexers#when-an-indexer-keeps-failing">
+              <TipLabel text={t('After 3 failures in a row an indexer is left out of searches for 5 minutes, then 10, 20, 40 and so on, up to 6 hours. Try again now clears it.')}>
                 {t('Paused until {time} after {failures} in a row, because {why}.', {
                   time: untilText(i.pausedUntil ?? ''),
                   failures: plural(i.failures ?? 0, '{n} failure', '{n} failures'),
@@ -211,7 +211,7 @@ export default function IndexerCard({ indexer: i, onChanged, onToggle, onRemove 
           {!result && !!i.lastTestAt && <KnownFixHint error={i.lastTestError} />}
         </div>
         <label className="indexer-priority">
-          <TipLabel text={t('Lower number = tried first. Quality always comes first. Between two equally good releases, the one with the lower number wins.')} learnMore="indexers#priority-health-and-test-all">{t('Priority')}</TipLabel>
+          <TipLabel text={t('Lower number = tried first. Quality always comes first. Between two equally good releases, the one with the lower number wins.')}>{t('Priority')}</TipLabel>
           <input type="number" min={1} max={50} step={1} value={prio} style={{ width: 72 }} onChange={(e) => setPrio(e.target.value)} onBlur={() => void savePriority()} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} />
         </label>
       </div>
@@ -231,7 +231,7 @@ export default function IndexerCard({ indexer: i, onChanged, onToggle, onRemove 
 
       {i.protocol === 'torrent' && (
         <label className="indexer-minseed">
-          <TipLabel text={t('Releases from this indexer with fewer seeders than this are skipped. Releases that a debrid service already has cached are not skipped. 0 means off.')} learnMore="indexers#minimum-seeders">{t('Minimum seeders')}</TipLabel>
+          <TipLabel text={t('Releases from this indexer with fewer seeders than this are skipped. Releases that a debrid service already has cached are not skipped. 0 means off.')}>{t('Minimum seeders')}</TipLabel>
           <input type="number" min={0} max={1000} step={1} value={minSeed} onChange={(e) => setMinSeed(e.target.value)} onBlur={() => void saveMinSeeders()} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} />
         </label>
       )}
@@ -291,13 +291,13 @@ export default function IndexerCard({ indexer: i, onChanged, onToggle, onRemove 
             </>
           )}
           <label>
-            <TipLabel text={t('The most requests a day Mediarium makes to this indexer. Free indexers often allow only a few, such as 25. Leave it at 0 to use the limit the indexer reports, if it reports one.')} learnMore="indexers#daily-limits">{t('Requests per day')}</TipLabel>
+            <TipLabel text={t('The most requests a day Mediarium makes to this indexer. Free indexers often allow only a few, such as 25. Leave it at 0 to use the limit the indexer reports, if it reports one.')}>{t('Requests per day')}</TipLabel>
             <input type="number" min={0} max={100000} value={perDay} onChange={(e) => setPerDay(e.target.value)} {...v.bind('perDay', perDay, setPerDay)} />
             <FieldError v={v} name="perDay" />
           </label>
           {!site && (
             <div className="indexer-extra">
-              <TipLabel text={t('Category numbers your indexer files releases under besides the standard ones, for example 105000 for TV or 7120 for German books. They are searched together with the standard categories. Separate several with commas.')} learnMore="indexers#extra-categories">{t('Extra categories')}</TipLabel>
+              <TipLabel text={t('Category numbers your indexer files releases under besides the standard ones, for example 105000 for TV or 7120 for German books. They are searched together with the standard categories. Separate several with commas.')}>{t('Extra categories')}</TipLabel>
               {EXTRA_KINDS.map((k) => {
                 const hints = caps ? suggestionsFor(k, caps, extra.extra[k] ?? []) : []
                 return (

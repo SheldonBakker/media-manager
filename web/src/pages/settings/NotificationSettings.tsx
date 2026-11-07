@@ -513,7 +513,7 @@ function Watch() {
   return (
     <fieldset className="group usenet span-all">
       <legend>
-        <Icon name="activity" size={14} /> <TipLabel help="notifications#connection-watch">{t('Connection watch')}</TipLabel>
+        <Icon name="activity" size={14} /> {t('Connection watch')}
       </legend>
       <p style={{ marginTop: 0, color: 'var(--text-dim)' }}>
         {minutes === 0

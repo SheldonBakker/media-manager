@@ -16,8 +16,6 @@ FROM --platform=$BUILDPLATFORM node:26-alpine AS frontend
 WORKDIR /src/web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
-# The pages in docs/ are turned into the in-app user guide while the web app is built.
-COPY docs/ /src/docs/
 COPY web/ ./
 RUN npm run build
 

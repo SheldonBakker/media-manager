@@ -83,7 +83,7 @@ function SubtitlesSection({ sources }: { sources: SubtitleSourceStatus[] | undef
 
   return (
     <section className="card grid-form">
-      <h2><TipLabel help="subtitles">{t('Languages')}</TipLabel></h2>
+      <h2>{t('Languages')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>{t('Subtitles are saved next to each movie and episode, in the languages you pick.')}</p>
       <fieldset style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 12 }}>
         <legend>{t('Languages to keep')}</legend>
@@ -99,7 +99,7 @@ function SubtitlesSection({ sources }: { sources: SubtitleSourceStatus[] | undef
       </fieldset>
       {languages.length > 0 && (
         <fieldset style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 12 }}>
-          <legend><TipLabel help="subtitles#normal-sdh-and-forced-subtitles">{t('Which kind of subtitle')}</TipLabel></legend>
+          <legend>{t('Which kind of subtitle')}</legend>
           <p style={{ color: 'var(--text-dim)', margin: '0 0 10px' }}>
             {t('Normal is the plain dialogue. SDH also describes sounds, for people who are deaf or hard of hearing. A forced track holds only the lines spoken in another language, such as a few words of a foreign tongue in a film. Plex, Jellyfin and Emby pick up the .sdh and .forced names.')}
           </p>
@@ -121,18 +121,18 @@ function SubtitlesSection({ sources }: { sources: SubtitleSourceStatus[] | undef
       )}
       <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
-        <TipLabel text={t('Fetches subtitles right after an import, then looks every six hours for missing ones, always within the OpenSubtitles daily limit.')} learnMore="subtitles#daily-limits-and-the-free-account">{t('Download after each import, and look again every few hours for anything missing')}</TipLabel>
+        <TipLabel text={t('Fetches subtitles right after an import, then looks every six hours for missing ones, always within the OpenSubtitles daily limit.')}>{t('Download after each import, and look again every few hours for anything missing')}</TipLabel>
       </label>
       <label style={{ display: 'flex', gap: 6, alignItems: 'center', marginLeft: 22, opacity: auto && osOn ? 1 : 0.55 }}>
         <input type="checkbox" checked={upgrade} disabled={!auto || !osOn} onChange={(e) => setUpgrade(e.target.checked)} />
-        <TipLabel text={t('A subtitle made for your exact file is in sync. If one turns up within a month it replaces the first pick. Ones you chose or edited are left alone.')} learnMore="subtitles#subtitles-made-for-your-exact-file">{t('For a month after, swap a subtitle for one made for that exact video file if one turns up')}</TipLabel>
+        <TipLabel text={t('A subtitle made for your exact file is in sync. If one turns up within a month it replaces the first pick. Ones you chose or edited are left alone.')}>{t('For a month after, swap a subtitle for one made for that exact video file if one turns up')}</TipLabel>
       </label>
       {sourcesKnown && !osOn && (
         <small style={{ color: 'var(--text-dim)', marginLeft: 22 }}>{t('Only OpenSubtitles can match the exact video file, so this needs OpenSubtitles switched on.')}</small>
       )}
       <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <input type="checkbox" checked={countEmbedded} onChange={(e) => setCountEmbedded(e.target.checked)} />
-        <TipLabel text={t('A language that is already inside the file counts as there, so nothing is downloaded for it. Only the track list is read, never the video.')} learnMore="subtitles#subtitles-inside-the-video">{t("Count subtitles already inside the video file (MKV and MP4), so they aren't downloaded again")}</TipLabel>
+        <TipLabel text={t('A language that is already inside the file counts as there, so nothing is downloaded for it. Only the track list is read, never the video.')}>{t("Count subtitles already inside the video file (MKV and MP4), so they aren't downloaded again")}</TipLabel>
       </label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button className="primary" onClick={save} disabled={!loaded || saving}>
@@ -177,7 +177,7 @@ function OpenSubtitlesAccount({ s, reload }: { s: SettingsData; reload: () => vo
 
   return (
     <div className="grid-form" style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-      <h3 style={{ margin: 0 }}><TipLabel help="subtitles#daily-limits-and-the-free-account">{t('Your OpenSubtitles.com account (optional)')}</TipLabel></h3>
+      <h3 style={{ margin: 0 }}>{t('Your OpenSubtitles.com account (optional)')}</h3>
       <p style={{ color: 'var(--text-dim)', margin: 0 }}>{t('A free account raises the daily limit from about 5 downloads to about 20.')}</p>
       <label>
         {t('Username')}
@@ -310,7 +310,7 @@ function SourcesCard({ s, reload }: { s: SettingsData | null; reload: () => void
   const addons = status('addons')
   return (
     <section className="card grid-form sources-card span-all">
-      <h2><TipLabel help="subtitles#choosing-your-sources">{t('Subtitle sources')}</TipLabel></h2>
+      <h2>{t('Subtitle sources')}</h2>
       <p style={{ color: 'var(--text-dim)', margin: 0 }}>
         {t('Choose where Mediarium looks for subtitles. Every source that is on is searched, and the best fit for your video file wins. A source that is off is never asked and its limits do not count.')}
       </p>
@@ -391,7 +391,7 @@ function AddonsCard({ onChanged }: { onChanged: () => void }) {
 
   return (
     <section className="card grid-form addon-card">
-      <h2><TipLabel help="subtitles#subtitle-add-ons">{t('Subtitle add-ons')}</TipLabel></h2>
+      <h2>{t('Subtitle add-ons')}</h2>
       <p style={{ color: 'var(--text-dim)', margin: 0 }}>
         {t('Bring in a subtitle site Mediarium has no built-in support for, such as subs.ro or a Hebrew or Arabic site. Many of them offer an add-on (the Stremio kind): open its page, copy the add-on address, and paste it here.')}
       </p>

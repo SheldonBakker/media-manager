@@ -71,18 +71,18 @@ export default function TorrentSection({ status }: { status: DownloadsStatus['to
         {t('The defaults are fine for most people.')}
       </p>
       <label>
-        <TipLabel text={t('The port other torrent users connect to. Keep 58264 unless it clashes; if you change it, publish the same number in your Docker ports.')} learnMore="downloads#torrent-port-58264">{t('Listen port (0 = the default, 58264)')}</TipLabel>
+        <TipLabel text={t('The port other torrent users connect to. Keep 58264 unless it clashes; if you change it, publish the same number in your Docker ports.')}>{t('Listen port (0 = the default, 58264)')}</TipLabel>
         <input aria-label={t('Listen port (0 = the default, 58264)')} inputMode="numeric" value={listenPort} onChange={(e) => setListenPort(e.target.value)} {...v.bind('listenPort', listenPort, setListenPort)} />
         <FieldError v={v} name="listenPort" />
       </label>
       <PortStatus status={status} />
       <label>
-        <TipLabel text={t("A finished torrent keeps sharing until it has uploaded this many times its size, or reaches the time limit. Whichever comes first stops it. Empty means no limit; 0 means don't seed at all. An external client such as qBittorrent gets these limits too, and decides itself what to do when they are met.")} learnMore="downloads#seeding">{t('Seed ratio limit')}</TipLabel>
+        <TipLabel text={t("A finished torrent keeps sharing until it has uploaded this many times its size, or reaches the time limit. Whichever comes first stops it. Empty means no limit; 0 means don't seed at all. An external client such as qBittorrent gets these limits too, and decides itself what to do when they are met.")}>{t('Seed ratio limit')}</TipLabel>
         <input aria-label={t('Seed ratio limit')} type="number" min={0} step="any" inputMode="decimal" placeholder={t('Unlimited')} value={seedRatioLimit} onChange={(e) => setSeedRatioLimit(e.target.value)} {...v.bind('seedRatioLimit', seedRatioLimit, setSeedRatioLimit)} />
         <FieldError v={v} name="seedRatioLimit" />
       </label>
       <label>
-        <TipLabel text={t("A finished torrent stops sharing after this many hours, or when it reaches the ratio limit. Whichever comes first stops it. Empty means no limit; 0 means don't seed at all.")} learnMore="downloads#seeding">{t('Seed time limit, hours')}</TipLabel>
+        <TipLabel text={t("A finished torrent stops sharing after this many hours, or when it reaches the ratio limit. Whichever comes first stops it. Empty means no limit; 0 means don't seed at all.")}>{t('Seed time limit, hours')}</TipLabel>
         <input aria-label={t('Seed time limit, hours')} type="number" min={0} step="any" inputMode="decimal" placeholder={t('Unlimited')} value={seedTimeLimitH} onChange={(e) => setSeedTimeLimitH(e.target.value)} {...v.bind('seedTimeLimitH', seedTimeLimitH, setSeedTimeLimitH)} />
         <FieldError v={v} name="seedTimeLimitH" />
       </label>

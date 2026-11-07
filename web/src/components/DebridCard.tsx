@@ -3,7 +3,6 @@ import { api, TORRENT_ROUTE_EVENT, type DebridAccount } from '../api'
 import { locale, t, tx } from '../i18n'
 import Icon from './Icon'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 
 type Service = '' | 'realdebrid' | 'torbox' | 'premiumize'
 
@@ -85,7 +84,7 @@ export default function DebridCard() {
   return (
     <fieldset className="group torrent">
       <legend>
-        <Icon name="cloud" size={14} /> <TipLabel help="downloads#debrid-services-real-debrid-torbox-premiumize">{t('Debrid service')}</TipLabel>
+        <Icon name="cloud" size={14} /> {t('Debrid service')}
       </legend>
       <p style={{ marginTop: 0 }}>
         {t('A debrid service (Real-Debrid, TorBox, Premiumize) downloads torrents on its own fast servers. Mediarium then downloads the finished files from it over https, so no torrent traffic leaves your home and nothing is seeded from here. The built-in torrent client can stay off.')}
@@ -139,7 +138,7 @@ export default function DebridCard() {
           <label className="check-hint">
             <input type="checkbox" checked={preferCached} onChange={(e) => setPreferCached(e.target.checked)} />
             <span>
-              <TipLabel help="downloads#releases-that-are-already-cached-torbox-and-premiumize">{t('Prefer releases {name} already has', { name: help?.label ?? '' })}</TipLabel>
+              {t('Prefer releases {name} already has', { name: help?.label ?? '' })}
               <small>{t('Mediarium asks {name} which of the torrents it found are already stored there, marks them "Cached" in the release list, and picks one of those over an equal release that has to be downloaded first. It never picks a worse quality for it. Only the torrents\' hashes are sent.', { name: help?.label ?? '' })}</small>
             </span>
           </label>

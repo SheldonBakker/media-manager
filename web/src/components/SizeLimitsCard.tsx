@@ -288,7 +288,7 @@ export default function SizeLimitsCard() {
   ]
   return (
     <section className="card size-limits span-all">
-      <h2><TipLabel help="quality#size-limits-per-quality">{t('Size limits')}</TipLabel></h2>
+      <h2>{t('Size limits')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {t("The smallest and largest release to take for each quality, in megabytes for each minute of the film or episode. A release outside them is skipped by automatic searches and marked in the list when you search yourself; you can still pick it by hand. They come on top of the built-in minimums and a profile's largest size: the tightest one wins. A release that doesn't say its size always passes, and a season pack is only checked against the smallest.")}
       </p>

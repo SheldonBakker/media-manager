@@ -6,7 +6,6 @@ import { createPasskey, passkeyProblem, passkeysSupported } from '../passkey'
 import { useConfirm } from './ConfirmProvider'
 import Icon from './Icon'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -95,7 +94,7 @@ export default function PasskeysCard() {
   return (
     <fieldset className="group passkeys">
       <legend>
-        <Icon name="key" size={14} /> <TipLabel help="accounts#passkeys">{t('Passkeys')}</TipLabel>
+        <Icon name="key" size={14} /> {t('Passkeys')}
         {list.keys.length > 0 && <span className="legend-count">{list.keys.length}</span>}
       </legend>
       <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>

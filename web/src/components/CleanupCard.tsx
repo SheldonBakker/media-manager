@@ -8,7 +8,6 @@ import Loading from './Loading'
 import Switch from './Switch'
 import { useToast } from './Toast'
 import { plural, t, tx } from '../i18n'
-import TipLabel from './TipLabel'
 
 const REASON: Record<string, string> = {
   orphaned: t('Not part of any download'),
@@ -121,7 +120,7 @@ export default function CleanupCard() {
   return (
     <fieldset className="group usenet span-all">
       <legend>
-        <Icon name="trash" size={14} /> <TipLabel help="downloads#clean-up">{t('Clean up')}</TipLabel>
+        <Icon name="trash" size={14} /> {t('Clean up')}
       </legend>
       <p style={{ marginTop: 0 }}>
         {t('Leftovers in the downloads folder: files from failed or finished downloads, torrents that are done seeding, and empty folders. Your movie and TV library is never touched.')}

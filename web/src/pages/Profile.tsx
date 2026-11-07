@@ -25,7 +25,6 @@ import * as check from '../validate'
 import { FieldError, FormProblem, useValidation, type FieldProps } from '../useValidation'
 import { useFocusTrap } from '../useFocusTrap'
 import { locale, plural, t, tx } from '../i18n'
-import TipLabel from '../components/TipLabel'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -216,7 +215,7 @@ function APIKeys() {
   return (
     <fieldset className="group torrent">
       <legend>
-        <Icon name="server" size={14} /> <TipLabel help="accounts#read-only-api-keys">{t('API keys')}</TipLabel>
+        <Icon name="server" size={14} /> {t('API keys')}
       </legend>
       <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>
         {tx('For scripts and other apps: send a key as an {header} header instead of signing in. A key is shown only once, when you create it.', { header: <code>X-API-Key</code> })}
@@ -558,7 +557,7 @@ function AddAccountForm({ onAdded }: { onAdded: (a: Account) => void }) {
   return (
     <fieldset className="group usenet">
       <legend>
-        <Icon name="plus" size={14} /> <TipLabel help="accounts#adding-a-family-account">{t('Add an account')}</TipLabel>
+        <Icon name="plus" size={14} /> {t('Add an account')}
       </legend>
       <div className="account-form">
         <div className="triple-cols">

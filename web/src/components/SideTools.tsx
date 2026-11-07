@@ -186,9 +186,8 @@ function Tool({ label, className = '', href, onClick, children, expanded, showTi
 }
 
 // The row of small buttons at the bottom of the sidebar: the players menu
-// (books, music, media servers), the user guide and GitHub.
+// (books, music, media servers) and GitHub.
 export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps = [], variant = 'side', children }: { ebooksOn: boolean; audiobooksOn: boolean; musicOn: boolean; homes: WatchLink[]; apps?: AppLink[]; variant?: 'side' | 'top'; children?: ReactNode }) {
-  const navigate = useNavigate()
   const [tip, setTip] = useState<Tip | null>(null)
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null)
   const top = variant === 'top'
@@ -219,11 +218,6 @@ export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps
         </Tool>
       )}
       {menuAt && <PlayMenu homes={homes} apps={apps} ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} at={menuAt} onClose={() => setMenuAt(null)} below={top} />}
-      <Tool label={t('User guide')} onClick={() => navigate('/help')} className="help-tool" {...props}>
-        <span className="side-q" aria-hidden="true">
-          ?
-        </span>
-      </Tool>
       <Tool label={t('Star Mediarium on GitHub')} href={REPO_URL} className="github" {...props}>
         <Icon name="github" size={16} />
       </Tool>

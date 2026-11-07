@@ -70,7 +70,7 @@ export default function RequestSettingsCard() {
       />
 
       <div className="rp-block">
-        <h3 className="rp-h3"><TipLabel help="accounts#the-request-portal-settings">{t('Limit requests')}</TipLabel></h3>
+        <h3 className="rp-h3">{t('Limit requests')}</h3>
         <div className="rp-row">
           <label>
             <TipLabel text={t('How many requests one person can have waiting or approved in the period you choose. Empty means no limit, and admins are never limited.')}>{t('Requests each person may make')}</TipLabel>
@@ -146,7 +146,7 @@ export default function RequestSettingsCard() {
       </div>
 
       <div className="rp-block">
-        <h3 className="rp-h3"><TipLabel help="accounts#the-request-portal-settings">{t('4K requests')}</TipLabel></h3>
+        <h3 className="rp-h3">{t('4K requests')}</h3>
         <Switch
           checked={o.fourK}
           disabled={busy || (!o.fourK && o.fourKProfileId <= 0)}
@@ -188,7 +188,7 @@ export default function RequestSettingsCard() {
       </div>
 
       <div className="rp-block">
-        <h3 className="rp-h3"><TipLabel help="accounts#the-request-portal-settings">{t('Problem reports')}</TipLabel></h3>
+        <h3 className="rp-h3">{t('Problem reports')}</h3>
         <Switch
           checked={o.reports}
           disabled={busy}

@@ -6,7 +6,6 @@ The screenshots in these pages come from demo mode: the movies, shows, artists, 
 
 | I want to... | Read |
 |---|---|
-| Read these pages inside Mediarium, without leaving the app or going online (the user guide, opened with the **?** key or the **?** button at the top) | [The guide inside Mediarium](#the-guide-inside-mediarium) |
 | Install it with Docker (one compose file, any Linux server or NAS) | [INSTALL.md](./INSTALL.md) |
 | Install it on Synology, Unraid, QNAP or Linux, step by step | [synology.md](./synology.md), [unraid.md](./unraid.md), [qnap.md](./qnap.md), [linux.md](./linux.md) |
 | See which platforms Mediarium runs on (one Docker image for all of them, Raspberry Pi notes) | [PLATFORMS.md](./PLATFORMS.md) |
@@ -72,17 +71,7 @@ The app language is only about the app itself. The audio language you want is un
 
 - Change a feature, setting or install step: update its page here and add a line to `CHANGELOG.md` in the same pull request. CI fails a pull request that changes the app without touching the docs (add the `no-docs-needed` label if nothing visible changed).
 - Change a route, an environment variable or a settings key: run `go run ./tools/docgen` and commit the regenerated `docs/reference/*.md`. CI fails if they are out of date.
-- The in-app user guide is built from the pages here (see [The guide inside Mediarium](#the-guide-inside-mediarium)), so an edited page shows up in the next build with nothing else to do. A new page has to be added to `web/src/guide/topicDefs.ts`, or the web tests fail.
 - The app links here from its About and credits page. The address lives in one place, `web/src/docs.ts`, so it can move to a website later.
-
-## The guide inside Mediarium
-
-Mediarium has these pages built in. Open **User guide** from the profile menu (your initial, top right), press the **?** button next to the bug in the top bar (it is in the menu on a phone), or press **?** on your keyboard anywhere you are not typing. The guide lists the topics (getting started, adding movies and shows, music, books, downloads, quality profiles, subtitles, accounts, media servers, notifications, backups, fixing problems and the install guides), has a search box over all of them, and shows a list of sections for the topic you are reading. Links between pages stay inside the guide, and code blocks have a **Copy** button.
-
-- It is made from the pages in this folder when the app is built, so it always matches the version you run and works without an internet connection. It leaves out the notes for people who script against the API, and the screenshots. **Read the full documentation** at the top of every topic opens the complete pages online.
-- It is in English only for now. When Mediarium is set to another language, the guide says so at the top.
-- The small round **i** and **?** buttons next to settings and headings open a short explanation. Hover over one, tab to it or tap it; Escape closes it. A **?** also has a **Learn more** link that opens the matching part of the guide. Most settings pages have a **?** after the line under their name that opens the part of the guide about that page, and the fields and switches that need an explanation have an **i** with one sentence on what they do and what changes when you set them.
-- A page in this folder shows up in the guide once it is listed in `web/src/guide/topicDefs.ts`. `npm run build` in `web/` stops with a message when a listed page or section no longer exists.
 
 ## Sharing and feedback
 

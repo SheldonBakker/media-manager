@@ -4,8 +4,7 @@ A rebranded build of [Mediarium](https://github.com/rdborg/Mediarium): movies, T
 books, from search to library, in one app. All credit for the software goes to the upstream
 project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 
-`main` is upstream's code plus the files below. The app itself is documented in [docs/](docs/README.md),
-which is also built into the in-app guide.
+`main` is upstream's code plus the files below. The app itself is documented in [docs/](docs/README.md).
 
 ## What this fork adds
 

@@ -7,36 +7,36 @@ import { t, tc } from './i18n.ts'
 // `notViewer` pages are left out of the list for view-only accounts, which
 // have nothing to set there. Every page is one job, named by its title, with
 // one honest sentence under it (`blurb`).
-export const SETTINGS_NAV: { to: string; label: string; icon: IconName; color: string; blurb: string; member?: boolean; notViewer?: boolean; help?: string }[] = [
+export const SETTINGS_NAV: { to: string; label: string; icon: IconName; color: string; blurb: string; member?: boolean; notViewer?: boolean }[] = [
   { to: '/settings/general', label: t('General'), icon: 'sliders', color: '#e7a6f2', blurb: t('The app as a whole: its language, look, address and updates.'), member: true },
-  { to: '/settings/modules', label: t('Media types'), icon: 'grid', color: '#ff9f6b', blurb: t('Switch movies, shows, music, ebooks and audiobooks on or off.'), help: 'getting-started#media-types' },
-  { to: '/settings/media', label: t('Folders'), icon: 'folder', color: '#7cc4f8', blurb: t('Where your movies, shows, music, books and downloads are kept.'), help: 'install-docker#why-one-data-folder-hardlinks' },
-  { to: '/settings/naming', label: t('File names and importing'), icon: 'list', color: '#7cc4f8', blurb: t('How imported files are named, the info files saved next to them, and what runs after an import.'), help: 'library#file-names' },
-  { to: '/settings/quality', label: t('Quality'), icon: 'star', color: '#f5c76a', blurb: t('What counts as good enough, which release wins, and which audio language you want.'), help: 'quality' },
-  { to: '/settings/automation', label: t('Automatic searching'), icon: 'sliders', color: '#f0b46a', blurb: t('When Mediarium looks for things by itself, and whether it waits for Usenet or torrents.'), help: 'quality#automatic-searching' },
-  { to: '/settings/indexers', label: t('Indexers & Search'), icon: 'search', color: '#a5b4fc', blurb: t('The sites Mediarium searches for releases.'), help: 'indexers' },
-  { to: '/settings/usenet', label: t('Usenet'), icon: 'server', color: '#86dca4', blurb: t('Your Usenet provider and the built-in downloader.'), help: 'downloads#usenet-connections' },
-  { to: '/settings/torrents', label: t('Torrents'), icon: 'magnet', color: '#86dca4', blurb: t('The built-in torrent client and its options, a debrid service, or a client you already run.'), help: 'downloads#controls-of-the-built-in-torrent-client' },
-  { to: '/settings/vpn', label: t('VPN and proxy'), icon: 'shield', color: '#6fd6c8', blurb: t('Keep torrent traffic behind a VPN, or send it through a proxy.'), help: 'downloads#vpn-protection' },
-  { to: '/settings/download-rules', label: t('Download rules'), icon: 'download', color: '#86dca4', blurb: t('Where to download from, how many at once, how fast and when, and which releases to skip.'), help: 'downloads#checks-on-releases' },
+  { to: '/settings/modules', label: t('Media types'), icon: 'grid', color: '#ff9f6b', blurb: t('Switch movies, shows, music, ebooks and audiobooks on or off.') },
+  { to: '/settings/media', label: t('Folders'), icon: 'folder', color: '#7cc4f8', blurb: t('Where your movies, shows, music, books and downloads are kept.') },
+  { to: '/settings/naming', label: t('File names and importing'), icon: 'list', color: '#7cc4f8', blurb: t('How imported files are named, the info files saved next to them, and what runs after an import.') },
+  { to: '/settings/quality', label: t('Quality'), icon: 'star', color: '#f5c76a', blurb: t('What counts as good enough, which release wins, and which audio language you want.') },
+  { to: '/settings/automation', label: t('Automatic searching'), icon: 'sliders', color: '#f0b46a', blurb: t('When Mediarium looks for things by itself, and whether it waits for Usenet or torrents.') },
+  { to: '/settings/indexers', label: t('Indexers & Search'), icon: 'search', color: '#a5b4fc', blurb: t('The sites Mediarium searches for releases.') },
+  { to: '/settings/usenet', label: t('Usenet'), icon: 'server', color: '#86dca4', blurb: t('Your Usenet provider and the built-in downloader.') },
+  { to: '/settings/torrents', label: t('Torrents'), icon: 'magnet', color: '#86dca4', blurb: t('The built-in torrent client and its options, a debrid service, or a client you already run.') },
+  { to: '/settings/vpn', label: t('VPN and proxy'), icon: 'shield', color: '#6fd6c8', blurb: t('Keep torrent traffic behind a VPN, or send it through a proxy.') },
+  { to: '/settings/download-rules', label: t('Download rules'), icon: 'download', color: '#86dca4', blurb: t('Where to download from, how many at once, how fast and when, and which releases to skip.') },
   { to: '/settings/metadata', label: t('Movie and show info'), icon: 'globe', color: '#c1acf7', blurb: t('Where titles, posters, episode numbers and trailers come from.') },
-  { to: '/settings/lists', label: t('Import lists'), icon: 'list', color: '#c1acf7', blurb: t('Add movies and shows by themselves from lists on Trakt, TMDB, IMDb, MDBList and Letterboxd.'), help: 'adding#import-lists' },
-  { to: '/settings/subtitles', label: t('Subtitles'), icon: 'chat', color: '#f4a3c8', blurb: t('Where subtitles come from and which languages to keep.'), help: 'subtitles' },
-  { to: '/settings/media-servers', label: t('Media servers'), icon: 'monitor', color: '#f2c14e', blurb: t('Plex, Jellyfin and the rest: scan after a download and link to them.'), help: 'media-servers' },
-  { to: '/settings/notifications', label: t('Notifications'), icon: 'mail', color: '#f7b27a', blurb: t('Messages when something is added, downloaded or goes wrong.'), help: 'notifications' },
-  { to: '/settings/other-apps', label: t('Other apps'), icon: 'server', color: '#9fd4a8', blurb: t('Let Overseerr, Homepage and phone apps talk to Mediarium.'), help: 'media-servers#overseerr-dashboards-and-phone-apps' },
-  { to: '/settings/addons', label: t('Add-ons'), icon: 'grid', color: '#9fd4a8', blurb: t('Other programs you run next to Mediarium, with a link to each.'), help: 'media-servers#add-ons' },
+  { to: '/settings/lists', label: t('Import lists'), icon: 'list', color: '#c1acf7', blurb: t('Add movies and shows by themselves from lists on Trakt, TMDB, IMDb, MDBList and Letterboxd.') },
+  { to: '/settings/subtitles', label: t('Subtitles'), icon: 'chat', color: '#f4a3c8', blurb: t('Where subtitles come from and which languages to keep.') },
+  { to: '/settings/media-servers', label: t('Media servers'), icon: 'monitor', color: '#f2c14e', blurb: t('Plex, Jellyfin and the rest: scan after a download and link to them.') },
+  { to: '/settings/notifications', label: t('Notifications'), icon: 'mail', color: '#f7b27a', blurb: t('Messages when something is added, downloaded or goes wrong.') },
+  { to: '/settings/other-apps', label: t('Other apps'), icon: 'server', color: '#9fd4a8', blurb: t('Let Overseerr, Homepage and phone apps talk to Mediarium.') },
+  { to: '/settings/addons', label: t('Add-ons'), icon: 'grid', color: '#9fd4a8', blurb: t('Other programs you run next to Mediarium, with a link to each.') },
   { to: '/settings/profile', label: t('Your profile'), icon: 'user', color: '#8fb8f5', blurb: t('Your name, email and password, and the messages you get about your requests.'), member: true },
-  { to: '/settings/security', label: t('Security'), icon: 'shield', color: '#8fb8f5', blurb: t('Passkeys, two-step sign-in, a linked single sign-on account and your API keys.'), member: true, help: 'accounts#two-step-sign-in' },
+  { to: '/settings/security', label: t('Security'), icon: 'shield', color: '#8fb8f5', blurb: t('Passkeys, two-step sign-in, a linked single sign-on account and your API keys.'), member: true },
   { to: '/settings/services', label: t('Linked services'), icon: 'external', color: '#8fb8f5', blurb: t('Your Plex watchlist, ListenBrainz and your e-reader.'), member: true, notViewer: true },
-  { to: '/settings/accounts', label: t('All accounts'), icon: 'user', color: '#8fb8f5', blurb: t('Add people and choose what each of them may do.'), help: 'accounts' },
-  { to: '/settings/requests', label: t('Requests and reports'), icon: 'chat', color: '#8fb8f5', blurb: t('What people may ask for, how many requests they get, and problem reports.'), help: 'accounts#requests' },
-  { to: '/settings/sign-in', label: t('Ways to sign in'), icon: 'key', color: '#8fb8f5', blurb: t('Passwords, passkeys, single sign-on, a directory, or a login proxy in front of Mediarium.'), help: 'accounts#ways-to-sign-in' },
-  { to: '/settings/system', label: t('Server'), icon: 'hard', color: '#b4bfcc', blurb: t('How the server is doing, restarting it and cleaning up leftovers.'), help: 'problems' },
-  { to: '/settings/backup', label: t('Backup and restore'), icon: 'hard', color: '#b4bfcc', blurb: t('Save a copy of everything, in the cloud too, and put it back.'), help: 'backups-updates#backup-and-restore' },
-  { to: '/settings/statistics', label: t('Statistics'), icon: 'activity', color: '#8fe0c4', blurb: t('How big the library is and what was downloaded.'), member: true, help: 'library#statistics' },
-  { to: '/settings/logs', label: t('Logs and errors'), icon: 'warning', color: '#f0a3a3', blurb: t('Errors Mediarium noticed, what to do about them, and a report to copy when you ask for help.'), help: 'problems' },
-  { to: '/settings/migrate', label: t('Move from other apps'), icon: 'refresh', color: '#b4bfcc', blurb: t('Bring your library and settings over from Radarr, Sonarr and others.'), help: 'adding#moving-from-radarr-sonarr-and-other-apps' },
+  { to: '/settings/accounts', label: t('All accounts'), icon: 'user', color: '#8fb8f5', blurb: t('Add people and choose what each of them may do.') },
+  { to: '/settings/requests', label: t('Requests and reports'), icon: 'chat', color: '#8fb8f5', blurb: t('What people may ask for, how many requests they get, and problem reports.') },
+  { to: '/settings/sign-in', label: t('Ways to sign in'), icon: 'key', color: '#8fb8f5', blurb: t('Passwords, passkeys, single sign-on, a directory, or a login proxy in front of Mediarium.') },
+  { to: '/settings/system', label: t('Server'), icon: 'hard', color: '#b4bfcc', blurb: t('How the server is doing, restarting it and cleaning up leftovers.') },
+  { to: '/settings/backup', label: t('Backup and restore'), icon: 'hard', color: '#b4bfcc', blurb: t('Save a copy of everything, in the cloud too, and put it back.') },
+  { to: '/settings/statistics', label: t('Statistics'), icon: 'activity', color: '#8fe0c4', blurb: t('How big the library is and what was downloaded.'), member: true },
+  { to: '/settings/logs', label: t('Logs and errors'), icon: 'warning', color: '#f0a3a3', blurb: t('Errors Mediarium noticed, what to do about them, and a report to copy when you ask for help.') },
+  { to: '/settings/migrate', label: t('Move from other apps'), icon: 'refresh', color: '#b4bfcc', blurb: t('Bring your library and settings over from Radarr, Sonarr and others.') },
   { to: '/settings/about', label: t('About and credits'), icon: 'info', color: '#e7a6f2', blurb: t('Version, credits and the legal notice.'), member: true },
 ]
 
@@ -111,11 +111,6 @@ export function pageParts(pathname: string, admin = true): { group?: string; pag
 // What the page is for, one line, shown under the name of a settings page.
 export function pageBlurb(pathname: string, admin = true): string {
   return settingsNavFor(admin).find((p) => inPage(pathname, p.to))?.blurb ?? ''
-}
-
-// The user guide topic that explains the page, if there is one.
-export function pageHelp(pathname: string, admin = true): string {
-  return settingsNavFor(admin).find((p) => inPage(pathname, p.to))?.help ?? ''
 }
 
 export function pageTitle(pathname: string, admin = true): string {

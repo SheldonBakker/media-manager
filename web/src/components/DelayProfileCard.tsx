@@ -4,7 +4,6 @@ import { plural, t, tx } from '../i18n'
 import { firstError, numberRange } from '../validate'
 import { useToast } from './Toast'
 import Switch from './Switch'
-import TipLabel from './TipLabel'
 
 const MAX_MINUTES = 30 * 24 * 60
 
@@ -64,7 +63,7 @@ export default function DelayProfileCard() {
 
   return (
     <section className="card">
-      <h2><TipLabel help="quality#wait-for-a-better-protocol">{t('Wait for a better protocol')}</TipLabel></h2>
+      <h2>{t('Wait for a better protocol')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {t("Mediarium's own searches can hold a release back for a while, so a copy from the protocol you like better has time to turn up. The wait counts from when the release was posted. A search or download you start yourself never waits. With 0 minutes for both, nothing waits.")}
       </p>

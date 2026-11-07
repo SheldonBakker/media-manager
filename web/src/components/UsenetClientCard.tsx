@@ -3,7 +3,6 @@ import { api, type UsenetClientInput, type UsenetClientKind, type UsenetClientPr
 import { t } from '../i18n'
 import Icon from './Icon'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 import { reloadForm } from './downloadClientForm'
 
 const LABEL: Record<Exclude<UsenetClientKind, ''>, string> = {
@@ -129,7 +128,7 @@ export default function UsenetClientCard({ onChanged }: { onChanged?: () => void
   return (
     <fieldset className="group usenet span-all">
       <legend>
-        <Icon name="server" size={14} /> <TipLabel help="downloads#sabnzbd-and-nzbget">{t('Use SABnzbd or NZBGet')}</TipLabel>
+        <Icon name="server" size={14} /> {t('Use SABnzbd or NZBGet')}
       </legend>
       <p style={{ marginTop: 0 }}>
         {t('Hand Usenet releases to a downloader you already run. SABnzbd or NZBGet does the downloading, repairing and unpacking, and Mediarium imports the finished files from its folder without moving them.')}
@@ -242,7 +241,7 @@ export default function UsenetClientCard({ onChanged }: { onChanged?: () => void
               <small>{t("Off: Mediarium gets the NZB, checks it and sends the file on. On: only the link is sent, so Mediarium can't check the file first. Releases that need Mediarium's sign-in are always sent as a file.")}</small>
             </span>
           </label>
-          <h3 style={{ margin: '18px 0 4px', fontSize: '1rem' }}><TipLabel help="downloads#path-mapping">{t('Path mapping')}</TipLabel></h3>
+          <h3 style={{ margin: '18px 0 4px', fontSize: '1rem' }}>{t('Path mapping')}</h3>
           <p className="field-help">
             {t("Only needed when {name} runs in another container or on another computer and sees its download folder under another path. Example: it saves to /downloads/complete, and Mediarium sees the same folder as /data/usenet/complete.", { name })}
           </p>

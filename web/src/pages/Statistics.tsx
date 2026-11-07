@@ -10,7 +10,6 @@ import { locale, plural, t } from '../i18n'
 import { useConfirm } from '../components/ConfirmProvider'
 import { useToast } from '../components/Toast'
 import '../stats.css'
-import TipLabel from '../components/TipLabel'
 
 // How much of a kind is in, as a ring around its shape.
 function Ring({ pct }: { pct: number }) {
@@ -188,7 +187,7 @@ function IndexerStats() {
   const busiest = Math.max(1, ...data.indexers.map((i) => i.queries))
   return (
     <section className="card" style={{ marginTop: 16 }}>
-      <h2><TipLabel help="indexers#how-each-indexer-is-doing">{plural(data.days, 'Indexers, last {n} day', 'Indexers, last {n} days')}</TipLabel></h2>
+      <h2>{plural(data.days, 'Indexers, last {n} day', 'Indexers, last {n} days')}</h2>
       <div style={{ overflowX: 'auto' }}>
         <table className="indexer-stats" style={{ width: '100%' }}>
           <thead>

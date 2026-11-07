@@ -29,7 +29,6 @@ import ThemeToggle from './ThemeToggle'
 import UsageStatsPrompt from './UsageStats'
 import WhatsNew from './WhatsNew'
 import { t, tc } from '../i18n'
-import { useGuideShortcut } from '../guide/shortcut.ts'
 import AmbientBackdrop from './AmbientBackdrop'
 
 const NAV: { to: string; label: string; icon: IconName; sec: SectionKey; end?: boolean }[] = [
@@ -215,7 +214,7 @@ function Shell() {
 
   // The page name in the top bar, in the browser tab and (when the page has no
   // heading of its own) as the page's one <h1>.
-  const heading = location.pathname.startsWith('/help') ? t('User guide') : pageTitle(location.pathname, admin)
+  const heading = pageTitle(location.pathname, admin)
   const parts = pageParts(location.pathname, admin)
   const headingText = parts.group ? `${parts.group} · ${parts.page}` : heading
   const headingNode = (
@@ -231,7 +230,6 @@ function Shell() {
       )}
     </span>
   )
-  useGuideShortcut()
   const specificTitle = useSpecificTitle()
   useEffect(() => {
     document.title = titleFor(specificTitle || heading)

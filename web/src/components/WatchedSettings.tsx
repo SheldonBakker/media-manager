@@ -78,7 +78,7 @@ export default function WatchedSettings() {
     <>
       <fieldset className="group span-all">
         <legend>
-          <Icon name="eye" size={14} /> <TipLabel help="media-servers#whats-been-watched">{t("What's been watched")}</TipLabel>
+          <Icon name="eye" size={14} /> {t("What's been watched")}
         </legend>
         <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>
           {t('Mediarium can ask Plex, Jellyfin and Emby what has been played, every six hours, and show it on title pages. Plex tells it what the account connected above has watched; Jellyfin and Emby tell it about all their users. Nothing is changed on your media servers.')}
@@ -135,7 +135,7 @@ export default function WatchedSettings() {
       {st.sync && (
         <fieldset className="group span-all">
           <legend>
-            <Icon name="trash" size={14} /> <TipLabel help="media-servers#cleanup-rules">{t('Cleanup rules')}</TipLabel>
+            <Icon name="trash" size={14} /> {t('Cleanup rules')}
           </legend>
           <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>
             {t('Free up space by removing what has been watched. Once a day the files of titles matching a rule are deleted (into the recycle bin when it is on), the title stays in your library, and Mediarium stops looking for it. Every removal is listed under Activity. Check the preview before you switch it on.')}

@@ -142,7 +142,7 @@ export default function IndexerSettings() {
       </fieldset>
       <fieldset className="group torrent flare-card">
         <legend>
-          <Icon name="shield" size={14} /> <TipLabel text={t('Some sites show a "checking your browser" page that only a real browser passes. FlareSolverr opens it for Mediarium and passes the cookies back.')} learnMore="indexers#sites-behind-a-cloudflare-check">{t('Cloudflare sites (optional)')}</TipLabel>
+          <Icon name="shield" size={14} /> <TipLabel text={t('Some sites show a "checking your browser" page that only a real browser passes. FlareSolverr opens it for Mediarium and passes the cookies back.')}>{t('Cloudflare sites (optional)')}</TipLabel>
         </legend>
         {flareState?.configured && (
           <div className={`flare-status ${flareState.running ? 'ok' : 'down'}`} role="status">
