@@ -1,10 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { isAdmin } from '../../api'
 import { useAuth } from '../../AuthContext'
-import TipLabel from '../../components/TipLabel'
 import { useFindOnPage } from '../../findOnPage'
-import { t } from '../../i18n'
-import { pageBlurb, pageHelp, pageParts } from '../../settingsNav'
+import { pageBlurb, pageParts } from '../../settingsNav'
 import '../../settings.css'
 
 // Holds the open settings page. Pages that share a sidebar entry are listed
@@ -17,7 +15,6 @@ export default function SettingsLayout() {
   const admin = isAdmin(user)
   const parts = pageParts(pathname, admin)
   const blurb = pageBlurb(pathname, admin)
-  const help = pageHelp(pathname, admin)
   return (
     <div className="settings-content">
       <h2 className="settings-phone-title">
@@ -25,9 +22,7 @@ export default function SettingsLayout() {
         {parts.page}
       </h2>
       {blurb && (
-        <p className="settings-blurb">
-          {help ? <TipLabel help={help} label={t('Open the user guide for this page')}>{blurb}</TipLabel> : blurb}
-        </p>
+        <p className="settings-blurb">{blurb}</p>
       )}
       <Outlet />
     </div>

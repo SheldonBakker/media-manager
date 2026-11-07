@@ -261,12 +261,6 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | POST | `/api/exclusions` | any account |  |
 | DELETE | `/api/exclusions/{kind}/{tmdbId}` | any account |  |
 
-## feedback
-
-| Method | Path | Access | What it does |
-|---|---|---|---|
-| POST | `/api/feedback` | any account | forwards a report or idea to the developer. |
-
 ## files
 
 | Method | Path | Access | What it does |
@@ -907,4 +901,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-557 routes.
+556 routes.

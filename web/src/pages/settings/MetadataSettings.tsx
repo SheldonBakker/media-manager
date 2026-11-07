@@ -9,7 +9,6 @@ import Switch from '../../components/Switch'
 import { t } from '../../i18n'
 import { useAutosaveSetting } from '../../useAutosave'
 import { useModules } from '../../ModulesContext'
-import TipLabel from '../../components/TipLabel'
 
 // The trailer behind movie and show pages, for everyone. A browser can still choose for itself with the button on the page.
 function TrailerCard() {
@@ -59,7 +58,7 @@ function NumberingCard() {
   )
   return (
     <section className="card">
-      <h2><TipLabel help="library#scene-and-anime-numbering">{t('Anime numbering')}</TipLabel></h2>
+      <h2>{t('Anime numbering')}</h2>
       <Switch
         checked={sw.value}
         onChange={(v) => void sw.change(v)}

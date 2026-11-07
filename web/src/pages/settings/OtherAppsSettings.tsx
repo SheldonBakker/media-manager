@@ -77,7 +77,7 @@ export default function OtherAppsSettings() {
                 <dd>
                   <CopyBox text={`${origin}${BASE_PATH}/${a.app}`} />
                 </dd>
-                <dt><TipLabel text={t('The URL base is the part after the port, such as /radarr. Many apps have a separate box for it. Use it exactly as shown.')} learnMore="install-docker#running-under-a-sub-path-url-base">{t('Or, when the app asks for each part')}</TipLabel></dt>
+                <dt><TipLabel text={t('The URL base is the part after the port, such as /radarr. Many apps have a separate box for it. Use it exactly as shown.')}>{t('Or, when the app asks for each part')}</TipLabel></dt>
                 <dd>
                   {url.protocol === 'https:'
                     ? tx('Host {host}, port {port}, URL base {base}, SSL on', { host: <code>{url.hostname}</code>, port: <code>{port}</code>, base: <code>{BASE_PATH}/{a.app}</code> })

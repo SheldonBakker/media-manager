@@ -1,7 +1,7 @@
 import type { IconName } from './components/Icon'
 import { t } from './i18n.ts'
 
-export type SectionKey = 'dashboard' | 'discover' | 'library' | 'wanted' | 'calendar' | 'activity' | 'settings' | 'profile' | 'about'
+export type SectionKey = 'dashboard' | 'discover' | 'library' | 'wanted' | 'calendar' | 'activity' | 'settings' | 'profile'
 
 export const SECTIONS: Record<SectionKey, { label: string; icon: IconName }> = {
   dashboard: { label: t('Dashboard'), icon: 'grid' },
@@ -12,7 +12,6 @@ export const SECTIONS: Record<SectionKey, { label: string; icon: IconName }> = {
   activity: { label: t('Activity'), icon: 'activity' },
   settings: { label: t('Settings'), icon: 'sliders' },
   profile: { label: t('Profile'), icon: 'user' },
-  about: { label: t('About and credits'), icon: 'info' },
 }
 
 // Which colour family a URL belongs to.
@@ -25,6 +24,5 @@ export function sectionFor(pathname: string): SectionKey {
   if (pathname.startsWith('/queue')) return 'activity'
   if (pathname.startsWith('/settings')) return 'settings'
   if (pathname.startsWith('/profile')) return 'profile'
-  if (pathname.startsWith('/about') || pathname.startsWith('/help')) return 'about'
   return 'dashboard'
 }

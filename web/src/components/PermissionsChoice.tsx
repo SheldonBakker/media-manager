@@ -1,7 +1,6 @@
 import { DEFAULT_PERMISSIONS, type Permission, type Permissions } from '../api'
 import { useModules } from '../ModulesContext'
 import { t } from '../i18n'
-import TipLabel from './TipLabel'
 
 // What a basic account may do, chosen when adding or editing it. Everything
 // is on by default, which is what a basic account could always do.
@@ -27,7 +26,7 @@ export default function PermissionsChoice({ value, onChange, disabled }: { value
   ]
   return (
     <div className="perm-choice">
-      <span className="field-title"><TipLabel help="accounts#permissions-for-basic-users">{t('Permissions')}</TipLabel></span>
+      <span className="field-title">{t('Permissions')}</span>
       <div className="perm-kinds" role="group" aria-label={t('What they can add or ask for')}>
         <span className="field-note">{t('They can add or ask for:')}</span>
         {kinds

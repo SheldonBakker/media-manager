@@ -117,7 +117,7 @@ export default function CloudBackupCard() {
   return (
     <fieldset className="group">
       <legend>
-        <Icon name="cloud" size={14} /> <TipLabel help="backups-updates#cloud-backups">{t('Cloud backups')}</TipLabel>
+        <Icon name="cloud" size={14} /> {t('Cloud backups')}
       </legend>
       <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>
         {t("A copy of each nightly backup somewhere off this server, so a dead disk or a stolen NAS doesn't take your setup with it. Works with Backblaze B2, Wasabi, Cloudflare R2, Amazon S3, MinIO and other S3-style storage, or a WebDAV folder (Nextcloud, ownCloud, most NAS boxes). Only settings and the database are copied, never media. Each copy is locked with your passphrase before it leaves, so the storage company can't read it.")}{' '}

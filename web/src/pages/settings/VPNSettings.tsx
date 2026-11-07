@@ -334,7 +334,7 @@ function VPNSection() {
           disabled={!kill.loaded || kill.saving}
           label={t('Kill switch: only run torrents while a VPN is connected')}
           tip={t('When no VPN is connected, torrents wait instead of connecting directly, so the swarm never sees your real address. A connected VPN is always used.')}
-          learnMore="downloads#the-kill-switch"
+         
           description={t('Torrents wait instead of connecting without the tunnel. A proxy for torrents (below) counts too. uTP stays off through the tunnel.')}
           showState
         />
@@ -344,7 +344,7 @@ function VPNSection() {
           disabled={!discover.loaded || discover.saving}
           label={t('UDP trackers and DHT through the VPN')}
           tip={t('Peers and trackers see the VPN address. Tracker and DHT names are looked up through the tunnel, and if that fails nothing is sent from your home address.')}
-          learnMore="downloads#udp-trackers-and-dht"
+         
           description={t("Announces to UDP trackers and DHT queries go out through the tunnel, so peers and trackers see the VPN address. Tracker and DHT names are looked up through the VPN's DNS, not from your home connection, and a failed lookup does not go out. While this is off, those are skipped and only HTTP trackers are used. A download that has already started keeps the previous choice until you retry it.")}
           showState
         />
@@ -354,7 +354,7 @@ function VPNSection() {
           disabled={!indexers.loaded || indexers.saving}
           label={t('Send indexer traffic through the VPN')}
           tip={t("Your indexers see the VPN's address instead of yours, and their names are looked up through the tunnel too.")}
-          learnMore="downloads#indexers-through-the-vpn"
+         
           description={t('Searches, RSS, release downloads, IRC announces and debrid go through the tunnel. Indexers on your own network still connect directly. If the VPN is down, searches wait instead of going without it.')}
           showState
         />
@@ -414,9 +414,9 @@ function VPNSection() {
       </section>
 
       <section className="card grid-form span-all">
-        <h2><TipLabel help="downloads#add-a-connection">{t('Add a VPN connection')}</TipLabel></h2>
+        <h2>{t('Add a VPN connection')}</h2>
         <label>
-          <TipLabel text={t('Pick yours for step-by-step help getting its WireGuard file. If your provider is not listed, choose Not listed and paste the file.')} learnMore="downloads#providers-and-where-to-get-the-file">{t('Provider')}</TipLabel>
+          <TipLabel text={t('Pick yours for step-by-step help getting its WireGuard file. If your provider is not listed, choose Not listed and paste the file.')}>{t('Provider')}</TipLabel>
           <select value={providerId} onChange={(e) => chooseProvider(e.target.value)}>
             <option value="">{t('Choose your provider…')}</option>
             {providers.map((p) => (
@@ -458,7 +458,7 @@ function VPNSection() {
           </div>
           <div style={{ display: 'grid', gap: 12 }}>
             <label>
-              <TipLabel text={t('The WireGuard file from your VPN provider. Pasting it fills in every field below. Only the first [Peer] part is used.')} learnMore="downloads#add-a-connection">{t('Paste your .conf file (optional)')}</TipLabel>
+              <TipLabel text={t('The WireGuard file from your VPN provider. Pasting it fills in every field below. Only the first [Peer] part is used.')}>{t('Paste your .conf file (optional)')}</TipLabel>
               <textarea
                 value={confText}
                 onChange={(e) => fillFromConf(e.target.value)}

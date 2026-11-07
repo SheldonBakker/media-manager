@@ -1,25 +1,19 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
-import { helpPath } from '../guide/path.ts'
-import { guideClick } from '../guide/popup.ts'
 import { t } from '../i18n'
 import './InfoTip.css'
 
 // A small round button that explains the thing next to it in one sentence.
 //
 //   <TipLabel text={sentence}>{t('Search now')}</TipLabel>
-//   <TipLabel help="quality#automatic-searching">{t('Automation')}</TipLabel>
-//   <Switch label={t('Name')} tip={sentence} learnMore="quality#automatic-searching" />
-//   <InfoTip text={sentence} learnMore="quality#automatic-searching" />
+//   <Switch label={t('Name')} tip={sentence} />
+//   <InfoTip text={sentence} />
 //
 // - `text` is one plain sentence: what the setting does and what happens when
 //   you change it. Write it with t() like any other text. Put it after a label
 //   with TipLabel (or the tip prop of Switch): they keep the last word and the
 //   button together, so the button never wraps onto a line of its own. Line
 //   breaks (a backslash and n in the text) are kept, for a short list of meanings.
-// - `learnMore` ("topic" or "topic#anchor" of the user guide) adds a "Learn more"
-//   link to the popover. HelpLink is the same thing with a question mark.
 // - `label` is the button's name for screen readers (default "More information").
 //
 // It opens on hover, on keyboard focus and on a click or tap (the click keeps it
@@ -30,15 +24,13 @@ import './InfoTip.css'
 export interface InfoTipProps {
   text: string
   label?: string
-  learnMore?: string
-  glyph?: 'i' | '?'
   className?: string
 }
 
 const GAP = 8
 const EDGE = 8
 
-export default function InfoTip({ text, label, learnMore, glyph = 'i', className = '' }: InfoTipProps) {
+export default function InfoTip({ text, label, className = '' }: InfoTipProps) {
   const descId = useId()
   const popId = useId()
   const button = useRef<HTMLButtonElement>(null)
@@ -129,8 +121,8 @@ export default function InfoTip({ text, label, learnMore, glyph = 'i', className
       <button
         ref={button}
         type="button"
-        className={`info-tip${open ? ' open' : ''}${glyph === '?' ? ' help' : ''}${className ? ` ${className}` : ''}`}
-        aria-label={label ?? (learnMore ? t('Help') : t('More information'))}
+        className={`info-tip${open ? ' open' : ''}${className ? ` ${className}` : ''}`}
+        aria-label={label ?? t('More information')}
         aria-describedby={descId}
         aria-expanded={open}
         aria-controls={open ? popId : undefined}
@@ -155,11 +147,9 @@ export default function InfoTip({ text, label, learnMore, glyph = 'i', className
           if (open && pinned) return close()
           setOpen(true)
           setPinned(true)
-          // From the keyboard, move to the link so Enter can follow it.
-          if (learnMore && e.detail === 0) requestAnimationFrame(() => pop.current?.querySelector('a')?.focus())
         }}
       >
-        <span aria-hidden="true">{glyph === '?' ? '?' : 'i'}</span>
+        <span aria-hidden="true">i</span>
       </button>
       <span id={descId} className="sr-only" aria-hidden="true">
         {text}
@@ -170,8 +160,7 @@ export default function InfoTip({ text, label, learnMore, glyph = 'i', className
             ref={pop}
             id={popId}
             className={`info-pop${at?.below ? ' below' : ''}`}
-            role={learnMore ? 'group' : 'tooltip'}
-            aria-label={learnMore ? (label ?? t('Help')) : undefined}
+            role="tooltip"
             style={{ left: at?.left ?? 0, top: at?.top ?? 0, visibility: at ? 'visible' : 'hidden' }}
             onPointerEnter={() => clearTimers()}
             onPointerLeave={(e) => {
@@ -180,11 +169,6 @@ export default function InfoTip({ text, label, learnMore, glyph = 'i', className
             }}
           >
             <p>{text}</p>
-            {learnMore && (
-              <Link to={helpPath(learnMore)} onClick={guideClick(learnMore, close)}>
-                {t('Learn more')}
-              </Link>
-            )}
           </div>,
           document.body,
         )}

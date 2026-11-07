@@ -77,7 +77,7 @@ export default function ScriptCard() {
       </p>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'end' }}>
         <label style={{ display: 'grid', gap: 4, flex: '1 1 220px', maxWidth: 320 }}>
-          <TipLabel text={t('Runs after every finished import and is told which title and file it was. Off until you pick one.')} learnMore="media-servers#running-a-script-after-each-import">{t('Script')}</TipLabel>
+          <TipLabel text={t('Runs after every finished import and is told which title and file it was. Off until you pick one.')}>{t('Script')}</TipLabel>
           <select value={script} onChange={(e) => setScript(e.target.value)} disabled={busy || state === null}>
             <option value="">{t('None (off)')}</option>
             {state?.scripts.map((name) => (

@@ -109,9 +109,7 @@ code, kbd, .mono { font-family: var(--font-mono); }
 .sidebar .side-tools .side-tool { --tc: var(--text-dim); color: var(--tc); background: color-mix(in srgb, var(--tc) 13%, transparent); border-color: transparent; }
 .sidebar .side-tools .side-tool.books { --tc: var(--c-book); }
 .sidebar .side-tools .side-tool.play { --tc: var(--accent); }
-.sidebar .side-tools .side-tool.report { --tc: var(--c-audiobook); }
 .sidebar .side-tools .side-tool.github { --tc: var(--text); }
-.sidebar .side-tools .side-tool.support { --tc: var(--c-music); }
 .sidebar .side-tools .side-tool:hover,
 .sidebar .side-tools .side-tool:focus-visible,
 .sidebar .side-tools .side-tool[aria-expanded='true'],
@@ -1394,9 +1392,7 @@ fieldset.group { border-radius: 6px 26px 26px 26px; }
 .top-tools .side-tool { --tc: var(--text-dim); width: 34px; height: 34px; min-height: 34px; border-radius: 10px; border: 0; color: var(--tc); background: color-mix(in srgb, var(--tc) 14%, transparent); box-shadow: none; transition: background 0.16s var(--ease), color 0.16s var(--ease), box-shadow 0.16s var(--ease); }
 .top-tools .side-tool.books { --tc: var(--c-book); }
 .top-tools .side-tool.play { --tc: var(--accent); }
-.top-tools .side-tool.report { --tc: var(--c-audiobook); }
 .top-tools .side-tool.github { --tc: var(--text); }
-.top-tools .side-tool.support { --tc: var(--c-music); }
 .top-tools .side-tool:hover, .top-tools .side-tool:focus-visible, .top-tools .side-tool[aria-expanded='true'] { color: var(--on-kind); background: var(--tc); transform: none; box-shadow: 0 0 14px color-mix(in srgb, var(--tc) 45%, transparent); }
 .top-tools .side-tool.github:hover, .top-tools .side-tool.github:focus-visible { color: var(--bg); }
 .side-tip.below { transform: translate(-50%, 8px); }

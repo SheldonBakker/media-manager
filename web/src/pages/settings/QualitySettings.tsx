@@ -13,7 +13,6 @@ import MusicProfilesSection from '../../components/MusicProfiles'
 import MusicFiltersCard from '../../components/MusicFiltersCard'
 import QuietForAWhile from '../../components/QuietForAWhile'
 import { t } from '../../i18n'
-import TipLabel from '../../components/TipLabel'
 
 function AutomationSection() {
   const automation = useAutosaveSetting<boolean>(
@@ -43,7 +42,7 @@ function AutomationSection() {
 
   return (
     <section className="card">
-      <h2><TipLabel help="quality#automatic-searching">{t('Automation')}</TipLabel></h2>
+      <h2>{t('Automation')}</h2>
       <Switch
         checked={automation.value}
         onChange={automation.change}
@@ -60,7 +59,7 @@ function AutomationSection() {
         disabled={!unmonitorDownloaded.loaded || unmonitorDownloaded.saving}
         label={t("Stop monitoring a movie once it's downloaded")}
         tip={t("Monitored means Mediarium searches for it. You can switch monitoring back on from the movie's page at any time.")}
-        learnMore="quality#automatic-searching"
+       
         description={t("It won't be searched again, not even for a better version, and a file you delete isn't fetched again.")}
       />
       <Switch
@@ -110,7 +109,7 @@ function LanguageSection() {
 
   return (
     <section className="card">
-      <h2><TipLabel help="quality#audio-language">{t('Audio language')}</TipLabel></h2>
+      <h2>{t('Audio language')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {t("List the languages you'd watch in, best first. A release in an earlier language is picked over one in a later language, and releases with two or more audio tracks count when one of them matches. With one language, a release that names only that language is picked over a multi-language one. With several, like German and English, a multi-language release that has the first one is picked over a plain one, because it also carries the others. Releases with no language in the name count as English. Releases only in some other language, like GERMAN, are skipped.")}
       </p>
@@ -158,7 +157,7 @@ function LanguageSection() {
 function AdvancedSection({ value, loaded, saving, change }: { value: boolean; loaded: boolean; saving: boolean; change: (v: boolean) => void }) {
   return (
     <section className="card">
-      <h2><TipLabel help="quality#custom-formats">{t('Advanced options')}</TipLabel></h2>
+      <h2>{t('Advanced options')}</h2>
       <Switch
         checked={value}
         onChange={change}

@@ -23,14 +23,12 @@ import ImportBanner from './ImportBanner'
 import Icon, { type IconName } from './Icon'
 import KindGlyph from './KindGlyph'
 import ProfileMenu from './ProfileMenu'
-import ReportHost from './ReportHost'
 import SideTools from './SideTools'
 import SearchBox from './SearchBox'
 import ThemeToggle from './ThemeToggle'
 import UsageStatsPrompt from './UsageStats'
 import WhatsNew from './WhatsNew'
 import { t, tc } from '../i18n'
-import { useGuideShortcut } from '../guide/shortcut.ts'
 import AmbientBackdrop from './AmbientBackdrop'
 
 const NAV: { to: string; label: string; icon: IconName; sec: SectionKey; end?: boolean }[] = [
@@ -78,14 +76,6 @@ export default function AppShell() {
 
 function Shell() {
   const [menuOpen, setMenuOpen] = useState(false)
-  // A small, hideable link to support the project (administrators only). Hidden per browser.
-  const [showSupport] = useState(() => {
-    try {
-      return localStorage.getItem('mediarium-hide-support') !== '1'
-    } catch {
-      return true
-    }
-  })
   const [active, setActive] = useState(0)
   const location = useLocation()
   const [homes, setHomes] = useState<WatchLink[]>([])
@@ -224,7 +214,7 @@ function Shell() {
 
   // The page name in the top bar, in the browser tab and (when the page has no
   // heading of its own) as the page's one <h1>.
-  const heading = location.pathname.startsWith('/help') ? t('User guide') : pageTitle(location.pathname, admin)
+  const heading = pageTitle(location.pathname, admin)
   const parts = pageParts(location.pathname, admin)
   const headingText = parts.group ? `${parts.group} · ${parts.page}` : heading
   const headingNode = (
@@ -240,7 +230,6 @@ function Shell() {
       )}
     </span>
   )
-  useGuideShortcut()
   const specificTitle = useSpecificTitle()
   useEffect(() => {
     document.title = titleFor(specificTitle || heading)
@@ -507,7 +496,7 @@ function Shell() {
         </div>
         </div>
         )}
-        <SideTools ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} homes={homes} apps={apps} showSupport={admin && showSupport} variant="side">
+        <SideTools ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} homes={homes} apps={apps} variant="side">
           <ThemeToggle />
         </SideTools>
         </div>
@@ -556,7 +545,7 @@ function Shell() {
                 <Icon name="flask" size={14} /> <span className="demo-chip-label">{t('Demo data')}</span>
               </span>
             )}
-            <SideTools ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} homes={homes} apps={apps} showSupport={admin && showSupport} variant="top" />
+            <SideTools ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} homes={homes} apps={apps} variant="top" />
             <span className="top-theme">
               <ThemeToggle />
             </span>
@@ -574,7 +563,6 @@ function Shell() {
         {!demoEnabled() && <WhatsNew version={version} onDone={onNotesDone} />}
         {!demoEnabled() && admin && notesDone && <UsageStatsPrompt />}
         <FeedbackNudge />
-        <ReportHost />
       </div>
     </div>
   )

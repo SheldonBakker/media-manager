@@ -189,7 +189,7 @@ export default function ImportLists() {
   return (
     <div className="settings-stack">
       <section className="card span-all">
-        <h2><TipLabel help="adding#import-lists">{t('Import lists')}</TipLabel></h2>
+        <h2>{t('Import lists')}</h2>
         <p className="il-intro">
           {t('A list is read on a schedule, and the movies and shows on it are added to your library with the quality, folder and tags you choose. Nothing is ever removed because a title left a list, and a title is added only once, even if you remove it later.')}
         </p>

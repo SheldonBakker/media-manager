@@ -86,7 +86,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
   return (
     <div className="torrent-options" style={variant === 'settings' ? { borderTop: 0, marginTop: 0, paddingTop: 0 } : undefined}>
       <div className="to-map">
-        <b><TipLabel text={t('Whether your router passed the torrent port on to this machine (UPnP or NAT-PMP), so peers can reach you. Not needed to download, but it helps seeding.')} learnMore="downloads#opening-the-port-on-your-router">{t('Router port')}</TipLabel></b>
+        <b><TipLabel text={t('Whether your router passed the torrent port on to this machine (UPnP or NAT-PMP), so peers can reach you. Not needed to download, but it helps seeding.')}>{t('Router port')}</TipLabel></b>
         <span className={`badge ${opts.portMapping.state === 'mapped' ? 'downloaded' : opts.portMapping.state === 'none' ? 'missing' : ''}`}>
           {opts.portMapping.state === 'mapped'
             ? t('open')
@@ -113,7 +113,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
             onChange={(on) => void save({ portMapping: on }, on ? t('Mediarium will ask the router to open the port.') : t('Mediarium will not ask the router.'))}
             label={t('Open the port on my router')}
             tip={t("You can skip it: torrents download without it. An open port finds more peers and lets you seed properly. In Docker's default network no router is usually found.")}
-            learnMore="downloads#opening-the-port-on-your-router"
+           
             description={t('Asks the router with UPnP, then NAT-PMP, so peers can connect to you. It is never used with a VPN or proxy.')}
           />
           <Switch
@@ -129,7 +129,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
             onChange={(on) => void save({ sequentialDefault: on }, t('Saved.'))}
             label={t('Download new torrents in order')}
             tip={t('A little slower than the usual order and harder on the peers that share it, so leave it off unless you want to watch while it downloads.')}
-            learnMore="downloads#download-in-order"
+           
             description={t('First piece to last, so a video can be played while it downloads. Each torrent can choose for itself under Details.')}
           />
           <Switch
@@ -138,7 +138,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
             onChange={(on) => void save({ skipJunk: on }, t('Saved.'))}
             label={t('Leave out samples and notes')}
             tip={t('You can still tick any left-out file under Details while the torrent downloads. A torrent that is only junk is downloaded as it is.')}
-            learnMore="downloads#choosing-files"
+           
             description={t('Sample clips and .nfo, .txt, .exe and .url files are not downloaded.')}
           />
           <Switch
@@ -156,7 +156,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
             }}
           >
             <label>
-              <TipLabel text={t('Caps how fast the built-in client uploads, for all torrents together. Empty means no limit. 0 switches uploading off completely; downloading keeps working.')} learnMore="downloads#speed-limits">{t('Upload limit (KB/s)')}</TipLabel>
+              <TipLabel text={t('Caps how fast the built-in client uploads, for all torrents together. Empty means no limit. 0 switches uploading off completely; downloading keeps working.')}>{t('Upload limit (KB/s)')}</TipLabel>
               <input type="number" min={0} step={1} inputMode="numeric" value={upload} placeholder={t('Unlimited')} onChange={(e) => setUpload(e.target.value)} aria-invalid={uploadBad} />
             </label>
             <button className="btn-sm" type="submit" disabled={busy || uploadBad || uploadValue === savedUpload}>
@@ -176,7 +176,7 @@ export default function TorrentOptionsPanel({ listenPort, variant = 'activity' }
                   <input value={c.name} maxLength={40} onChange={(e) => setCats(cats.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
                 </label>
                 <label>
-                  <small className="has-tip"><TipLabel text={t('A plain folder name inside the downloads working folder. Leave it empty to use the working folder itself.')} learnMore="downloads#categories-and-save-folders">{t('Folder (optional)')}</TipLabel></small>
+                  <small className="has-tip"><TipLabel text={t('A plain folder name inside the downloads working folder. Leave it empty to use the working folder itself.')}>{t('Folder (optional)')}</TipLabel></small>
                   <input value={c.subfolder} maxLength={60} spellCheck={false} onChange={(e) => setCats(cats.map((x, j) => (j === i ? { ...x, subfolder: e.target.value } : x)))} />
                 </label>
                 <button

@@ -4,10 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "guide": "node --experimental-strip-types --no-warnings tools/build-guide.mjs",
-    "predev": "npm run guide",
     "dev": "vite",
-    "prebuild": "npm run guide",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "i18n": "node tools/i18n-check.mjs",

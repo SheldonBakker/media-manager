@@ -21,8 +21,7 @@ export async function expectNoErrors(errors: string[]) {
 }
 
 // The layout for tablets and phones starts at 900px: the main menu is a drawer
-// that starts closed (the theme button and the links to the guide live in it)
-// and the guide's landing page lists its topics as cards instead of a side list.
+// that starts closed (the theme button lives in it).
 const narrow = (page: Page) => (page.viewportSize()?.width ?? 1280) <= 900
 
 // Opens the menu drawer; on a wide screen the menu is already there.

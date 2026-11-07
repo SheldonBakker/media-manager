@@ -5,7 +5,6 @@ import type { AppLink, WatchLink } from '../api'
 import { openBookApp } from '../bookshelf/open'
 import { REPO_URL } from '../docs'
 import { t } from '../i18n'
-import { openReport } from '../report'
 import Icon, { type IconName, ICON_NAMES } from './Icon'
 import { useMusicPlayer } from './MusicPlayer'
 import { MEDIA_SERVER_BRAND, MediaServerMark } from './mediaServerBrand'
@@ -187,9 +186,8 @@ function Tool({ label, className = '', href, onClick, children, expanded, showTi
 }
 
 // The row of small buttons at the bottom of the sidebar: the players menu
-// (books, music, media servers), reporting a problem, GitHub and support.
-export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps = [], showSupport, variant = 'side', children }: { ebooksOn: boolean; audiobooksOn: boolean; musicOn: boolean; homes: WatchLink[]; apps?: AppLink[]; showSupport: boolean; variant?: 'side' | 'top'; children?: ReactNode }) {
-  const navigate = useNavigate()
+// (books, music, media servers) and GitHub.
+export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps = [], variant = 'side', children }: { ebooksOn: boolean; audiobooksOn: boolean; musicOn: boolean; homes: WatchLink[]; apps?: AppLink[]; variant?: 'side' | 'top'; children?: ReactNode }) {
   const [tip, setTip] = useState<Tip | null>(null)
   const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null)
   const top = variant === 'top'
@@ -220,22 +218,9 @@ export default function SideTools({ ebooksOn, audiobooksOn, musicOn, homes, apps
         </Tool>
       )}
       {menuAt && <PlayMenu homes={homes} apps={apps} ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} at={menuAt} onClose={() => setMenuAt(null)} below={top} />}
-      <Tool label={t('User guide')} onClick={() => navigate('/help')} className="help-tool" {...props}>
-        <span className="side-q" aria-hidden="true">
-          ?
-        </span>
-      </Tool>
-      <Tool label={t('Report a problem or share an idea')} onClick={() => openReport()} className="report" {...props}>
-        <Icon name="bug" size={16} />
-      </Tool>
       <Tool label={t('Star Mediarium on GitHub')} href={REPO_URL} className="github" {...props}>
         <Icon name="github" size={16} />
       </Tool>
-      {showSupport && (
-        <Tool label={t('Support Mediarium')} href="https://ko-fi.com/ryanborg" className="support" {...props}>
-          <Icon name="heart" size={16} />
-        </Tool>
-      )}
       {children}
       {tip &&
         !menuAt &&

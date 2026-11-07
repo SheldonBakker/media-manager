@@ -7,7 +7,7 @@ import TipLabel from './TipLabel'
 // has been stored. showState adds a plain "On" / "Off" next to it, in a
 // colour that matches, for the switches on the settings pages.
 // `tip` adds an info button after the label (one plain sentence, see
-// InfoTip); `learnMore` adds a "Learn more" link to a guide topic in it.
+// InfoTip).
 export default function Switch({
   checked,
   onChange,
@@ -16,7 +16,6 @@ export default function Switch({
   disabled,
   showState,
   tip,
-  learnMore,
 }: {
   checked: boolean
   onChange: (next: boolean) => void
@@ -25,7 +24,6 @@ export default function Switch({
   disabled?: boolean
   showState?: boolean
   tip?: string
-  learnMore?: string
 }) {
   return (
     <label className={`switch-row${disabled ? ' disabled' : ''}${showState ? ' has-state' : ''}`}>
@@ -42,7 +40,7 @@ export default function Switch({
       )}
       <span className="switch-text">
         <span className="switch-label">
-          {tip ? <TipLabel text={tip} learnMore={learnMore}>{label}</TipLabel> : label}
+          {tip ? <TipLabel text={tip}>{label}</TipLabel> : label}
         </span>
         {description && <span className="switch-desc">{description}</span>}
       </span>

@@ -4,8 +4,8 @@ A rebranded build of [Mediarium](https://github.com/rdborg/Mediarium): movies, T
 books, from search to library, in one app. All credit for the software goes to the upstream
 project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 
-`main` is upstream's code plus the files below. The app itself is documented in [docs/](docs/README.md),
-which is also built into the in-app guide.
+`main` is upstream's code plus the files below, minus the features listed under
+[What this fork removes](#what-this-fork-removes). The app itself is documented in [docs/](docs/README.md).
 
 ## What this fork adds
 
@@ -18,6 +18,16 @@ which is also built into the in-app guide.
   checkout, pushes `ghcr.io/sheldonbakker/media-manager:latest` and `:<sha>`, joins the
   tailnet and deploys `:<sha>` to the VM over SSH.
 - `deploy/docker-compose.yml` is the compose file the VM runs.
+
+## What this fork removes
+
+- The "Report a problem or share an idea" window (sidebar bug button, profile menu item, the
+  nudge's "Send an idea") and its `POST /api/feedback` relay to mediarium.app.
+- The ko-fi "Support Mediarium" sidebar link.
+- The in-app user guide (`/help`, the `?` key and buttons, "Learn more" links, the
+  docs-to-guide build step). The pages in `docs/` stay as documentation.
+- Settings > System > About and credits (`/settings/about`, `/about`), including its credits,
+  thank-you list, TMDB logo and legal notice.
 
 ## Deploy setup
 
@@ -47,4 +57,4 @@ git merge <upstream tag>     # for example v3.9.5
 ```
 
 Files removed from this fork may come back as "deleted by us" conflicts; resolve those with
-`git rm <file>`. Push to `main` and the workflow builds and deploys it.
+`git rm <file>`. Upstream changes to the removed features (above) are dropped the same way. Push to `main` and the workflow builds and deploys it.

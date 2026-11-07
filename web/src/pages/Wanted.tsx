@@ -10,7 +10,6 @@ import Cover from '../components/Cover'
 import Icon, { type IconName } from '../components/Icon'
 import Loading from '../components/Loading'
 import InfoTip from '../components/InfoTip'
-import HelpLink from '../components/HelpLink'
 import { PosterFallback } from '../components/PosterCard'
 import { KIND_LABEL, useKinds, useModules, type MediaKind } from '../ModulesContext'
 import QuotaNote from '../components/QuotaNote'
@@ -483,7 +482,7 @@ export default function Wanted() {
           {tab('cutoff', t('Upgrades'))}
           {subtitlesOn && tab('subtitles', t('Subtitles'))}
         </div>
-        <HelpLink topic="activity#the-wanted-page" text={t('Missing: monitored titles that have no file yet. Upgrades: titles you have that are below the quality you asked for. Subtitles: downloaded titles that lack a subtitle in your languages.')} />
+        <InfoTip text={t('Missing: monitored titles that have no file yet. Upgrades: titles you have that are below the quality you asked for. Subtitles: downloaded titles that lack a subtitle in your languages.')} />
       </div>
 
       {error && <p className="error-text">{error}</p>}

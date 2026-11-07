@@ -461,7 +461,7 @@ export default function QualityProfilesSection({ rev = 0, onChanged, advanced = 
       </div>
       <div className="grid-form profile-form-col">
         <fieldset className="profile-fieldset">
-          <legend><TipLabel text={t('If nothing fits this profile and the title has no file yet, these profiles are tried in order. A better match replaces that file later.')} learnMore="quality#fallback-profiles">{t('If nothing is found at this quality, also try')}</TipLabel></legend>
+          <legend><TipLabel text={t('If nothing fits this profile and the title has no file yet, these profiles are tried in order. A better match replaces that file later.')}>{t('If nothing is found at this quality, also try')}</TipLabel></legend>
           <FallbackEditor profiles={profiles} selfId={draft.id} value={draft.fallback} onChange={(fallback) => setDraft({ ...draft, fallback })} />
         </fieldset>
         <details open={!!(draft.mustContain || draft.mustNotContain || draft.preferred)}>
@@ -576,7 +576,7 @@ export default function QualityProfilesSection({ rev = 0, onChanged, advanced = 
 
   return (
     <section className="card wide">
-      <h2><TipLabel help="quality">{t('Quality profiles')}</TipLabel></h2>
+      <h2>{t('Quality profiles')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {t('A profile sets which releases are acceptable and whether Mediarium keeps looking for a better version. Movies and shows use the default unless you pick another on their page.')}
       </p>

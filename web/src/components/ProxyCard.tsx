@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useToast } from './Toast'
 import { api, type ProxySettings } from '../api'
 import { t, st } from '../i18n'
-import TipLabel from './TipLabel'
 
 type Form = Omit<ProxySettings, 'hasPassword' | 'port'> & { port: string; password: string }
 
@@ -75,7 +74,7 @@ export default function ProxyCard() {
 
   return (
     <section className="card grid-form">
-      <h2><TipLabel help="downloads#a-socks5-or-http-proxy-instead">{t('Proxy')}</TipLabel></h2>
+      <h2>{t('Proxy')}</h2>
       <p style={{ color: 'var(--text-dim)', margin: 0 }}>
         {t('Already run a proxy, such as the SOCKS5 port of a VPN container or a seedbox? Send torrents, indexer searches or Usenet through it. A connected VPN above still takes over for torrents.')}
       </p>

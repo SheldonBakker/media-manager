@@ -17,7 +17,6 @@ import (
 var memberRoutes = []string{
 	"GET /api/plex-watchlist", "PUT /api/plex-watchlist", "DELETE /api/plex-watchlist", "POST /api/plex-watchlist/pin",
 	"GET /api/plex-watchlist/pin/{pinId}", "POST /api/plex-watchlist/check", "GET /api/plex-watchlist/items",
-	"POST /api/feedback",
 	"GET /api/auth/me",
 	"GET /api/auth/two-step",
 	"POST /api/auth/two-step/setup",

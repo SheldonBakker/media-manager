@@ -42,7 +42,7 @@ Everything else reads it:
 - **The release workflow** (`.github/workflows/release.yml`) checks that the tag you pushed is exactly `v` + `VERSION`, and stops the whole release if not. It also uses `VERSION` for the file names and the image tags.
 - **A test** (`cmd/app/version_test.go`) fails if `VERSION` is not a valid semantic version, so a typo is caught by CI before you ever tag.
 
-A plain `go build` or `go run` without extra flags reports the version `dev`, so a developer's build never claims to be a release. The running version shows on the About page and at `GET /api/version`.
+A plain `go build` or `go run` without extra flags reports the version `dev`, so a developer's build never claims to be a release. The running version shows at the bottom of the sidebar and at `GET /api/version`.
 
 The git tag is the only place with a `v` in front: file `2.1.0`, tag `v2.1.0`, Docker image `2.1.0`.
 

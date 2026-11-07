@@ -4,7 +4,6 @@ import { useToast } from './Toast'
 import { useConfirm } from './ConfirmProvider'
 import { api, type CustomFormat, type FormatTestResult, type QualityProfile, type TrashFormat, type TrashProfile } from '../api'
 import { plural, t, tx, st } from '../i18n'
-import TipLabel from './TipLabel'
 import Collapsible from './Collapsible'
 import TrashUpdateBar from './TrashUpdateBar'
 import { importScoreAction, profileForApp, scorePreview, signed } from '../trashScores'
@@ -66,7 +65,7 @@ export default function CustomFormatsSection({ rev = 0, onChanged }: { rev?: num
 
   return (
     <section className="card wide">
-      <h2><TipLabel help="quality#custom-formats">{t('Custom formats')}</TipLabel></h2>
+      <h2>{t('Custom formats')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {t('A custom format spots something in a release name, like HDR, a codec or a release group. Each quality profile gives the formats it cares about a score: releases scoring higher win, and a negative score keeps a release out. Most people start from the TRaSH Guides.')}
       </p>

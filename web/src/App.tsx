@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
 import { isAdmin } from './api'
-import GuidePopupHost from './components/GuidePopup'
 import { BASE_PATH } from './base'
 import { t } from './i18n'
 import { AuthProvider, useAuth } from './AuthContext'
@@ -69,7 +68,6 @@ const MusicPlaylistPage = lazy(() => import('./pages/MusicPlaylists').then((m) =
 const Statistics = lazy(() => import('./pages/Statistics'))
 const ManualImport = lazy(() => import('./pages/ManualImport'))
 const ReleaseSearch = lazy(() => import('./pages/ReleaseSearch'))
-const About = lazy(() => import('./pages/About'))
 const DownloadRulesSettings = lazy(() => import('./pages/settings/DownloadSettings'))
 const UsenetSettings = lazy(() => import('./pages/settings/DownloadSettings').then((m) => ({ default: m.UsenetSettings })))
 const TorrentSettings = lazy(() => import('./pages/settings/DownloadSettings').then((m) => ({ default: m.TorrentSettings })))
@@ -79,7 +77,6 @@ const SecuritySettings = lazy(() => import('./pages/Profile').then((m) => ({ def
 const ServicesSettings = lazy(() => import('./pages/Profile').then((m) => ({ default: m.ServicesSettings })))
 const RequestsSettings = lazy(() => import('./pages/Profile').then((m) => ({ default: m.RequestsSettings })))
 const SignInSettings = lazy(() => import('./pages/Profile').then((m) => ({ default: m.SignInSettings })))
-const Guide = lazy(() => import('./pages/Guide'))
 const SystemSettings = lazy(() => import('./pages/settings/SystemSettings'))
 const BackupSettings = lazy(() => import('./pages/settings/BackupSettings'))
 const AllAccounts = lazy(() => import('./pages/Profile').then((m) => ({ default: m.AllAccounts })))
@@ -192,8 +189,6 @@ function Gate() {
         <Route path="/calendar" element={<Upcoming tab="calendar" />} />
         <Route path="/queue" element={<Queue />} />
         <Route path="/apps/:id" element={<AppFrame />} />
-        <Route path="/help" element={<Guide />} />
-        <Route path="/help/:topic" element={<Guide />} />
         <Route path="/settings" element={<SettingsLayout />}>
           <Route index element={<Navigate to="general" replace />} />
           <Route path="modules" element={<AdminOnly><ModulesSettings /></AdminOnly>} />
@@ -224,18 +219,15 @@ function Gate() {
           <Route path="security" element={<SecuritySettings />} />
           <Route path="services" element={<ServicesSettings />} />
           <Route path="logs" element={<AdminOnly><LogsSettings /></AdminOnly>} />
-          <Route path="about" element={<About />} />
           <Route path="statistics" element={<Statistics />} />
           {SETTINGS_REDIRECTS.map(([from, to]) => (
             <Route key={from} path={from.replace('/settings/', '')} element={<Navigate to={to} replace />} />
           ))}
         </Route>
         <Route path="/profile" element={<Navigate to="/settings/profile" replace />} />
-        <Route path="/about" element={<Navigate to="/settings/about" replace />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
-    <GuidePopupHost />
     </>
   )
 }

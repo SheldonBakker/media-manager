@@ -62,7 +62,7 @@ export default function ProxySignIn() {
           <input value={header} placeholder="Remote-User" onChange={(e) => setHeader(e.target.value)} disabled={busy || state === null} />
         </label>
         <label style={{ display: 'grid', gap: 4, flex: '1 1 220px', maxWidth: 320 }}>
-          <TipLabel text={t('Mediarium only believes the header when the request comes straight from this address, so nobody else can fake it.')} learnMore="internet#sign-in-through-your-reverse-proxy">{t("Your proxy's address")}</TipLabel>
+          <TipLabel text={t('Mediarium only believes the header when the request comes straight from this address, so nobody else can fake it.')}>{t("Your proxy's address")}</TipLabel>
           <input value={addresses} placeholder="172.18.0.5" onChange={(e) => setAddresses(e.target.value)} disabled={busy || state === null} />
         </label>
         <button

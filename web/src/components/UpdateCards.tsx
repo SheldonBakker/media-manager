@@ -11,7 +11,6 @@ import Icon from './Icon'
 import Loading from './Loading'
 import Switch from './Switch'
 import { useToast } from './Toast'
-import TipLabel from './TipLabel'
 
 // ---- Shared bits ----
 
@@ -289,7 +288,7 @@ export function UpdatesCard() {
   return (
     <fieldset className="group usenet span-all">
       <legend>
-        <Icon name="download" size={14} /> <TipLabel help="backups-updates#knowing-when-there-is-a-new-version">{t('Updates')}</TipLabel>
+        <Icon name="download" size={14} /> {t('Updates')}
       </legend>
       {!state || !notice ? (
         <Loading height={90} />

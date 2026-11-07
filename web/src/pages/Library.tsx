@@ -29,7 +29,6 @@ import { chosenOf, count, failureLines, nameList, selectAllKeys, selectionText, 
 import { removeOption } from '../diskUsage'
 import FilterToggle from '../components/FilterToggle'
 import InfoTip from '../components/InfoTip'
-import HelpLink from '../components/HelpLink'
 import { useUrlState } from '../useUrlState'
 import { plural, t, tx, st } from '../i18n'
 import { compareTitles } from '../titleSort'
@@ -723,7 +722,7 @@ export default function Library() {
               <Icon name="check" size={16} /> {t('Select')}
             </button>
           )}
-          {admin && <HelpLink topic="library#selecting-many-titles" text={t('Pick several titles, then change them all at once: monitoring, quality profile, where they download from, tags, folder, searching or removing. Nothing changes until you press one of the actions.')} />}
+          {admin && <InfoTip text={t('Pick several titles, then change them all at once: monitoring, quality profile, where they download from, tags, folder, searching or removing. Nothing changes until you press one of the actions.')} />}
           {view === 'grid' && (
             <label className="poster-size" title={t('Poster size')}>
               <Icon name="image" size={14} />

@@ -3934,8 +3934,6 @@ export const api = {
   migrateStatus: () => get<MigrateStatus>('/migrate/status'),
   systemStats: () => get<SystemStats>('/system/stats'),
   diagnostics: () => get<Diagnostics>('/system/diagnostics'),
-  sendFeedback: (req: { kind: 'problem' | 'idea'; title: string; message: string; contact?: string; report?: string; lang?: string; screenshot?: string }) =>
-    post<{ id: string }>('/feedback', req),
   usageStats: () => get<UsageStatsState>('/usage-stats'),
   setUsageStats: (choice: 'yes' | 'no') => put<UsageStatsState>('/usage-stats', { choice }),
   resetUsageStatsId: () => post<UsageStatsState>('/usage-stats/reset-id'),

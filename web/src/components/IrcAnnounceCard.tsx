@@ -78,7 +78,7 @@ export default function IrcAnnounceCard() {
   return (
     <fieldset className="group torrent irc-card">
       <legend>
-        <Icon name="chat" size={14} /> <TipLabel help="indexers#grabbing-from-irc-announcements">{t('IRC announce')}</TipLabel>
+        <Icon name="chat" size={14} /> {t('IRC announce')}
       </legend>
       <p>
         {t('Trackers post every new release in an IRC channel within seconds of the upload. Mediarium can listen there and download a release you want right away, instead of waiting for the next check. It only ever downloads titles that are in your library and wanted, with the same quality rules as everywhere else. Nothing runs until you add a connection and switch it on.')}
@@ -437,7 +437,7 @@ function Editor({ existing, presets, onCancel, onSaved }: { existing?: IrcConnec
             <small style={{ color: 'var(--text-dim)' }}>{t('Your key is only ever sent to this address.')}</small>
           </label>
           <label>
-            <TipLabel text={t('Describe how a line from the bot is read, so Mediarium can pull out the release name and size. A ready-made style fills these in for you.')} learnMore="indexers#writing-your-own-template">{t('Patterns')}</TipLabel>
+            <TipLabel text={t('Describe how a line from the bot is read, so Mediarium can pull out the release name and size. A ready-made style fills these in for you.')}>{t('Patterns')}</TipLabel>
             <textarea value={patterns} onChange={(e) => setPatterns(e.target.value)} rows={4} spellCheck={false} placeholder="(?P<releaseName>.+) - (?P<torrentSize>.+)" {...v.bind('patterns')} />
             <FieldError v={v} name="patterns" />
             <small style={{ color: 'var(--text-dim)' }}>

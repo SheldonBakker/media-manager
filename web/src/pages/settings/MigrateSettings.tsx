@@ -20,7 +20,6 @@ import { importReason } from '../../importReasons'
 import { locale, plural, t, tx, st } from '../../i18n'
 import { FieldError, FormProblem, useValidation } from '../../useValidation'
 import { apiKey as apiKeyCheck, firstError, folderPath, required, url as urlCheck } from '../../validate'
-import TipLabel from '../../components/TipLabel'
 import TypeTag from '../../components/TypeTag'
 
 interface AppDef {
@@ -240,7 +239,7 @@ export default function MigrateSettings() {
       {/* 1. Connect */}
       <fieldset className="group folders span-all">
         <legend>
-          <Icon name="key" size={14} /> <TipLabel help="adding#moving-from-radarr-sonarr-and-other-apps">{t('1. Connect your current apps')}</TipLabel>
+          <Icon name="key" size={14} /> {t('1. Connect your current apps')}
         </legend>
         {GROUPS.map((g) => (
           <div key={g.title} className="mig-group">

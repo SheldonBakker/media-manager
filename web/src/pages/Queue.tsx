@@ -6,7 +6,6 @@ import Cover from '../components/Cover'
 import Icon, { type IconName } from '../components/Icon'
 import Loading from '../components/Loading'
 import InfoTip from '../components/InfoTip'
-import HelpLink from '../components/HelpLink'
 import { PosterFallback } from '../components/PosterCard'
 import { useToast } from '../components/Toast'
 import TorrentsOffNote from '../components/TorrentsOffNote'
@@ -1138,7 +1137,7 @@ export default function Queue() {
         <>
           <p style={{ color: 'var(--text-dim)' }}>
             {t("Releases that failed because they were bad. Mediarium won't pick them again, but you can still choose one by hand.")}
-            <HelpLink topic="activity#when-a-release-turns-out-to-be-bad" text={t('Remove lets searches pick that release again. Clear all does the same for every release in the list.')} />
+            <InfoTip text={t('Remove lets searches pick that release again. Clear all does the same for every release in the list.')} />
           </p>
           {blocklistTotal === 0 ? (
             <div className="empty-state">

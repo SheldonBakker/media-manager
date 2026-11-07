@@ -60,7 +60,7 @@ export default function SeedRules({ indexerId }: { indexerId: number }) {
 
   return (
     <details className="qdetails" onToggle={(e) => e.currentTarget.open && load()}>
-      <summary><TipLabel text={t('How long a torrent from this tracker keeps sharing, in the built-in torrent client or in qBittorrent or Transmission. Private trackers often ask for a minimum ratio or time.')} learnMore="downloads#seeding-rules-for-one-indexer">{t('Seeding rules')}</TipLabel></summary>
+      <summary><TipLabel text={t('How long a torrent from this tracker keeps sharing, in the built-in torrent client or in qBittorrent or Transmission. Private trackers often ask for a minimum ratio or time.')}>{t('Seeding rules')}</TipLabel></summary>
       <div className="seed-rule">
         <label>
           <small>{t('Seed until ratio')}</small>

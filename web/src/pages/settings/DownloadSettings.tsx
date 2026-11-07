@@ -18,7 +18,6 @@ import { useLive } from '../../useLive'
 import { useConfirm } from '../../components/ConfirmProvider'
 import { plural, t, tx, st } from '../../i18n'
 import InfoTip from '../../components/InfoTip'
-import TipLabel from '../../components/TipLabel'
 import SpeedSchedule from '../../components/SpeedSchedule'
 import { firstError, numberRange } from '../../validate'
 
@@ -90,7 +89,7 @@ export default function DownloadRulesSettings() {
       <div className="half-cols span-all">
       <fieldset className="group folders">
         <legend>
-          <Icon name="download" size={14} /> <TipLabel help="downloads#the-downloading-pages">{t('Where to download from')}</TipLabel>
+          <Icon name="download" size={14} /> {t('Where to download from')}
         </legend>
         <DefaultSourcesCard
           key={settings?.defaultSources ?? 'loading'}
@@ -104,31 +103,31 @@ export default function DownloadRulesSettings() {
       </fieldset>
       <fieldset className="group folders">
         <legend>
-          <Icon name="list" size={14} /> <TipLabel help="downloads#downloads-at-the-same-time-the-download-line">{t('Downloads at the same time')}</TipLabel>
+          <Icon name="list" size={14} /> {t('Downloads at the same time')}
         </legend>
         <DownloadsAtOnceCard />
       </fieldset>
       <fieldset className="group folders">
         <legend>
-          <Icon name="download" size={14} /> <TipLabel help="downloads#speed-and-space">{t('Speed, hours and free space')}</TipLabel>
+          <Icon name="download" size={14} /> {t('Speed, hours and free space')}
         </legend>
         <SpeedAndSpaceCard />
       </fieldset>
       <fieldset className="group folders">
         <legend>
-          <Icon name="folder" size={14} /> <TipLabel help="downloads#temporary-download-folder">{t('Temporary download folder')}</TipLabel>
+          <Icon name="folder" size={14} /> {t('Temporary download folder')}
         </legend>
         <TempFolderCard key={settings ? 'loaded' : 'loading'} saved={settings?.downloadsTempPath ?? ''} ready={settings !== null} onSaved={loadSettings} />
       </fieldset>
       <fieldset className="group folders">
         <legend>
-          <Icon name="moon" size={14} /> <TipLabel help="downloads#speed-schedule">{t('Speed schedule')}</TipLabel>
+          <Icon name="moon" size={14} /> {t('Speed schedule')}
         </legend>
         <SpeedSchedule />
       </fieldset>
       <fieldset className="group folders">
         <legend>
-          <Icon name="shield" size={14} /> <TipLabel help="downloads#checks-on-releases">{t('Checks on releases')}</TipLabel>
+          <Icon name="shield" size={14} /> {t('Checks on releases')}
         </legend>
         <DownloadChecksCard />
       </fieldset>
@@ -158,7 +157,7 @@ export function UsenetSettings() {
           <div className="col-stack">
           <section className="card">
             <h2>
-              <TipLabel help="downloads#usenet-connections">{t('Downloader')}</TipLabel>{' '}
+              {t('Downloader')}{' '}
               {status?.usenet.external ? (
                 <span className="badge downloaded">{status.usenet.externalLabel}</span>
               ) : (
@@ -247,7 +246,7 @@ export function TorrentSettings() {
             </div>
             <div className="col-stack">
             <section className="card">
-              <h2><TipLabel help="downloads#controls-of-the-built-in-torrent-client">{t('Torrent options')}</TipLabel></h2>
+              <h2>{t('Torrent options')}</h2>
               <TorrentOptionsPanel variant="settings" listenPort={status?.torrent.listenPort ?? 58264} />
             </section>
             </div>
@@ -492,7 +491,7 @@ function SpeedAndSpaceCard() {
                   </option>
                 ))}
               </select>
-              <InfoTip text={t('Caps Usenet and torrents together. Pick hours below to apply it only part of the day, so downloads run at full speed at night.')} learnMore="downloads#speed-and-space" />
+              <InfoTip text={t('Caps Usenet and torrents together. Pick hours below to apply it only part of the day, so downloads run at full speed at night.')} />
             </span>
           ),
         })}
@@ -579,7 +578,7 @@ function StalledTorrentCard() {
   )
   return (
     <section className="card">
-      <h2><TipLabel help="downloads#stalled-torrents">{t('Stalled torrents')}</TipLabel></h2>
+      <h2>{t('Stalled torrents')}</h2>
       <label className="inline-field">
         {tx('Give up on a torrent that gets no data for {time}', {
           time: (
@@ -727,7 +726,7 @@ function UsenetServersSection({ onChange }: { onChange: () => void }) {
 
   return (
     <section className="card">
-      <h2><TipLabel help="downloads#usenet-connections">{t('Your Usenet provider')}</TipLabel></h2>
+      <h2>{t('Your Usenet provider')}</h2>
       <p style={{ color: 'var(--text-dim)' }}>
         {tx('The login your Usenet provider gave you. Add a second provider as a {backup}, ideally on a different backbone, to fill in articles the first one is missing.', { backup: <em>{t('backup')}</em> })}
       </p>

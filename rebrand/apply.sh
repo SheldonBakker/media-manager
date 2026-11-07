@@ -68,7 +68,6 @@ perl -pi -e 's#/Mediarium/blob/#/media-manager/blob/#g' "${FILES[@]}"
 perl -pi -e 's/(?<![\w\/\-=\\.@])Mediarium(?=s\b|(?![\w\/\-\\]))/$ENV{NAME}/g' "${FILES[@]}"
 # Heading anchors follow the renamed headings.
 perl -pi -e 's/#mediarium-(?=[a-z0-9])/#media-manager-/g' "${FILES[@]}"
-perl -pi -e "s/'mediarium-is-slow-to-answer/'media-manager-is-slow-to-answer/g" web/src/guide/markdown.test.ts
 # The share text pointed people at the upstream website.
 perl -pi -e 's/More at mediarium\.app/More at $ENV{REPO_URL}/g' "${FILES[@]}"
 

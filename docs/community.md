@@ -1,6 +1,6 @@
 # People who helped
 
-Mediarium gets better because people who use it say what's missing or what broke. Every idea and bug report below came from someone in the community. Thank you. The same list is on the **About and credits** page in the app.
+Mediarium gets better because people who use it say what's missing or what broke. Every idea and bug report below came from someone in the community. Thank you.
 
 | Who | Where | What came of it |
 |---|---|---|
@@ -56,7 +56,6 @@ Mediarium gets better because people who use it say what's missing or what broke
 
 ## Suggest something
 
-- **From inside Mediarium:** the bug button at the bottom of the sidebar sends a problem or an idea, privately or as a GitHub issue. See [Report a problem or share an idea](report-a-problem.md).
 - **Questions:** [GitHub Discussions](https://github.com/rdborg/Mediarium/discussions).
 - **Chat and show your setup:** the [Mediarium community on Reddit](https://www.reddit.com/r/Mediarium/). Replies can be slow there, and bugs are fixed fastest when they are also reported on GitHub.
 - **Something broken:** [open an issue](https://github.com/rdborg/Mediarium/issues/new/choose) with the text from **Settings > System > Copy for support**.

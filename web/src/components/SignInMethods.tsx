@@ -99,7 +99,7 @@ function GeneralCard({ state, error, onChange, reload }: { state: SignInSettings
       {state && (
         <div className="form-cols" style={{ gap: 18 }}>
           <div>
-            <strong><TipLabel text={t('Switching it off leaves only the other ways to sign in. It only works after an admin has signed in another way, so you cannot lock yourself out.')} learnMore="accounts#turning-password-sign-in-off">{t('Password sign-in')}</TipLabel></strong>
+            <strong><TipLabel text={t('Switching it off leaves only the other ways to sign in. It only works after an admin has signed in another way, so you cannot lock yourself out.')}>{t('Password sign-in')}</TipLabel></strong>
             <p style={{ margin: '4px 0 8px', color: 'var(--text-dim)' }}>
               {state.localEffective
                 ? state.localSignIn
@@ -127,7 +127,7 @@ function GeneralCard({ state, error, onChange, reload }: { state: SignInSettings
             )}
           </div>
           <div>
-            <strong><TipLabel text={t('A passkey signs you in with a fingerprint, face or device PIN instead of a password. It needs the address of Mediarium to start with https and use a name.')} learnMore="accounts#passkeys">{t('Passkeys')}</TipLabel></strong>
+            <strong><TipLabel text={t('A passkey signs you in with a fingerprint, face or device PIN instead of a password. It needs the address of Mediarium to start with https and use a name.')}>{t('Passkeys')}</TipLabel></strong>
             <p style={{ margin: '4px 0 8px', color: 'var(--text-dim)' }}>
               {state.passkeys
                 ? state.passkeysAvailable
@@ -156,7 +156,7 @@ function GeneralCard({ state, error, onChange, reload }: { state: SignInSettings
       {state && (
         <div style={{ marginTop: 18 }}>
           <strong>
-            <TipLabel text={t('Visitors who are not signed in are sent straight to the provider, and come back to the page they asked for. Add ?no-redirect=1 to the address to see the normal sign-in page. Password sign-in is not changed.')} learnMore="accounts#signing-in-automatically">
+            <TipLabel text={t('Visitors who are not signed in are sent straight to the provider, and come back to the page they asked for. Add ?no-redirect=1 to the address to see the normal sign-in page. Password sign-in is not changed.')}>
               {t('Sign in automatically with')}
             </TipLabel>
           </strong>

@@ -3,7 +3,7 @@ import { api, can, type SeriesType } from '../api'
 import { useAuth } from '../AuthContext'
 import { useToast } from './Toast'
 import { t } from '../i18n'
-import HelpLink from './HelpLink'
+import InfoTip from './InfoTip'
 
 // On a show's page: how releases number its episodes. Anime releases count
 // from the first episode ("Show - 105"); daily shows go by air date.
@@ -29,7 +29,7 @@ export default function SeriesTypePicker({ id, value, onChange }: { id: number; 
     <label className="inline-field series-type" title={t("How release names number this show's episodes")}>
       <span className="has-tip">
         {t('Episode numbering')}
-        <HelpLink topic="library#scene-and-anime-numbering" text={t('How release names count this show\'s episodes. Seasons is the usual S01E05; Anime counts from the first episode (Show - 105); Daily goes by the day the episode aired. Pick the one the releases of this show use.')} />
+        <InfoTip text={t('How release names count this show\'s episodes. Seasons is the usual S01E05; Anime counts from the first episode (Show - 105); Daily goes by the day the episode aired. Pick the one the releases of this show use.')} />
       </span>
       <select value={value} disabled={busy || !can(me, 'manage')} onChange={(e) => void change(e.target.value as SeriesType)}>
         {(Object.keys(LABEL) as SeriesType[]).map((type) => (

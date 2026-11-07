@@ -227,26 +227,6 @@ func (s *Server) TestSetBookReleaseDate(id int64, date string) {
 	_ = s.BookRepo.SetReleaseDate(id, date)
 }
 
-// Private reports: point them at a test server and start the hourly count
-// afresh. The returned func puts the real address back.
-func SetFeedbackEndpointForTest(url string) func() {
-	old := feedbackEndpoint
-	feedbackEndpoint = url
-	feedbackLimit.Lock()
-	feedbackLimit.sent = nil
-	feedbackLimit.byPerson = nil
-	feedbackLimit.Unlock()
-	return func() { feedbackEndpoint = old }
-}
-
-func LeadingZeroBitsForTest(b []byte) int { return leadingZeroBits(b) }
-
-const (
-	FeedbackPowBits        = feedbackPowBits
-	FeedbackPerHour        = feedbackPerHour
-	FeedbackPerHourInstall = feedbackPerHourInstall
-)
-
 // SetDebridURLForTest points the debrid services at a fake; the returned
 // function puts it back.
 func SetDebridURLForTest(u string) func() {

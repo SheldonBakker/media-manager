@@ -59,7 +59,6 @@ const PAGE_WORDS: Record<string, string> = {
   statistics: 'stats charts numbers',
   logs: 'errors problems debug support report',
   migrate: 'import radarr sonarr prowlarr sabnzbd move switch',
-  about: 'version credits legal licence open source',
 }
 
 // The cards and single settings. Each label is the heading the page shows.
@@ -192,9 +191,6 @@ function cardSpecs(): Spec[] {
     { to: 'statistics', label: t('By quality'), words: 'stats chart quality' },
     // Logs
     { to: 'logs', label: t('Messages about errors'), words: 'email alert errors' },
-    // About
-    { to: 'about', label: t('Legal and responsible use'), words: 'legal terms licence' },
-    { to: 'about', label: t('Credits: what Mediarium is built with'), words: 'credits open source libraries licences' },
   ]
 }
 

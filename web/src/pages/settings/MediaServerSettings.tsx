@@ -247,7 +247,7 @@ function KindPanel({
             </small>
           </label>}
           <div>
-            <strong style={{ fontSize: '0.9rem' }}><TipLabel text={t('Needed only when the media server sees your library under another path. Each row pairs the folder as Mediarium names it with the same folder on the server.')} learnMore="media-servers#path-mapping">{t('Folder mapping (optional)')}</TipLabel></strong>
+            <strong style={{ fontSize: '0.9rem' }}><TipLabel text={t('Needed only when the media server sees your library under another path. Each row pairs the folder as Mediarium names it with the same folder on the server.')}>{t('Folder mapping (optional)')}</TipLabel></strong>
             <p style={{ margin: '4px 0 8px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
               {tx("Only needed when {name} sees your library under a different path, for example Mediarium's {from} is {to} in {name}.", {
                 name: brand.label,
@@ -434,7 +434,7 @@ function ServerCard({ s, onChanged }: { s: MediaServer; onChanged: () => void })
         onChange={(v) => void update({ refreshAfterImport: v }, v ? t('{name} is refreshed after every download.', { name: s.name }) : t('{name} is no longer refreshed automatically.', { name: s.name }))}
         label={t('Refresh after every download')}
         tip={t('Tells the server about the new folder as soon as a download is imported, so you do not wait for its own scheduled scan.')}
-        learnMore="media-servers#what-happens-after-an-import"
+       
         description={
           s.kind === 'webhook'
             ? t('Gets a message naming the new folder after every download.')
@@ -500,7 +500,7 @@ function ServerCard({ s, onChanged }: { s: MediaServer; onChanged: () => void })
             <FieldError v={v} name="publicUrl" />
           </label>
           <div>
-            <strong style={{ fontSize: '0.9rem' }}><TipLabel text={t('Needed only when the media server sees your library under another path. Each row pairs the folder as Mediarium names it with the same folder on the server.')} learnMore="media-servers#path-mapping">{t('Folder mapping')}</TipLabel></strong>
+            <strong style={{ fontSize: '0.9rem' }}><TipLabel text={t('Needed only when the media server sees your library under another path. Each row pairs the folder as Mediarium names it with the same folder on the server.')}>{t('Folder mapping')}</TipLabel></strong>
             <PathMapEditor value={pathMap} onChange={setPathMap} v={v} prefix="edit" />
           </div>
           <div>

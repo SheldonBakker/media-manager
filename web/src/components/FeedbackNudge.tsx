@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { demoEnabled } from '../demo'
 import { REPO_URL } from '../docs'
-import { openReport } from '../report'
 import { t } from '../i18n'
 import { NUDGE_FIRST_SEEN, NUDGE_LAST_ASKED, NUDGE_NEVER, shouldNudge } from '../nudge'
 import Icon from './Icon'
@@ -25,7 +24,7 @@ function write(key: string, value: string) {
 }
 
 // Now and then (see nudge.ts) a small card in the corner asks for a GitHub
-// star, an idea or a share. It waits half a minute so it never gets in the
+// star or a share. It waits half a minute so it never gets in the
 // way of what someone opened the page for.
 export default function FeedbackNudge() {
   const [show, setShow] = useState(false)
@@ -64,15 +63,6 @@ export default function FeedbackNudge() {
         <a className="btn-link primary-look" href={REPO_URL} target="_blank" rel="noreferrer" onClick={() => setShow(false)}>
           <Icon name="star" size={15} /> {t('Star on GitHub')}
         </a>
-        <button
-          className="btn-with-icon"
-          onClick={() => {
-            setShow(false)
-            openReport('idea')
-          }}
-        >
-          <Icon name="chat" size={15} /> {t('Send an idea')}
-        </button>
         <button
           className="btn-with-icon"
           onClick={() => {

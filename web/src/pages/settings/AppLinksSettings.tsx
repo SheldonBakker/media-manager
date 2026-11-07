@@ -5,7 +5,6 @@ import Icon, { type IconName } from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { DOCS_URL } from '../../docs'
 import { t } from '../../i18n'
-import TipLabel from '../../components/TipLabel'
 
 const ICONS: IconName[] = ['grid', 'tv', 'film', 'music', 'book', 'headphones', 'globe', 'server', 'monitor', 'star', 'shield', 'calendar']
 
@@ -49,7 +48,7 @@ export default function AppLinksSettings() {
     <div className="settings-stack">
       <section className="card wide">
         <h2>
-          <TipLabel help="media-servers#add-ons">{t('Add-ons')}</TipLabel>
+          {t('Add-ons')}
         </h2>
         <p style={{ color: 'var(--text-dim)' }}>
           {t('Other programs you run next to Mediarium, such as a channel guide or a dashboard, can have a link here. They show up in the players menu (the play button at the bottom of the sidebar). Mediarium does not run them or load their code, and each is its own project with its own rules.')}
