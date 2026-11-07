@@ -14,7 +14,7 @@ One block for each Settings page that holds a single set of values:
 | `downloadClient` | Settings > Downloading > Torrents > **Use your own torrent client** (qBittorrent, Transmission, RDT-Client, Decypharr) |
 | `debrid` | Settings > Downloading > Torrents > **Debrid service** |
 | `proxy` | The SOCKS5 or HTTP proxy for Usenet, indexers and torrents ([vpn.md](./vpn.md#a-socks5-or-http-proxy-instead)) |
-| `systemOptions` | The update options under Settings > System (daily check, overnight install, restart when stuck) |
+| `systemOptions` | The Restart options under Settings > System (restart when stuck) |
 
 Things you add several of are **lists**. Each item has a `name`, and Mediarium finds the one you mean by that name (capital letters don't matter):
 
@@ -121,7 +121,7 @@ docker exec -e MEDIARIUM_API_KEY=your-key -e TRANSMISSION_PASSWORD=... mediarium
 
 - A name that isn't one of Mediarium's settings (a typo) stops the command before anything is changed, and the name is listed.
 - A block Mediarium refuses is reported, and the other blocks are still applied. The exit code is then 1, so a script can tell.
-- A few things can't be done with an API key, for security (for example switching on pushed updates, `systemOptions.allowPush`). Mediarium says so; do those on the Settings page.
+- A few things can't be done with an API key, for security. Mediarium says so; do those on the Settings page.
 
 Options for all three commands: `--url` (the address of your Mediarium; the default is `http://127.0.0.1:8264`, or `$MEDIARIUM_URL`) and `--key` (the API key; the default is `$MEDIARIUM_API_KEY`). Options go before the file name.
 

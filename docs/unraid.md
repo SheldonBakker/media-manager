@@ -83,8 +83,6 @@ Mediarium runs beside your current apps. It has its own port (8264) and its own 
 
 On the **Docker** tab, click **Check for Updates** at the bottom. When Mediarium shows **update ready**, click it (or the icon → **Update**). Your settings and library are kept. Read the [changelog](../CHANGELOG.md) first and back up before a big update.
 
-When a new version is out, administrators see a card on the dashboard and on **Settings → General**. If the release is signed, the card also has an **Update now** button. See [Update now](./INSTALL.md#update-now-docker-image).
-
 ## Backing up
 
 Everything that is not a media file is in `/mnt/user/appdata/mediarium` (`app.db` and `secret.key`; keep them together). The **Appdata Backup** plugin can back it up on a schedule, or use **Settings → System → Backup and restore** in Mediarium to download a backup zip.

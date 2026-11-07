@@ -32,6 +32,12 @@ project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](
 - Anonymous usage numbers: the consent window, the Settings > General card, the daily
   message to mediarium.app/stats, `/api/usage-stats`, `MEDIARIUM_DISABLE_STATS` and the
   `tools/stats-receiver` server code.
+- In-app updates: the daily GitHub check and its dashboard card, version dot and "New version"
+  notification, "Update now" and overnight install, updates pushed through the API
+  (`/api/system/update*`), and the entrypoint's installed-update handling. New versions come
+  only from a newer image. Restart, safe restart and restart-when-stuck stay
+  (`GET /api/system/control`); their notes now live in `/config/restart/`, and a leftover
+  `/config/update/` folder is ignored and can be deleted.
 
 ## Deploy setup
 

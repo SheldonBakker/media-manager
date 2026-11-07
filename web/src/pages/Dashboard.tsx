@@ -15,7 +15,6 @@ import { linePlace } from '../queueView'
 import { ServerInfoCard, useServerStats } from '../components/ServerStats'
 import { useModules } from '../ModulesContext'
 import SetupGaps from '../components/SetupGaps'
-import { DashboardUpdate } from '../components/UpdateCards'
 import { entryDay, entryTime, readZonePref, resolveZone } from '../airTime'
 import { dismiss, factsFromDashboard, isDismissed, setupGaps } from '../setupStatus'
 import { useGridColumns } from '../useGridColumns'
@@ -534,7 +533,6 @@ export default function Dashboard() {
         )}
       </section>
 
-      {admin && <DashboardUpdate />}
       <TwoStepTip />
 
       {admin && !startedClosed && startedGaps.length > 0 && (

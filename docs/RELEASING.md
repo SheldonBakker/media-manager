@@ -91,7 +91,6 @@ The example releases version `2.1.0`. Replace it with your number.
    - checks that the tag matches `VERSION` (and stops everything if not);
    - builds the web interface once;
    - builds the app for Linux (amd64, arm64), each packed with the licence, the install notes and the systemd files, plus a `sha256sums.txt`;
-   - signs `sha256sums.txt` and adds `sha256sums.txt.sig`, if the `UPDATE_SIGNING_KEY` secret is set (see [Signing releases](#signing-releases));
    - creates a GitHub Release named "Mediarium v2.1.0" with those files, and notes made from the version's section of `CHANGELOG.md` with install steps on top (`tools/release-notes.sh`; a test build without a section gets GitHub's own list);
    - builds the Docker image for linux/amd64 and linux/arm64 and pushes it to `ghcr.io` with the tags `2.1.0`, `2.1` and `latest`;
    - builds the "full" image (with the Cloudflare helper), starts it as a test, and pushes it with the tags `2.1.0-full`, `2.1-full` and `latest-full` (see [The full image](#the-full-image-with-the-cloudflare-helper)).
@@ -114,7 +113,7 @@ The example releases version `2.1.0`. Replace it with your number.
 
 ## How users get the update
 
-Nothing updates unless the person switches on an overnight install. Each release publishes three Docker tags, and the same three again with `-full` added for the image with the Cloudflare helper:
+Nothing updates by itself. Each release publishes three Docker tags, and the same three again with `-full` added for the image with the Cloudflare helper:
 
 | Tag | Moves when | For people who want |
 |---|---|---|
@@ -123,50 +122,6 @@ Nothing updates unless the person switches on an overnight install. Each release
 | `latest` (`latest-full`) | any release, including MAJOR ones | always the newest (reading the changelog first) |
 
 To update, a user changes the tag in their compose file if needed, then runs `docker compose pull && docker compose up -d`. The database migrates by itself on start; they should back up `/config` first. See [INSTALL.md](./INSTALL.md#updating). (Native binaries are attached to each GitHub Release too, but they are not a supported install yet: see [PLATFORMS.md](./PLATFORMS.md).)
-
-Administrators are also told about a new release by the app itself. Once a day it reads the latest releases of this repository from the GitHub API and shows the first ten lines of the release notes, so write them for users. A signed release also gets an **Update now** button in the Docker images. A release must therefore carry its signature: see [Signing releases](#signing-releases). A pre-release is only offered to installs that already run a pre-release.
-
-## Signing releases
-
-Mediarium's **Update now** button installs a release only if the release carries a signature. The release workflow signs the checksum list (`sha256sums.txt`) and attaches the signature (`sha256sums.txt.sig`). The button only exists in the Docker images, on Linux. The app has the matching public key built in (`updatePublicKey` in `cmd/app/main.go`), so a changed download, or a release somebody else published, is refused.
-
-One-time setup:
-
-1. Make a key pair: `go run ./tools/signsums -generate`. It prints the private **seed** and the **public key**.
-2. Put the seed in the repository secret `UPDATE_SIGNING_KEY` (GitHub: Settings, Secrets and variables, Actions). Keep a copy in your password manager. It is never written to a file in the repository and the workflow only passes it to the signing step's environment.
-3. Put the public key in `updatePublicKey` in `cmd/app/main.go` (a fork does the same, or builds with `-ldflags "-X main.updatePublicKey=..."`).
-
-What the workflow does: after it creates `sha256sums.txt` it runs `tools/signsums`, which refuses to sign when the key does not match the public key in `cmd/app/main.go` (so a wrong secret fails the release instead of publishing signatures nobody can verify). If `UPDATE_SIGNING_KEY` is not set, the workflow prints a warning and publishes the release **unsigned**: people can still update the normal way, the button just is not offered.
-
-Losing or replacing the key: releases signed with the old key stop verifying against apps that carry the new public key, and the other way round. To rotate, publish a release whose app carries the new public key, signed by the old key (so existing installs accept it), then sign later releases with the new one. If the private key leaks, remove the secret, make a new pair and release a new version by hand, telling people to update the normal way.
-
-### Protecting the signing key
-
-Whoever can get the signing key can publish an update that every Mediarium install with **Update now** will run as code. So the key is guarded on the GitHub side too. Do this once, before the first release:
-
-1. **Settings > Environments > New environment**, named `release` (the release job of the workflow already uses it). Move the `UPDATE_SIGNING_KEY` secret there from the repository secrets, so it is only handed to that job.
-2. In the environment, under **Deployment branches and tags**, allow only tags that match `v*`, and add **Required reviewers** (you) so nothing signs without an approval click.
-3. **Settings > Rules > Rulesets**: protect the tag pattern `v*` so that only you can create, move or delete such tags, and protect `main` (pull request required, no force pushes).
-4. Give collaborators the *Triage* or *Write* role only when you must; anyone who can change the workflow files on a tag you approve can read the key.
-5. Leave "Allow GitHub Actions to create and approve pull requests" off, and keep the default workflow permissions on *Read repository contents*.
-
-The workflows also pin every action to a full commit (with the version as a comment) and Dependabot updates those pins, so a moved tag of a third-party action cannot change what runs.
-
-Check a release by hand: `sha256sum -c sha256sums.txt` verifies the archives against the list. The signature is base64 of an ed25519 signature over the exact bytes of `sha256sums.txt`.
-
-## Pushing a test build
-
-`tools/push-update.sh` builds the committed `HEAD` in Docker (the repository's own `Dockerfile`, so the interface is included), stamps the version and the app-wide keys from the git-ignored `.env` (`TMDB_API_KEY`, `OPENSUBTITLES_API_KEY`, `TRAKT_CLIENT_ID`; they are passed to Docker through the environment and never printed), computes the SHA-256 and uploads it to an install that has **Allow updates pushed through the API** switched on. It is for the maintainer, for testing a build on a real install before a release, and for installs that cannot rebuild their container.
-
-```bash
-MEDIARIUM_API_KEY=<administrator API key> tools/push-update.sh http://192.168.1.10:8264
-tools/push-update.sh --arch arm64 --version 2.1.1 --wait https://mediarium.example.com
-tools/push-update.sh --no-upload          # only build; writes ./mediarium-<version>-<arch>
-```
-
-The API key comes from the environment (or a prompt), is never stored in a file, and is given to `curl` on its standard input so it does not show in a process list. `--force` lets the install accept the same or an older version. Only committed work is built.
-
-The install must have been started by the Docker image (its entrypoint starts the pushed program), on Linux. See [INSTALL.md](./INSTALL.md#updating-without-rebuilding-the-container) for what the install checks and how to go back.
 
 ## Pre-releases
 
@@ -191,7 +146,7 @@ Copy this into the release pull request or an issue:
 - [ ] MAJOR only: an "Upgrading" note says exactly what users must do
 - [ ] Release commit pushed to `main`, CI green on it
 - [ ] Tag `vX.Y.Z` created on that commit and pushed
-- [ ] Release workflow finished: GitHub Release has all archives and `sha256sums.txt` and `sha256sums.txt.sig` (no warning about a missing signing key)
+- [ ] Release workflow finished: GitHub Release has all archives and `sha256sums.txt`
 - [ ] Image `ghcr.io/rdborg/mediarium:X.Y.Z` pulls and `/api/version` reports `X.Y.Z`
 - [ ] Stable release only: `X.Y` and `latest` point at the new image, and `X.Y.Z-full`, `X.Y-full` and `latest-full` exist too
 ```

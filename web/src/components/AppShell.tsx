@@ -297,17 +297,6 @@ function Shell() {
       .then((v) => setVersion(v.version))
       .catch(() => undefined)
   }, [])
-  // A dot on the version when a newer release is waiting (administrators only).
-  const [updateReady, setUpdateReady] = useState(false)
-  const checkUpdate = useCallback(() => {
-    if (!admin) return
-    api
-      .updateLatest()
-      .then((n) => setUpdateReady(n.available))
-      .catch(() => undefined)
-  }, [admin])
-  useEffect(checkUpdate, [checkUpdate])
-  useLive(checkUpdate, 10 * 60 * 1000, admin)
 
   // A small count of downloads in flight next to "Activity".
   const loadActive = useCallback(() => {
@@ -498,10 +487,9 @@ function Shell() {
         {version && (
           <div className="side-version">
             {admin ? (
-              <NavLink to="/settings/system" aria-label={t('Version {version}', { version: `v${version}` })} title={updateReady ? t('Mediarium {version}. A newer version is available.', { version }) : `Mediarium ${version}`}>
+              <NavLink to="/settings/system" aria-label={t('Version {version}', { version: `v${version}` })} title={`Mediarium ${version}`}>
                 <BrandMark className="ver-mark" />
                 v{version}
-                {updateReady && <span className="version-dot" aria-label={t('A newer version is available')} />}
               </NavLink>
             ) : (
               <span aria-label={t('Version {version}', { version: `v${version}` })} title={`Mediarium ${version}`}>

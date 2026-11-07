@@ -4,7 +4,6 @@ import { useAuth } from '../../AuthContext'
 import Icon from '../../components/Icon'
 import PublicAddress from '../../components/PublicAddress'
 import ThemeToggle from '../../components/ThemeToggle'
-import { PushCard, UpdatesCard } from '../../components/UpdateCards'
 import { LANGUAGES, chooseLanguage, currentLanguage, locale, t, type Lang } from '../../i18n'
 
 // The language the app itself is shown in (not the audio or subtitle language).
@@ -101,13 +100,6 @@ export default function GeneralSettings() {
       <LookCard />
       <TimeZoneCard />
       {admin && <PublicAddress />}
-      {admin && <UpdatesCard />}
-      {admin && (
-        <details className="how-details span-all">
-          <summary>{t('Advanced: updates pushed through the API')}</summary>
-          <PushCard />
-        </details>
-      )}
       {admin && <LegalCard />}
     </div>
   )

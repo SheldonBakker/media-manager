@@ -92,7 +92,7 @@ func TestAppriseKeyTagAndLogin(t *testing.T) {
 }
 
 func TestAppriseTypeByEvent(t *testing.T) {
-	cases := map[string]string{"failed": "failure", "health": "warning", "conflict": "warning", "imported": "success", "grabbed": "info", "update": "info"}
+	cases := map[string]string{"failed": "failure", "health": "warning", "conflict": "warning", "imported": "success", "grabbed": "info"}
 	for typ, want := range cases {
 		srv, got := fakeServer(t, 200, "")
 		ev := fixtureEvent

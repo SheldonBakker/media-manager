@@ -69,8 +69,6 @@ function cardSpecs(): Spec[] {
     { to: 'general', label: t('Light or dark'), words: 'theme dark mode light appearance colours look' },
     { to: 'general', label: t('Time zone'), words: 'timezone clock hours tz' },
     { to: 'general', label: t('Address of Mediarium'), words: 'remote access public address url domain external reverse proxy https share link', admin: true },
-    { to: 'general', label: t('Updates'), words: 'update upgrade version new release check', admin: true },
-    { to: 'general', label: t('Updates pushed through the API'), words: 'push update api watchtower automatic', admin: true },
     { to: 'general', label: t('Legal notice'), words: 'legal terms disclaimer responsible use', admin: true },
     // Folders
     { to: 'media', label: t('Movies folder'), words: 'movie library path root directory', module: ['movies'] },

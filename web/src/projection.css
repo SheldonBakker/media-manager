@@ -1402,7 +1402,6 @@ fieldset.group { border-radius: 6px 26px 26px 26px; }
 }
 .sidebar .side-version a:hover { color: var(--text-dim); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, var(--rim)); }
 .sidebar .side-version .ver-mark { width: 12px; height: 12px; color: var(--accent); flex: none; }
-.sidebar .side-version .version-dot { width: 6px; height: 6px; }
 
 /* on a phone the header has no room: the buttons are in the menu drawer instead */
 .sidebar .side-tools { display: none; }

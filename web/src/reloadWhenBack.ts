@@ -1,4 +1,4 @@
-import { waitForApp } from './updateSteps'
+import { waitForApp } from './waitForApp'
 import { withBase } from './base'
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
@@ -19,8 +19,8 @@ async function fetchVersion(): Promise<string | null> {
 // it shows the version that is running now. The reload also picks up the new
 // interface, since the pages are part of the program. Resolves false when it
 // did not come back in time.
-export async function reloadWhenBack(expectVersion?: string): Promise<boolean> {
-  const result = await waitForApp({ expectVersion, fetchVersion, sleep, now: Date.now })
+export async function reloadWhenBack(): Promise<boolean> {
+  const result = await waitForApp({ fetchVersion, sleep, now: Date.now })
   if (result === 'back') {
     window.location.reload()
     return true

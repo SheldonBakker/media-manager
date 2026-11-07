@@ -30,7 +30,7 @@ func fakeSettingsServer(t *testing.T) (*httptest.Server, *[]string) {
 				"/api/download-client": map[string]any{"kind": "", "url": "", "hasPassword": false},
 				"/api/debrid":          map[string]any{"service": "", "preferCached": true},
 				"/api/proxy":           map[string]any{"type": ""},
-				"/api/system/options":  map[string]any{"updateCheck": true},
+				"/api/system/options":  map[string]any{"autoRestartWhenStuck": true},
 			}
 			_ = json.NewEncoder(w).Encode(vals[r.URL.Path])
 		case http.MethodPut:

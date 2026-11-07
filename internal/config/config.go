@@ -63,13 +63,6 @@ type Config struct {
 	// settings apply again.
 	DisableSSO bool
 
-	// ImageVersion is the version of the program inside the container image.
-	// The image's entrypoint sets it before starting the app, which is how the
-	// app knows it was started by that entrypoint and so can restart into an
-	// installed update (see internal/selfupdate). It is empty on a native
-	// install. The image sets it; users do not.
-	ImageVersion string
-
 	// Supervised is true when something restarts Mediarium after it exits, so
 	// the Restart button can work. Docker (with a restart policy), systemd and
 	// launchd are recognised by themselves; MEDIARIUM_SUPERVISED=1 says so for
@@ -99,8 +92,7 @@ func Load() Config {
 
 		DisableSSO: truthy(envStr("MEDIARIUM_DISABLE_SSO", "")),
 
-		ImageVersion: envStr("MEDIARIUM_IMAGE_VERSION", ""),
-		Supervised:   truthy(envStr("MEDIARIUM_SUPERVISED", "")),
+		Supervised: truthy(envStr("MEDIARIUM_SUPERVISED", "")),
 	}
 	cfg.URLBase, cfg.urlBaseErr = NormalizeURLBase(envStr("URL_BASE", ""))
 	cfg.DownloadsIncomplete = filepath.Join(cfg.DownloadsDir, "incomplete")

@@ -15,7 +15,6 @@ This page has a checklist, examples for the common proxies, and a list of what M
 7. **Don't add WebSocket or path-rewriting settings you don't need.** Mediarium only needs plain HTTP proxying. Don't strip the `Host`, `Origin` or `Sec-Fetch-*` headers.
 8. **Keep the backup file private.** A backup contains your database *and* the encryption key (`secret.key`), so whoever holds it can read every stored indexer key, Usenet password and VPN key. [Cloud backups](./INSTALL.md#cloud-backups) are locked with your passphrase before they leave the server; choose a long one.
 9. **Update.** Security fixes only go into the latest release.
-10. **Leave *Allow updates pushed through the API* off** (Settings > General). Switch it on only for the moment you push a file, see [below](#updating-the-program).
 
 ## Example proxy setups
 
@@ -145,33 +144,7 @@ environment:
 
 ## Updating the program
 
-Three things in Mediarium deal with new versions, and the last two can put a new program in place. All three are limited to administrators. The last two are checked before they run, written to the log and the Activity page, and undone with **Go back to the image's version** (or by removing the installed file). None of them needs the Docker socket or extra privileges, and the last two only work in the Docker images, on Linux.
-
-| What | Default | What it allows | How to leave it out |
-|---|---|---|---|
-| **New-version notice** | On | Once a day, one web request to GitHub asking for the newest release number. It only reads. | Untick *Look for new versions once a day* (Settings > General, in the Updates box). |
-| **Update now** and *Install new versions overnight* | The button is there when a release is signed; overnight is off | Downloads a release from the official GitHub repository and installs it, but only if the release's checksum list carries a valid signature from the Mediarium project's key, and the download matches that list. | Do not press the button and leave the overnight switch off. A release with no signature is never installed. |
-| **Allow updates pushed through the API** | **Off** | An administrator can replace the running program by uploading a file to `POST /api/system/update`. | Leave the switch off. While it is off, the endpoint answers `403`. |
-
-The third one is the powerful one: while it is on, whoever holds an administrator's API key can make your server run a program of their choosing. That is why it is off, and why it can only be switched on from a signed-in browser session (an API key can switch it off but never on). Switch it on when you need it and off again afterwards. Removing an installed update always works.
-
-What is checked, every time, before a new program is installed:
-
-- **Who:** only an administrator's session or API key. Basic users get `403`.
-- **A checksum that you supply** (pushed updates): `X-Update-SHA256` is required and must match the uploaded bytes. Without it, or if it differs, the file is thrown away without being started.
-- **A signature that the project supplies** (Update now): the release's `sha256sums.txt` must verify against the public key built into Mediarium (ed25519), the archive must match the signed list, and downloads may only come from `github.com` and GitHub's own file hosts (each redirect is checked; link-local and cloud-metadata addresses are refused as everywhere else).
-- **Size and type:** at most 200 MB, a Linux program for the same processor, that answers `--version-check` as a Mediarium program. It is started once with an empty environment and nothing else, only to print its version.
-- **Version:** newer than the running one, and never older than the one inside the Docker image (`?force=true` allows the same or an older one above that, for going back).
-- **One at a time**, and the previous program is kept.
-
-And afterwards: the entrypoint of the Docker images starts an installed program only as the app's own user (never as root), only if it still matches its recorded checksum, and puts it aside if it stops within 20 seconds of starting three times in a row. Every install is logged with the account and the checksum, never a key. The installed files are in `/config/update/`; anyone who can write to that folder can already read your database and encryption key, so they gain nothing new there.
-
-**Updates and the risk to the project's signing key.** The private key that signs releases lives only in a protected GitHub environment (see [RELEASING.md](./RELEASING.md#protecting-the-signing-key)); the public half is built into every release. If that key ever leaked, someone could publish an update that installs on every copy with **Update now** switched on. That is why **Install new versions overnight** is off until you switch it on, and why you can leave it off and still update by hand.
-
-**Pushing a program file is code execution.** With *Allow updates pushed through the API* on, an administrator's API key or session can make the server run any program file that comes with its own checksum. The checksum only proves the upload wasn't damaged, since the sender supplies it. The file is started once with an empty environment to read its version, then runs with the same access Mediarium has, including your database and encryption key. That is the point of the feature (it is how a test build gets onto a server), and why it can only be switched on from a signed-in browser. Leave it off unless you're about to push a file, and switch it off afterwards. **Update now** is different: it only installs files that carry the project's signature.
-
-**Reverse proxy tip:** if you publish Mediarium, you can also refuse `POST /api/system/update` (the push endpoint, and only that exact address) at the proxy as a second lock. Nothing needs it from the internet: pushing is done from your own network.
-
+Mediarium never changes its own program. It does not look for new versions, download them or accept a program file through the API. A new version only arrives when you pull a newer image (or replace the program yourself) and restart it, see [INSTALL.md](./INSTALL.md#updating).
 
 ## Two-step sign-in
 
@@ -217,7 +190,7 @@ All three are off by default, and none of them takes the password away unless an
 **An administrator can do a great deal, by design.** They can point Mediarium at any address on your network (that is how it reaches Plex, Prowlarr or FlareSolverr on `localhost`), choose the folders it reads and deletes in, download a backup (which holds the encryption key) and, if you switch it on, replace the running program. Assume an administrator account, or an administrator's browser session, can do anything the Mediarium container can do. So:
 
 - Give the *Admin* role to as few people as possible, and to nobody who does not need it.
-- An **API key** is as strong as the account that made it, with a few exceptions that need a signed-in browser (making keys and accounts, backups, pushed updates; see [accounts.md](./accounts.md)). Keep keys out of shared scripts, dashboards you publish and chat logs, and revoke one you may have leaked.
+- An **API key** is as strong as the account that made it, with a few exceptions that need a signed-in browser (making keys and accounts, backups; see [accounts.md](./accounts.md)). Keep keys out of shared scripts, dashboards you publish and chat logs, and revoke one you may have leaked.
 - **Local and LAN addresses are reachable on purpose.** Only the cloud metadata service and other link-local addresses are refused. Mediarium's outgoing connections are not a boundary between your containers: if another container on the same network trusts "requests from the Docker network", an administrator can reach it through Mediarium.
 - Do not put Mediarium on a network with things you would not want an administrator to reach.
 
@@ -241,6 +214,6 @@ If you lose the code, restart the container: it prints a new one. To read it on 
 - **First run.** The first account created becomes the administrator. Create it right after the first start.
 - **Reporting a bug with a log.** The log is cleaned of passwords, keys and tokens as it is written, but read it before you post it. It can still show your folder paths, the names of your indexers and the titles you download.
 - **Forgot the password.** Reset it from the command line on the machine running Mediarium ([accounts.md](./accounts.md#a-forgotten-administrator-password)). Nothing can reset it over the web.
-- **API keys** (Settings > Account & Access > Security > API keys) act as the account that made them, are stored hashed and can be revoked. Treat them like a password. A key cannot make new keys or accounts, change accounts, download or restore a backup (it holds the encryption key) or switch on pushed updates (those answer `403` and need a signed-in browser), so a leaked key does not survive being revoked.
+- **API keys** (Settings > Account & Access > Security > API keys) act as the account that made them, are stored hashed and can be revoked. Treat them like a password. A key cannot make new keys or accounts, change accounts, or download or restore a backup (it holds the encryption key); those answer `403` and need a signed-in browser, so a leaked key does not survive being revoked.
 - **Logs** never contain passwords, API keys or tokens (they are cleaned as they are written, both what `docker logs` shows and the copy under Settings > System; if you ever spot a secret in a log, report it, see [SECURITY.md](../.github/SECURITY.md)). Failed sign-ins are logged with the account name and the address they came from, which is what tools such as fail2ban need.
 - **Reporting a problem:** see [SECURITY.md](../.github/SECURITY.md).

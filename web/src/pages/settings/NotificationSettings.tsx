@@ -23,7 +23,6 @@ const EVENTS: { key: string; label: string; hint: string }[] = [
   { key: 'conflict', label: t('Needs a decision'), hint: t('A file already exists and Mediarium is asking what to do') },
   { key: 'subtitle', label: t('Subtitles'), hint: t('A subtitle was downloaded') },
   { key: 'health', label: t('Something is wrong'), hint: t('Your Usenet provider or an indexer stopped working, for example because a subscription expired') },
-  { key: 'update', label: t('New version'), hint: t('A new version of Mediarium is available') },
   { key: 'digest', label: t('Weekly summary'), hint: t('A short summary once a week of what arrived, what failed and what is still missing') },
   { key: 'clientdown', label: t('Download client down'), hint: t('A download client cannot be reached, for example because it stopped or the network is down') },
   { key: 'clientup', label: t('Download client back'), hint: t('A download client that was down can be reached again') },
@@ -68,7 +67,7 @@ const TAGLINE: Record<string, string> = {
   apprise: t('Pass messages to an Apprise server, which can reach dozens of services.'),
 }
 
-const DEFAULT_EVENTS = ['imported', 'failed', 'health', 'update']
+const DEFAULT_EVENTS = ['imported', 'failed', 'health']
 
 // What one form holds while you fill it in: not saved anywhere until you press
 // Add (or Save changes).
@@ -373,7 +372,7 @@ function TargetRow({
           <small>{[label, summaryOf(target)].filter(Boolean).join(' · ')}</small>
           {target.secretError && <small className="error-text">{st(target.secretError)}</small>}
           <div className="target-events">
-            {(target.events ?? []).map((e) => (
+            {(target.events ?? []).filter((e) => EVENTS.some((x) => x.key === e)).map((e) => (
               <span key={e} className="badge" title={EVENTS.find((x) => x.key === e)?.hint}>
                 {EVENTS.find((x) => x.key === e)?.label ?? e}
               </span>

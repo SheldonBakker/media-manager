@@ -13,7 +13,7 @@ func TestUrgentMessagesIgnoreQuietHours(t *testing.T) {
 		urgent bool
 	}{
 		{"failed", true}, {"health", true}, {"conflict", true}, {"test", true},
-		{"imported", false}, {"grabbed", false}, {"subtitle", false}, {"update", false},
+		{"imported", false}, {"grabbed", false}, {"subtitle", false},
 	}
 	for _, tc := range cases {
 		if got := urgentEvent(notify.Event{Type: tc.typ}); got != tc.urgent {

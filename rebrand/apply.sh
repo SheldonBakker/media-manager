@@ -11,7 +11,6 @@ cd "$SRC"
 
 NAME='Media Manager'
 REPO_URL='github.com/SheldonBakker/media-manager'
-REPO_SLUG='SheldonBakker/media-manager'
 IMAGE='ghcr.io/sheldonbakker/media-manager'
 ARCH='M5 28V15a11 11 0 0 1 22 0v13h-6l-5-11-5 11z'
 SHINE='M7.4 15.5a8.6 8.6 0 0 1 7.2-8.1'
@@ -48,14 +47,12 @@ TEXT_DIRS=(web/src web/index.html web/public docs internal cmd docker)
 mapfile -t FILES < <(grep -rIl --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=testdata \
   -e 'Mediarium' -e 'rdborg' -e 'mediarium\.app' "${TEXT_DIRS[@]}" 2>/dev/null || true)
 [ "${#FILES[@]}" -gt 0 ] || die "no files to rebrand (wrong path?)"
-export REPO_URL REPO_SLUG IMAGE
+export REPO_URL IMAGE
 perl -pi -e '
   s#github\.com/rdborg/Mediarium#$ENV{REPO_URL}#g;
   s#github\\\.com\\/rdborg\\/Mediarium#github\\.com\\/SheldonBakker\\/media-manager#g;
   s#ghcr\.io/rdborg/mediarium#$ENV{IMAGE}#g;
 ' "${FILES[@]}"
-rep internal/updatecheck/updatecheck.go 's/var DefaultRepo = "rdborg\/Mediarium"/var DefaultRepo = "$ENV{REPO_SLUG}"/'
-grep -q "DefaultRepo = \"$REPO_SLUG\"" internal/updatecheck/updatecheck.go || die "update check repo not switched"
 
 # Upstream's website and Reddit links leave the profile menu (they are about upstream, not this build).
 rep web/src/components/ProfileMenu.tsx 's#\s*<a href=\{(WEBSITE_URL|REDDIT_URL)\}[^\n]*\n[^\n]*\n\s*</a>##g; s/(?:,\s*(?:WEBSITE_URL|REDDIT_URL)\b)|(?:\b(?:WEBSITE_URL|REDDIT_URL),\s*)//g'

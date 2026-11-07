@@ -1,6 +1,6 @@
 # Notifications
 
-Notifications tell you when something happens: a download started or finished, a download failed, Mediarium needs a decision, a subtitle arrived, a connection to your Usenet provider or an indexer broke, a download client went down or came back, an error was added to Logs and errors, or a new version of Mediarium is out. Administrators set them up under **Settings > Connections > Notifications**.
+Notifications tell you when something happens: a download started or finished, a download failed, Mediarium needs a decision, a subtitle arrived, a connection to your Usenet provider or an indexer broke, a download client went down or came back, or an error was added to Logs and errors. Administrators set them up under **Settings > Connections > Notifications**.
 
 ## The page
 
@@ -64,7 +64,7 @@ All three go through Mediarium's usual address check, like the other methods. Th
 
 1. Choose the method on the left.
 2. Fill in the fields. Each has a short explanation underneath, required ones are marked with a star, and mistakes (an address without `http://`, an email address without an `@`, a port that is not a number) are pointed out as you type.
-3. Choose **when** it should tell you: download started, downloaded, failed, needs a decision, subtitles, something is wrong, a new version of Mediarium. There is also **Weekly summary**, which is described [below](#weekly-summary), **Download client down** and **Download client back**, described [below](#download-client-down-and-back), and **TRaSH Guides sync applied**, described [below](#trash-guides-sync-applied). The default is downloaded, failed, something is wrong and a new version. The download client events and the TRaSH Guides event are never on unless you tick them, and notifications you made before they existed do not get them.
+3. Choose **when** it should tell you: download started, downloaded, failed, needs a decision, subtitles, something is wrong. There is also **Weekly summary**, which is described [below](#weekly-summary), **Download client down** and **Download client back**, described [below](#download-client-down-and-back), and **TRaSH Guides sync applied**, described [below](#trash-guides-sync-applied). The default is downloaded, failed and something is wrong. The download client events and the TRaSH Guides event are never on unless you tick them, and notifications you made before they existed do not get them.
 4. Press **Send a test** and check your device, then **Add**. Add works without a test, but a test finds a wrong address or password before you rely on it.
 
 ### The test log
@@ -94,7 +94,6 @@ Every message has a clear subject and the same details, made from one template, 
 | Needs a decision | `Needs your decision: Night Harbour (1997)` |
 | Subtitles | `Subtitles added: Night Harbour (1997)` |
 | Something is wrong | `Mediarium needs attention: your Usenet login was refused` |
-| New version | `Mediarium 2.1.0 is available` |
 | Test | `Mediarium test message` |
 
 Under the subject is one sentence and a small table: title, year, quality, size, where it was saved (or the reason it failed, or the release name) and the time.
@@ -134,7 +133,7 @@ Tick **TRaSH Guides sync applied** to hear when the update of your TRaSH custom 
 
 ### The link
 
-**Quiet hours** on the same page hold everyday messages (downloading, ready to watch, subtitles, a new version) between two hours, for example from 23:00 to 7:00; they arrive together when the quiet hours end. Problems (a failed download, a broken connection, a decision to make) are always sent straight away. Waiting messages are kept in memory, so a restart during the quiet hours drops them. The hours are server time. Stored as `notify.quiet_hours` ("23-7"); scripts use `notifyQuietHours` in `PUT /api/settings`. A season pack already sends one message, not one per episode.
+**Quiet hours** on the same page hold everyday messages (downloading, ready to watch, subtitles) between two hours, for example from 23:00 to 7:00; they arrive together when the quiet hours end. Problems (a failed download, a broken connection, a decision to make) are always sent straight away. Waiting messages are kept in memory, so a restart during the quiet hours drops them. The hours are server time. Stored as `notify.quiet_hours` ("23-7"); scripts use `notifyQuietHours` in `PUT /api/settings`. A season pack already sends one message, not one per episode.
 
 **Link in messages** on the same page holds the address you open Mediarium at, for example `https://mediarium.example.com`. Saved by itself. With it, messages get the **Open in Mediarium** button, and the footer of an email links to this page. Without it, messages carry no link. Scripts use `publicUrl` in `PUT /api/settings`, stored as `server.public_url`.
 
@@ -172,10 +171,6 @@ Every half hour Mediarium checks that your Usenet provider and indexers still ac
 ## Errors
 
 Turn on **Tell me when an error happens** at the bottom of **Settings > System > Logs and errors** to get a message, through the notifications that have **Something is wrong** ticked, whenever a new error is added to that page. Warnings are not sent. It is off by default. See [Logs and errors](logs-and-errors.md#messages-about-errors).
-
-## New versions
-
-Once a day (see [INSTALL.md](./INSTALL.md#knowing-when-there-is-a-new-version)) Mediarium checks whether a newer release is out. When one is, it sends one message for that version to every notification that has **New version** ticked, and no more for the same version. Notifications you made before this existed do not have it ticked: edit them to add it.
 
 ## For scripts
 

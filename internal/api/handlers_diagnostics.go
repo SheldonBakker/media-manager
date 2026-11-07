@@ -10,7 +10,6 @@ import (
 	"github.com/rdborg/mediarium/internal/backup"
 	"github.com/rdborg/mediarium/internal/download"
 	"github.com/rdborg/mediarium/internal/logbuf"
-	"github.com/rdborg/mediarium/internal/selfupdate"
 	"github.com/rdborg/mediarium/internal/store"
 )
 
@@ -45,18 +44,10 @@ type diagnosticsHealth struct {
 	Title string `json:"title"`
 }
 
-// diagnosticsUpdate is the update row of the support report: what is running,
-// what is installed on top of the image, and how updating is set up. Nothing
-// in it is secret.
-type diagnosticsUpdate struct {
-	Image       string `json:"image,omitempty"`     // version inside the container image
-	Installed   string `json:"installed,omitempty"` // version of the update installed on top of it
-	Latest      string `json:"latest,omitempty"`    // newest version the last check found
-	CheckedAt   string `json:"checkedAt,omitempty"`
-	CheckError  string `json:"checkError,omitempty"`
-	Check       bool   `json:"check"`
-	AutoInstall bool   `json:"autoInstall"`
-	AllowPush   bool   `json:"allowPush"`
+// diagnosticsRestart is the restart row of the support report: what starts
+// Mediarium again, the "restart when stuck" switch, and whether this run began
+// after Mediarium restarted itself. Nothing in it is secret.
+type diagnosticsRestart struct {
 	AutoRestart bool   `json:"autoRestartWhenStuck"`
 	Supervisor  string `json:"supervisor"`
 	SelfRestart string `json:"selfRestart,omitempty"` // this run began after Mediarium restarted itself
@@ -73,7 +64,7 @@ type diagnosticsPayload struct {
 	Goroutines    int                  `json:"goroutines"`
 	MemoryBytes   uint64               `json:"memoryBytes"`
 	Database      diagnosticsDB        `json:"database"`
-	Update        diagnosticsUpdate    `json:"update"`
+	Restart       diagnosticsRestart   `json:"restart"`
 	Downloads     *int                 `json:"downloadsRunning,omitempty"` // left out when the database did not answer in time
 	Usenet        []diagnosticsUsenet  `json:"usenet"`                     // news server logins used since the app started
 	Health        []diagnosticsHealth  `json:"health"`
@@ -149,7 +140,7 @@ func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 		out.Log = []string{}
 	}
 
-	out.Update = s.diagnosticsUpdate()
+	out.Restart = s.diagnosticsRestart()
 	out.Problems = s.diagnosticsProblems()
 
 	var running int
@@ -166,23 +157,8 @@ func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-func (s *Server) diagnosticsUpdate() diagnosticsUpdate {
-	pushed, _ := selfupdate.State(s.updateDir())
-	n := s.notice()
-	d := diagnosticsUpdate{
-		Image: s.imageVersion(), Check: n.Enabled, CheckError: n.Error,
-		AutoInstall: s.autoInstallEnabled(), AllowPush: s.allowPushEnabled(), AutoRestart: s.autoRestartEnabled(),
-		Supervisor: s.control().Kind,
-	}
-	if pushed != nil {
-		d.Installed = pushed.Version
-	}
-	if n.Latest != nil {
-		d.Latest = n.Latest.Version
-	}
-	if n.CheckedAt != nil {
-		d.CheckedAt = n.CheckedAt.UTC().Format(time.RFC3339)
-	}
+func (s *Server) diagnosticsRestart() diagnosticsRestart {
+	d := diagnosticsRestart{AutoRestart: s.autoRestartEnabled(), Supervisor: s.control().Kind}
 	if st := s.selfRestartNote(); st.Reason != "" {
 		d.SelfRestart = st.At.UTC().Format(time.RFC3339) + ": " + st.Reason
 	}

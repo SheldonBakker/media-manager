@@ -9,7 +9,7 @@
 //	downloadClient:  # Settings > Downloading > Torrents > Use your own torrent client
 //	debrid:          # Settings > Downloading > Torrents > Debrid service
 //	proxy:           # Settings > Downloading > Proxy
-//	systemOptions:   # Settings > System > Updates
+//	systemOptions:   # Settings > System > Restart
 //
 // Things you add several of are lists, matched by their name:
 //

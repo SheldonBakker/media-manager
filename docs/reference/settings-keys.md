@@ -186,12 +186,6 @@ The keys the app stores in its settings table. You normally change these from th
 | `ui.show_advanced` | "1" shows custom formats and format scores on the Quality page; unset follows whether any custom format exists |
 | `ui.trailer_background` | unset or "1" plays the trailer behind movie and show pages for everyone, unless a browser chose otherwise; "0" switches it off for everyone |
 | `ui.trailer_sound` | "1" starts the trailer behind a title page with its sound on, where the browser allows it; unset or "0" starts it muted |
-| `updates.allow_push` | "1" lets an administrator replace the program by uploading a file through the API; unset or "0" refuses. Only a signed-in browser session can switch it on, not an API key |
-| `updates.auto_install` | "1" installs a new, signed release overnight when nothing is downloading; unset or "0" leaves updating to you |
-| `updates.check` | "0" turns the daily check for a new version off; anything else (including unset) leaves it on |
-| `updates.last_checked_at` | when the last check ran (RFC 3339; set by the app, not user-editable) |
-| `updates.latest` | the newest release the last check found (JSON; set by the app, not user-editable) |
-| `updates.notified_version` | the version the "new version" message was last sent for (set by the app, not user-editable) |
 | `usenetclient.api_key` | encrypted; SABnzbd's API key |
 | `usenetclient.category` | the category NZBs are added with; unset = "mediarium" (when no kind has a category of its own either) |
 | `usenetclient.category_books` | category for books; unset = the main category |

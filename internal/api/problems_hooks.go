@@ -82,22 +82,8 @@ func (s *Server) diagnosticsProblems() []diagnosticsProblem {
 	return out
 }
 
-// noteUpdateCheckFailed records a daily check for a new version that could not
-// be finished.
 func noteBackupFailed(err error) {
 	problems.Record(problems.Problem{Code: problems.CodeBackupFailed, Err: err})
-}
-
-func noteUpdateCheckFailed(err error) {
-	problems.Record(problems.Problem{Code: problems.CodeUpdateCheckFailed, Message: "Mediarium could not check for a new version.", Err: err})
-}
-
-// noteUpdateInstallFailed records an update that could not be put in place.
-func noteUpdateInstallFailed(version, message string, err error) {
-	problems.Record(problems.Problem{
-		Code: problems.CodeUpdateInstallFailed, Level: problems.LevelError, Subject: version,
-		Message: message, Detail: "version " + version, Err: err,
-	})
 }
 
 // noteRestartedItself records that this run of Mediarium began after it

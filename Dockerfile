@@ -78,9 +78,9 @@ ARG VERSION=
 LABEL org.opencontainers.image.version="${VERSION}"       org.opencontainers.image.source="https://github.com/rdborg/mediarium"       org.opencontainers.image.licenses="AGPL-3.0"       org.opencontainers.image.description="Mediarium with a built-in Cloudflare helper (FlareSolverr)"
 RUN apt-get update  && apt-get install -y --no-install-recommends ca-certificates tzdata par2 p7zip-full  && rm -rf /var/lib/apt/lists/*
 ENV PUID=1000     PGID=1000     TZ=Etc/UTC     APP_PORT=8264     BUNDLED_FLARESOLVERR=1
-# The program inside this image. The entrypoint may start a newer installed one
-# from /config/update instead (docs/INSTALL.md, "Updating without rebuilding").
-ENV MEDIARIUM_IMAGE_BIN=/opt/mediarium/app
+# Tells the app it runs in a container, so Restart leaves starting it again to
+# the container's restart policy.
+ENV container=docker
 COPY --from=build /out/app /opt/mediarium/app
 # Mediarium's licence and those of everything it is built on.
 COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/doc/mediarium/
@@ -120,7 +120,7 @@ ENV PUID=1000 \
     PGID=1000 \
     TZ=Etc/UTC \
     APP_PORT=8264 \
-    MEDIARIUM_IMAGE_BIN=/app/app
+    container=docker
 
 COPY --from=build /out/app /app/app
 # Mediarium's licence and those of everything it is built on.

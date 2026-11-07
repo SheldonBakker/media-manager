@@ -45,8 +45,6 @@ export function areaName(id: string, fallback: string): string {
       return t('Database')
     case 'metadata':
       return t('Movie and show info')
-    case 'updates':
-      return t('Updates')
     case 'notifications':
       return t('Notifications')
     case 'system':
