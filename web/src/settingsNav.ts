@@ -37,7 +37,6 @@ export const SETTINGS_NAV: { to: string; label: string; icon: IconName; color: s
   { to: '/settings/statistics', label: t('Statistics'), icon: 'activity', color: '#8fe0c4', blurb: t('How big the library is and what was downloaded.'), member: true },
   { to: '/settings/logs', label: t('Logs and errors'), icon: 'warning', color: '#f0a3a3', blurb: t('Errors Mediarium noticed, what to do about them, and a report to copy when you ask for help.') },
   { to: '/settings/migrate', label: t('Move from other apps'), icon: 'refresh', color: '#b4bfcc', blurb: t('Bring your library and settings over from Radarr, Sonarr and others.') },
-  { to: '/settings/about', label: t('About and credits'), icon: 'info', color: '#e7a6f2', blurb: t('Version, credits and the legal notice.'), member: true },
 ]
 
 // Pages that moved or were split. The old address still opens, on the page
@@ -77,7 +76,7 @@ const GROUPS: { key: string; label: string; icon: IconName; color: string; pages
   { key: 'metadata', label: t('Info, lists and subtitles'), icon: 'globe', color: '#c1acf7', pages: ['/settings/metadata', '/settings/lists', '/settings/subtitles'] },
   { key: 'connections', label: t('Connections'), icon: 'monitor', color: '#f2c14e', pages: ['/settings/media-servers', '/settings/notifications', '/settings/other-apps', '/settings/addons'] },
   { key: 'profile', label: t('Account & Access'), icon: 'user', color: '#8fb8f5', pages: ['/settings/profile', '/settings/security', '/settings/services', '/settings/accounts', '/settings/requests', '/settings/sign-in'] },
-  { key: 'system', label: t('System'), icon: 'hard', color: '#b4bfcc', pages: ['/settings/system', '/settings/backup', '/settings/statistics', '/settings/logs', '/settings/migrate', '/settings/about'] },
+  { key: 'system', label: t('System'), icon: 'hard', color: '#b4bfcc', pages: ['/settings/system', '/settings/backup', '/settings/statistics', '/settings/logs', '/settings/migrate'] },
 ]
 
 export const inPage = (pathname: string, to: string) => pathname === to || pathname.startsWith(to + '/')

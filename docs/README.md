@@ -63,7 +63,7 @@ Settings has one entry in the sidebar. It always lists its groups, and one group
 | Info, lists and subtitles | Movie and show info, Import lists, Subtitles | TMDB and the info language, trailers; lists, the Trakt key and the Simkl account; subtitles. |
 | Connections | Media servers, Notifications, Other apps | Plex, Jellyfin and Emby; messages; Overseerr and phone apps. |
 | Accounts | Your profile, Security, Linked services, All accounts, Requests and reports, Ways to sign in | Your own details, passkeys, two-step sign-in and API keys, Plex watchlist, ListenBrainz and e-reader; for administrators the accounts, requests and every way to sign in. |
-| System | Server, Backup and restore, Statistics, Logs and errors, Move from other apps, About and credits | The server and its clean-up, backups, numbers, errors and the report for support. |
+| System | Server, Backup and restore, Statistics, Logs and errors, Move from other apps | The server and its clean-up, backups, numbers, errors and the report for support. |
 
 The app language is only about the app itself. The audio language you want is under Settings > Library > Quality, and the subtitle languages are under Settings > Info, lists and subtitles > Subtitles.
 
@@ -71,7 +71,7 @@ The app language is only about the app itself. The audio language you want is un
 
 - Change a feature, setting or install step: update its page here and add a line to `CHANGELOG.md` in the same pull request. CI fails a pull request that changes the app without touching the docs (add the `no-docs-needed` label if nothing visible changed).
 - Change a route, an environment variable or a settings key: run `go run ./tools/docgen` and commit the regenerated `docs/reference/*.md`. CI fails if they are out of date.
-- The app links here from its About and credits page. The address lives in one place, `web/src/docs.ts`, so it can move to a website later.
+- The app links here from the profile menu (**Documentation**). The address lives in one place, `web/src/docs.ts`, so it can move to a website later.
 
 ## Sharing and feedback
 

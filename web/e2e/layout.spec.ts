@@ -30,7 +30,7 @@ const WIDE_FONT = '*{font-family: Verdana, "DejaVu Sans", sans-serif !important}
 const SETTINGS = [
   'modules', 'media', 'naming', 'quality', 'automation', 'indexers', 'usenet', 'torrents', 'download-rules', 'vpn',
   'subtitles', 'metadata', 'lists', 'media-servers', 'other-apps', 'addons', 'migrate', 'notifications', 'profile',
-  'system', 'backup', 'accounts', 'requests', 'sign-in', 'general', 'security', 'services', 'logs', 'about', 'statistics',
+  'system', 'backup', 'accounts', 'requests', 'sign-in', 'general', 'security', 'services', 'logs', 'statistics',
 ].map((s) => `/settings/${s}`)
 
 for (const lang of ['en', 'ru', 'de', 'fr', 'pl']) {

@@ -1,6 +1,6 @@
 # People who helped
 
-Mediarium gets better because people who use it say what's missing or what broke. Every idea and bug report below came from someone in the community. Thank you. The same list is on the **About and credits** page in the app.
+Mediarium gets better because people who use it say what's missing or what broke. Every idea and bug report below came from someone in the community. Thank you.
 
 | Who | Where | What came of it |
 |---|---|---|

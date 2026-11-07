@@ -68,7 +68,6 @@ const MusicPlaylistPage = lazy(() => import('./pages/MusicPlaylists').then((m) =
 const Statistics = lazy(() => import('./pages/Statistics'))
 const ManualImport = lazy(() => import('./pages/ManualImport'))
 const ReleaseSearch = lazy(() => import('./pages/ReleaseSearch'))
-const About = lazy(() => import('./pages/About'))
 const DownloadRulesSettings = lazy(() => import('./pages/settings/DownloadSettings'))
 const UsenetSettings = lazy(() => import('./pages/settings/DownloadSettings').then((m) => ({ default: m.UsenetSettings })))
 const TorrentSettings = lazy(() => import('./pages/settings/DownloadSettings').then((m) => ({ default: m.TorrentSettings })))
@@ -220,14 +219,12 @@ function Gate() {
           <Route path="security" element={<SecuritySettings />} />
           <Route path="services" element={<ServicesSettings />} />
           <Route path="logs" element={<AdminOnly><LogsSettings /></AdminOnly>} />
-          <Route path="about" element={<About />} />
           <Route path="statistics" element={<Statistics />} />
           {SETTINGS_REDIRECTS.map(([from, to]) => (
             <Route key={from} path={from.replace('/settings/', '')} element={<Navigate to={to} replace />} />
           ))}
         </Route>
         <Route path="/profile" element={<Navigate to="/settings/profile" replace />} />
-        <Route path="/about" element={<Navigate to="/settings/about" replace />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

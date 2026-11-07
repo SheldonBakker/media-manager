@@ -79,7 +79,7 @@ The card on someone's profile has a switch, **Send me these messages**, for peop
 
 ## What a basic user sees
 
-- Under **Settings** they have **General** (app language and light or dark), their own **Your profile**, **Security** (passkeys, two-step sign-in, API keys), **Linked services** (not for view-only accounts), Statistics and About and credits. Any other settings address lands on General. The profile menu in the top-right corner has **Your profile** and **App language**.
+- Under **Settings** they have **General** (app language and light or dark), their own **Your profile**, **Security** (passkeys, two-step sign-in, API keys), **Linked services** (not for view-only accounts) and Statistics. Any other settings address lands on General. The profile menu in the top-right corner has **Your profile** and **App language**.
 - The **Library** has no Select, Import existing, Remove or quality-profile controls.
 - **Activity** shows the queue and history (file names, but not the folders on the server), with a Retry button on failed and stopped downloads. There's no Pause, Resume, Stop, Remove, Clear finished, Blocklist or conflict button, and no Blocklist tab. A download waiting for a decision about an existing file is listed as waiting for an administrator.
 - The **Dashboard** leaves out setup warnings, folder locations and links into settings.

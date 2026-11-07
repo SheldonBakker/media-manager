@@ -123,44 +123,6 @@
 .settings-content .mig-dot { box-shadow: 0 0 8px var(--ac); }
 .settings-content .mig-group > h3, .settings-content .mig-group > h4 { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); }
 
-/* ---- About: what it does, as the steps a title goes through ------------- */
-.settings-content .about .feature-grid {
-  counter-reset: step; position: relative; gap: 0; padding-top: 6px;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-.settings-content .about .feature-grid > .tile {
-  counter-increment: step; position: relative; height: auto; padding: 26px 20px 24px 0; margin: 0; min-width: 0;
-  border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; animation: none;
-  border-top: 1px dashed color-mix(in srgb, var(--text) 18%, transparent);
-}
-.settings-content .about .feature-grid > .tile::after { display: none; }
-.settings-content .about .feature-grid > .tile::before {
-  content: counter(step, decimal-leading-zero); display: block; margin-bottom: 12px;
-  position: static; inset: auto; width: auto; height: auto; border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-mask: none; mask: none; opacity: 1;
-  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.1em; color: var(--tc);
-}
-/* the dot where each step sits on the line */
-.settings-content .about .feature-grid > .tile > .tile-head::before {
-  content: ''; position: absolute; top: -5px; left: 0; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--tc); box-shadow: 0 0 0 4px var(--bg), 0 0 12px var(--tc);
-}
-/* All six steps in one row on a wide page: narrow, tall columns with the icon
-   above the title. The width is measured on the page, not the screen, so the
-   sidebar doesn't change the count. Three by two on a tablet, two by three on
-   a phone. */
-.feature-wrap { container-type: inline-size; }
-.settings-content .about .feature-grid .tile-head { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-.settings-content .about .feature-grid .tile-head h2 { font-size: 1.08rem; letter-spacing: -0.02em; flex: none; overflow-wrap: anywhere; }
-.settings-content .about .feature-grid .tile p { font-size: 0.9rem; max-width: none; line-height: 1.5; }
-@container (max-width: 899px) {
-  .settings-content .about .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@container (max-width: 559px) {
-  .settings-content .about .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .settings-content .about .feature-grid > .tile { padding-right: 14px; }
-}
-.settings-content .about .feature-grid .tile-ico { width: 30px; height: 30px; border-radius: 4px 9px 9px 9px; }
-
 /* Three panels in a two-column row: the first two stack on the left and the
    third runs the full height on the right, so no panel sits alone with an
    empty half next to it. */

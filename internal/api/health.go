@@ -187,12 +187,12 @@ func (s *Server) collectHealth() []healthItem {
 	if !organizer.NewExtractor().Available() {
 		addHealth("no-7z", "info", "The 7z tool isn't installed",
 			"Only .7z downloads need it, and those will fail until it's installed. The Docker image includes it. On a native install, install 7-Zip.",
-			"How to install it", "/about")
+			"", "")
 	}
 	if !organizer.NewRepairer().Available() {
 		addHealth("no-par2", "warn", "The repair tool (par2) is missing",
 			"Without it, Usenet downloads with missing pieces fail instead of being repaired. The Docker image includes it. On a native install, install par2.",
-			"How to install it", "/about")
+			"", "")
 	}
 
 	// While subtitles are switched off in Settings, nothing here mentions them.

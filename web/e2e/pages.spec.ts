@@ -37,7 +37,6 @@ const PAGES: [string, RegExp][] = [
   ['/settings/system', /Server/],
   ['/settings/logs', /Logs and errors/],
   ['/settings/migrate', /Move from other apps/],
-  ['/settings/about', /About and credits/],
 ]
 
 for (const [path, title] of PAGES) {

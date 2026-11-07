@@ -320,7 +320,7 @@ Removing an artist (administrators) always cancels its downloads and deletes the
 
 ## Sources
 
-Album, artist and release information, cover art and the popular and new-release lists on Discover all come from free public music services. They ask apps to make at most one request per second and to say who they are, and Mediarium does both. Lyrics are looked up on [LRCLIB](https://lrclib.net) (see "Lyrics"), and ListenBrainz also receives your plays if you connect it. The services are named and credited on the **About and credits** page in the app and in [LEGAL.md](./LEGAL.md).
+Album, artist and release information, cover art and the popular and new-release lists on Discover all come from free public music services. They ask apps to make at most one request per second and to say who they are, and Mediarium does both. Lyrics are looked up on [LRCLIB](https://lrclib.net) (see "Lyrics"), and ListenBrainz also receives your plays if you connect it. The services are named and credited in [LEGAL.md](./LEGAL.md).
 
 ## API
 
