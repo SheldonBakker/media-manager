@@ -14,6 +14,7 @@ Container-level settings only. Everything else (indexers, Usenet servers, naming
 | `EBOOKS_DIR` | `/ebooks` |
 | `MEDIARIUM_DISABLE_SSO` | `` |
 | `MEDIARIUM_PAUSE_AUTOMATION` | `` |
+| `MEDIARIUM_PROVISIONING_TOKEN` | `` |
 | `MEDIARIUM_SUPERVISED` | `` |
 | `MOVIES_DIR` | `/movies` |
 | `MUSIC_DIR` | `/music` |

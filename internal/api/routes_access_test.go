@@ -270,9 +270,10 @@ func TestEveryRouteIsClassified(t *testing.T) {
 	}
 
 	// Walk the package source: every /api route registered anywhere must be
-	// either one of the public (signed-out) routes or in the access table,
-	// registered through the member or admin group. A route added on some
-	// other mux would bypass the role check, so it fails here.
+	// one of the public (signed-out) routes, a provisioning route under
+	// /api/provisioning/, or in the access table, registered through the
+	// member or admin group. A route added on some other mux would bypass the
+	// role check, so it fails here.
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, ".", func(fi os.FileInfo) bool { return !strings.HasSuffix(fi.Name(), "_test.go") }, 0)
 	if err != nil {
@@ -314,6 +315,8 @@ func TestEveryRouteIsClassified(t *testing.T) {
 				switch {
 				case recv != nil && recv.Name == "public":
 					// signed-out routes and the hand-off to the auth middleware
+				case recv != nil && recv.Name == "provisioning" && strings.Contains(pattern, " /api/provisioning/"):
+					// another service with the provisioning token (provisioning.go)
 				case recv != nil && recv.Name == "root" && pattern == "/api/":
 				case recv != nil && (recv.Name == "member" || recv.Name == "admin"):
 					if _, ok := table.access[pattern]; !ok {

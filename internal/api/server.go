@@ -416,6 +416,8 @@ func (s *Server) Routes() http.Handler {
 	public.HandleFunc("POST /api/auth/passkey/login/finish", s.handlePasskeyLoginFinish)
 	// Calendar apps read the feed without signing in; the secret address is the key.
 	public.HandleFunc("GET /api/calendar/feed/{file}", s.handleCalendarFeed)
+	// Another service makes directory accounts with a token of its own (provisioning.go).
+	s.provisioningRoutes(public)
 
 	// The MCP address for AI assistants signs in with an API key of its own (mcp.go).
 	routes := s.protectedRoutes()

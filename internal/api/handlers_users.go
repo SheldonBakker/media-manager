@@ -140,10 +140,17 @@ func (s *Server) handleListUsers(w http.ResponseWriter, r *http.Request) {
 // log and to the Activity feed, where only administrators see it. text says
 // what happened and to whom; never put a password or key in it.
 func (s *Server) auditAccount(r *http.Request, text string) {
-	actor, ip := "someone", s.clientIP(r)
+	actor := "someone"
 	if u := auth.UserFromContext(r.Context()); u != nil {
 		actor = u.Username
 	}
+	s.auditAccountBy(r, actor, text)
+}
+
+// auditAccountBy is auditAccount for a change made by something other than a
+// signed-in account, such as another service with the provisioning token.
+func (s *Server) auditAccountBy(r *http.Request, actor, text string) {
+	ip := s.clientIP(r)
 	slog.Warn("auth: account change", "what", text, "by", actor, "ip", ip)
 	_ = s.QueueRepo.LogActivity(0, "account", fmt.Sprintf("%s (by %s, from %s)", text, actor, ip))
 }
