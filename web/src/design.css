@@ -2507,12 +2507,13 @@ a.version-chip:hover { color: var(--text); border-color: color-mix(in srgb, var(
   .setup-gaps li > button, .setup-gaps li > a { width: 100%; }
 }
 
-/* ---- "Forgot your password?" on the sign-in page ------------------------ */
-.auth-card .forgot { text-align: left; font-size: 0.9rem; color: var(--text-dim); }
-.auth-card .forgot summary { cursor: pointer; color: var(--text-dim); }
-.auth-card .forgot summary:hover { color: var(--text); }
-.auth-card .forgot p { margin: 8px 0 0; }
-.auth-card .forgot-cmd { display: block; margin-top: 8px; padding: 8px 10px; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.8rem; overflow-wrap: anywhere; user-select: all; }
+/* ---- "Forgot your password?" on the sign-in page and in its dialog -------- */
+.auth-card .forgot-link { justify-self: start; font-size: 0.9rem; }
+:is(.auth-card, .forgot-dialog) .forgot { text-align: left; font-size: 0.9rem; color: var(--text-dim); }
+:is(.auth-card, .forgot-dialog) .forgot summary { cursor: pointer; color: var(--text-dim); }
+:is(.auth-card, .forgot-dialog) .forgot summary:hover { color: var(--text); }
+:is(.auth-card, .forgot-dialog) .forgot p { margin: 8px 0 0; }
+:is(.auth-card, .forgot-dialog) .forgot-cmd { display: block; margin-top: 8px; padding: 8px 10px; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.8rem; overflow-wrap: anywhere; user-select: all; }
 
 /* ---- Landmarks and skipping ahead --------------------------------------- */
 .top-title { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }

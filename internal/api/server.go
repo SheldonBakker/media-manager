@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/rdborg/mediarium/internal/accountservice"
 	"log/slog"
 	"net/http"
 	"path/filepath"
@@ -55,6 +56,12 @@ type Server struct {
 	appFrames     atomic.Value       // []string: the origins of add-ons shown in a frame, kept in memory so the security headers never wait for the database (app_links.go)
 	cfg           config.Config
 	db            *sql.DB // for backups (VACUUM INTO); repos hold their own handles
+	// accountService signs people up from the sign-in page (signup.go); nil
+	// while MEDIARIUM_ACCOUNT_SERVICE_URL is not set.
+	accountService *accountservice.Client
+	signUps        *auth.LoginLimiter // sign-ups per address (signup.go)
+	signUpCodes    *auth.LoginLimiter // confirmation codes asked for per address (signup.go)
+	passwordResets *auth.LoginLimiter // password reset codes and resets per address (password_reset.go)
 
 	Auth              *auth.Service
 	Settings          *settings.Store
@@ -257,9 +264,15 @@ func New(db *sql.DB, cfg config.Config, box *crypto.Box, defaultTMDBAPIKey, vers
 		simklPins:         &mediaservers.Pending[simkl.SignIn]{TTL: simklPinTTL},
 		// "A handful of attempts per IP/window" — 5 tries per 15
 		// minutes blunts brute-force without punishing a genuine typo.
-		LoginLimiter: auth.NewLoginLimiter(5, 15*time.Minute),
-		version:      version,
-		Usage:        tracker,
+		LoginLimiter:   auth.NewLoginLimiter(5, 15*time.Minute),
+		signUps:        auth.NewLoginLimiter(signUpsPerAddress, signUpWindow),
+		signUpCodes:    auth.NewLoginLimiter(signUpCodesPerAddress, signUpWindow),
+		passwordResets: auth.NewLoginLimiter(passwordResetsPerAddress, signUpWindow),
+		version:        version,
+		Usage:          tracker,
+	}
+	if cfg.AccountServiceURL != "" {
+		s.accountService = accountservice.New(cfg.AccountServiceURL)
 	}
 	s.QueueRepo.SetBox(box) // download addresses carry indexer keys: kept encrypted
 	s.startProblems()
@@ -406,6 +419,10 @@ func (s *Server) Routes() http.Handler {
 	public.HandleFunc("GET /api/onboarding/status", s.handleOnboardingStatus)
 	public.HandleFunc("POST /api/onboarding/admin", s.handleCreateAdmin)
 	public.HandleFunc("POST /api/auth/login", s.handleLogin)
+	public.HandleFunc("POST /api/auth/signup", s.handleSignUp)
+	public.HandleFunc("POST /api/auth/signup/code", s.handleSignUpCode)
+	public.HandleFunc("POST /api/auth/password-reset/code", s.handlePasswordResetCode)
+	public.HandleFunc("POST /api/auth/password-reset", s.handlePasswordReset)
 	public.HandleFunc("POST /api/auth/login/code", s.handleLoginCode)
 	public.HandleFunc("POST /api/auth/logout", s.handleLogout)
 	// Other ways to sign in (signin_methods.go): what the sign-in page offers, single sign-on and passkeys.

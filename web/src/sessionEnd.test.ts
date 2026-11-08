@@ -22,6 +22,10 @@ test('other answers do not', () => {
   assert.equal(sessionEnded('/auth/me', 401, 'unauthorized'), false)
   assert.equal(sessionEnded('/auth/passkey/login/finish?c=x', 401, gone), false)
   assert.equal(sessionEnded('/onboarding/status', 401, gone), false)
+  assert.equal(sessionEnded('/auth/signup', 401, gone), false)
+  assert.equal(sessionEnded('/auth/signup/code', 401, gone), false)
+  assert.equal(sessionEnded('/auth/password-reset', 401, gone), false)
+  assert.equal(sessionEnded('/auth/password-reset/code', 401, gone), false)
 })
 
 test('listeners hear about it until they stop', () => {

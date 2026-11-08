@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -75,6 +76,12 @@ type Config struct {
 	// that is switched off; a token shorter than provisioningTokenMin is
 	// reported (see Problems) and leaves it off.
 	ProvisioningToken string
+
+	// AccountServiceURL is the address of the account service people sign up
+	// with (MEDIARIUM_ACCOUNT_SERVICE_URL). Set, the sign-in page offers
+	// "Create an account": the service makes the person's directory account
+	// and their basic account here. Empty means sign-up is off.
+	AccountServiceURL string
 }
 
 // provisioningTokenMin is the shortest provisioning token accepted, in
@@ -106,6 +113,8 @@ func Load() Config {
 		Supervised: truthy(envStr("MEDIARIUM_SUPERVISED", "")),
 
 		ProvisioningToken: provisioningToken(envStr("MEDIARIUM_PROVISIONING_TOKEN", "")),
+
+		AccountServiceURL: accountServiceURL(envStr("MEDIARIUM_ACCOUNT_SERVICE_URL", "")),
 	}
 	cfg.URLBase, cfg.urlBaseErr = NormalizeURLBase(envStr("URL_BASE", ""))
 	cfg.DownloadsIncomplete = filepath.Join(cfg.DownloadsDir, "incomplete")
@@ -204,6 +213,21 @@ func provisioningToken(v string) string {
 	v = strings.TrimSpace(v)
 	if v != "" && utf8.RuneCountInString(v) < provisioningTokenMin {
 		noteProblem("MEDIARIUM_PROVISIONING_TOKEN is shorter than %d characters, so making accounts from another service stays off.", provisioningTokenMin)
+		return ""
+	}
+	return v
+}
+
+// accountServiceURL is the address without spaces or a trailing slash, or ""
+// when it is not an http or https address (noted; see Problems).
+func accountServiceURL(v string) string {
+	v = strings.TrimRight(strings.TrimSpace(v), "/")
+	if v == "" {
+		return ""
+	}
+	u, err := url.Parse(v)
+	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+		noteProblem("MEDIARIUM_ACCOUNT_SERVICE_URL is not an http or https address, so signing up stays off.")
 		return ""
 	}
 	return v

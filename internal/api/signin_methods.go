@@ -207,6 +207,10 @@ type signInMethodsPayload struct {
 	// AutoSignIn is the method the sign-in page sends visitors to by itself
 	// ("oidc"), or empty. It is only set while that method works.
 	AutoSignIn string `json:"autoSignIn,omitempty"`
+	// Signup is whether "Create an account" works (signup.go).
+	Signup bool `json:"signup"`
+	// PasswordReset is whether "Forgot your password?" resets it (password_reset.go).
+	PasswordReset bool `json:"passwordReset"`
 }
 
 // autoSignInOIDC is the one value the automatic sign-in setting can hold besides off.
@@ -261,6 +265,8 @@ func (s *Server) handleSignInMethods(w http.ResponseWriter, r *http.Request) {
 		_, out.PasskeyHost = s.passkeyOrigin()
 	}
 	out.AutoSignIn = s.autoSignIn()
+	out.Signup = s.accountService != nil
+	out.PasswordReset = s.accountService != nil
 	writeJSON(w, http.StatusOK, out)
 }
 

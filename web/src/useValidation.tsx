@@ -140,6 +140,7 @@ export type FormAction =
   | 'password'
   | 'key'
   | 'account'
+  | 'signup'
   | 'checkThem'
   | 'checkAgain'
   | 'notification'
@@ -165,6 +166,8 @@ function problemText(action: FormAction): string {
       return t('A field above needs fixing before you can create the key. It is marked in red.')
     case 'account':
       return t('A field above needs fixing before you can add the account. It is marked in red.')
+    case 'signup':
+      return t('A field above needs fixing before you can create your account. It is marked in red.')
     case 'checkThem':
       return t('A field above needs fixing before you can check them. It is marked in red.')
     case 'checkAgain':

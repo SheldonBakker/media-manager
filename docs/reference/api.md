@@ -56,6 +56,8 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | POST | `/api/auth/passkeys/register/finish` | any account | POST /api/auth/passkeys/register/finish?c=<ceremony>&name=<label>  (body: the browser's answer) |
 | DELETE | `/api/auth/passkeys/{id}` | any account | DELETE /api/auth/passkeys/{id} |
 | PUT | `/api/auth/passkeys/{id}` | any account | PUT /api/auth/passkeys/{id} {"name"} |
+| POST | `/api/auth/password-reset` | **public** | sets a new password with the emailed code. |
+| POST | `/api/auth/password-reset/code` | **public** | asks the account service to email a password reset code. |
 | PUT | `/api/auth/profile` | any account | lets the logged-in user change their username, name and email, returning the updated account. |
 | GET | `/api/auth/proxy-signin` | admin |  |
 | PUT | `/api/auth/proxy-signin` | admin |  |
@@ -67,6 +69,8 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | GET | `/api/auth/sessions` | any account | lists the places the caller is signed in (GET /api/auth/sessions). |
 | GET | `/api/auth/sign-in` | admin | GET /api/auth/sign-in |
 | PUT | `/api/auth/sign-in` | admin | PUT /api/auth/sign-in {"localSignIn"?: bool, "passkeys"?: bool} |
+| POST | `/api/auth/signup` | **public** | makes a basic account through the account service and signs the person in, or says the account is still being set up. |
+| POST | `/api/auth/signup/code` | **public** | asks the account service to email a confirmation code, which signing up needs. |
 | GET | `/api/auth/two-step` | any account | GET /api/auth/two-step: the signed-in person's own state. |
 | POST | `/api/auth/two-step/disable` | any account | POST /api/auth/two-step/disable {"password"} |
 | POST | `/api/auth/two-step/enable` | any account | POST /api/auth/two-step/enable {"code"}: the first code from the app proves it was added; two-step sign-in is on from then, and the answer carries the recove... |
@@ -893,4 +897,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-548 routes.
+552 routes.

@@ -50,6 +50,31 @@ table('password', v.password, [
   ['é'.repeat(37), false],
 ])
 
+table('passwordLength from 12 to 128', (s) => v.passwordLength(s, 12, 128), [
+  ['', true],
+  ['a'.repeat(11), false],
+  ['a'.repeat(12), true],
+  ['a'.repeat(128), true],
+  ['a'.repeat(129), false],
+  [' ' + 'a'.repeat(10) + ' ', true],
+])
+
+table('phone', v.phone, [
+  ['', true],
+  ['+27821234567', true],
+  ['  +27821234567  ', true],
+  ['+12345678', true],
+  ['+123456789012345', true],
+  ['+1234567', false],
+  ['+1234567890123456', false],
+  ['27821234567', false],
+  ['0821234567', false],
+  ['+0821234567', false],
+  ['+27 82 123 4567', false],
+  ['+27-82-123-4567', false],
+  ['+2782123456a', false],
+])
+
 table('url', (s) => v.url(s), [
   ['', true],
   ['http://192.168.1.10:32400', true],

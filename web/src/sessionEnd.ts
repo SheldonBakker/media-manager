@@ -5,8 +5,8 @@
 // address, so signing in again goes back to where the person was.
 
 // Calls whose 401 means something else: a wrong password or code, or the
-// checks the app makes before anyone is signed in.
-const SIGN_IN_CALLS = ['/auth/login', '/auth/me', '/auth/methods', '/auth/passkey/', '/onboarding/']
+// checks, sign-up and password reset the app offers before anyone is signed in.
+const SIGN_IN_CALLS = ['/auth/login', '/auth/signup', '/auth/password-reset', '/auth/me', '/auth/methods', '/auth/passkey/', '/onboarding/']
 
 /** True when a 401 answer to path says the person is no longer signed in. */
 export function sessionEnded(path: string, status: number, body: string): boolean {

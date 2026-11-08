@@ -269,6 +269,26 @@ A sign-up page or another service in front of your directory can make a person's
 - A user name another account already has is refused with `409` and nothing is made: the account is never renamed and never takes over another one. A value that breaks the rules gets `400`, and a missing or wrong token `401`.
 - The token is for this one address. A session or an API key, even an administrator's, can't use it, and the token signs nobody in anywhere else. Every account made this way is in the Activity feed, "by provisioning".
 
+#### Letting people sign up
+
+With an account service that makes directory accounts this way (it puts the person in your directory and calls the address above), the sign-in page can offer **Create an account**.
+
+- Switch it on with `MEDIARIUM_ACCOUNT_SERVICE_URL` on the container: the account service's address, for example `https://accounts.example.com`. Not set (the default), there is no button and `POST /api/auth/signup` doesn't exist (404). An address that isn't http or https is mentioned in the container log and leaves it off.
+- The form asks for first name, last name, email address, phone number (international format, for example `+27821234567`) and a password of 12 to 128 characters. **Send code** has the account service email a 6-digit confirmation code (`POST /api/auth/signup/code`, passed on to its `POST /api/v1/auth/email-codes`), and the account is only made with that code (`POST /api/auth/signup`, passed on to its `POST /api/v1/auth/register`). The code expires after 15 minutes; **Resend code** works once a minute. Mediarium talks to the service from the server; the browser never does, and the password and code are never stored or logged here.
+- One address can ask for 10 codes an hour. The account service also limits how often a code can go to the same email address, and says so.
+- Anyone who can open the sign-in page can sign up, and every new account is a **Basic user**. One address can make 5 sign-up attempts an hour. Attempts whose details the service refuses, or that it can't answer, don't count; trying an email address that already has an account does.
+- When the account here is ready, Mediarium signs the person in through the directory with the password they chose, the same way the sign-in form does, so directory sign-in must be on. Otherwise the answer says the account is still being set up and gives the new user name; they sign in with it a few minutes later.
+- The service's reasons for refusing the details (a password that is too short, a phone number in the wrong format) are shown as it gives them. An email address that already has an account is refused with `409`.
+
+#### Forgotten passwords of accounts that signed up
+
+With `MEDIARIUM_ACCOUNT_SERVICE_URL` set, **Forgot your password?** on the sign-in page opens a reset for those accounts. The person enters their email address and gets a 6-digit code from the account service (`POST /api/auth/password-reset/code`), then enters it with a new password of 12 to 128 characters (`POST /api/auth/password-reset`, `204` when done). The account service sets the new password in the directory, so it works here, in the media server and everywhere else they sign in, straight away.
+
+- The first step answers the same whether or not an account has the address, so it can't be used to find out who has an account.
+- One address can ask for 10 reset codes and resets an hour; a wrong code counts against the code itself (it stops working after 5 tries).
+- Sessions that are already open stay open.
+- Administrator accounts keep their password here, so a code doesn't reset them; the dialog keeps the instructions above for them. Without the variable, **Forgot your password?** shows only those instructions.
+
 ### Passkeys
 
 A passkey signs you in with your fingerprint, face or device PIN, with no password to type. It is a key pair kept in your phone, computer or security key; Mediarium keeps only the public half.

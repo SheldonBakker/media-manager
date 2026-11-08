@@ -3127,6 +3127,35 @@ export interface SignInMethods {
   passkeys: boolean
   passkeyHost?: string // passkeys only work on pages opened at this host
   autoSignIn?: 'oidc' // the sign-in page sends visitors to this method by itself
+  signup?: boolean // "Create an account", through the account service
+  passwordReset?: boolean // "Forgot your password?" sets a new one in the account service
+}
+
+// A new password from the sign-in page (POST /api/auth/password-reset), with the
+// code POST /api/auth/password-reset/code emailed to the address.
+export interface PasswordReset {
+  email: string
+  code: string
+  password: string
+}
+
+// Creating an account from the sign-in page (POST /api/auth/signup). The code
+// is the one POST /api/auth/signup/code emailed, to confirm the address.
+export interface SignupDetails {
+  firstName: string
+  lastName: string
+  email: string
+  phoneNumber: string
+  password: string
+  code: string
+}
+// The account was made but is still being set up: sign in with this username a little later.
+export interface SignupPending {
+  pending: true
+  username: string
+}
+export function isSignupPending(v: unknown): v is SignupPending {
+  return typeof v === 'object' && v !== null && (v as SignupPending).pending === true
 }
 
 // Settings > Account & Access > All accounts: the general sign-in switches.
@@ -3385,6 +3414,10 @@ export const api = {
   updateAccount: (data: { username: string; name: string; email: string }) => put<User>('/auth/profile', data),
 
   login: (username: string, password: string) => post<User | TwoStepChallenge>('/auth/login', { username, password }),
+  sendSignupCode: (email: string) => post<Record<string, never>>('/auth/signup/code', { email }),
+  signup: (details: SignupDetails) => post<User | SignupPending>('/auth/signup', details),
+  sendPasswordResetCode: (email: string) => post<Record<string, never>>('/auth/password-reset/code', { email }),
+  resetPassword: (body: PasswordReset) => post<null>('/auth/password-reset', body),
   loginCode: (challenge: string, answer: { code?: string; recoveryCode?: string }) => post<User & { recoveryLeft?: number }>('/auth/login/code', { challenge, ...answer }),
   twoStep: () => get<TwoStepStatus>('/auth/two-step'),
   twoStepSetup: () => post<TwoStepSetup>('/auth/two-step/setup', {}),

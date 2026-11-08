@@ -39,5 +39,8 @@ func (s *Server) TestExpireCeremonies() {
 	}
 }
 
+// SignUpCodesPerAddress is how many confirmation codes one address may ask for per window.
+const SignUpCodesPerAddress = signUpCodesPerAddress
+
 // PasskeyOriginOf exposes the origin and relying party id derivation.
 func PasskeyOriginOf(base string) (origin, rpID string) { return passkeyOriginOf(base) }

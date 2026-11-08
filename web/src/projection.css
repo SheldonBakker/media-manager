@@ -1268,7 +1268,7 @@ fieldset.group { border-radius: 6px 26px 26px 26px; }
 .auth-sub { font-size: 0.95rem; }
 .auth-card button.primary { height: 46px; border-radius: 4px 13px 13px 13px; font-size: 1rem; }
 .auth-card input { height: 44px; }
-.auth-card .forgot-cmd { font-family: var(--font-mono); font-size: 0.74rem; border-radius: 4px 10px 10px 10px; }
+:is(.auth-card, .forgot-dialog) .forgot-cmd { font-family: var(--font-mono); font-size: 0.74rem; border-radius: 4px 10px 10px 10px; }
 @media (prefers-reduced-motion: reduce) { .auth-drift-item { animation: none; } }
 
 /* ==== Sidebar fixes ======================================================

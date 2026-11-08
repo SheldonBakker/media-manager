@@ -5,11 +5,13 @@ import { signInProblem } from '../signInProblem'
 import { useAuth } from '../AuthContext'
 import BrandMark from '../components/BrandMark'
 import AmbientBackdrop from '../components/AmbientBackdrop'
-import { DOCS_URL } from '../docs'
+import SignupDialog from '../components/SignupDialog'
+import ForgotPasswordDialog from '../components/ForgotPasswordDialog'
+import AdminPasswordHelp from '../components/AdminPasswordHelp'
 import { titleFor } from '../documentTitle'
 import { required } from '../validate'
 import { FieldError, FormProblem, useValidation } from '../useValidation'
-import { LANGUAGES, chooseLanguage, currentLanguage, plural, t, tx, type Lang } from '../i18n'
+import { LANGUAGES, chooseLanguage, currentLanguage, plural, t, type Lang } from '../i18n'
 import { withBase, withoutBase } from '../base'
 import { SKIP_ONCE_KEY, TRIED_KEY, autoSignInUrl, shouldAutoSignIn } from '../autoSignIn'
 import { takeRestored } from '../restoreNotice'
@@ -101,6 +103,8 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [signingUp, setSigningUp] = useState(false)
+  const [resetting, setResetting] = useState(false)
   // With two-step sign-in on, the password leads to a second step: the code
   // from the authenticator app (or a recovery code).
   const [challenge, setChallenge] = useState('')
@@ -211,24 +215,26 @@ export default function Login() {
             )}
           </div>
         )}
+        {methods.signup && (
+          <div className="auth-alt">
+            <span className="auth-or">{t('New here?')}</span>
+            <button type="button" className="auth-alt-btn" onClick={() => setSigningUp(true)}>
+              {t('Create an account')}
+            </button>
+          </div>
+        )}
         {!methods.local && methods.ldap && <p className="auth-sub">{t('Use your directory account.')}</p>}
-        {methods.local && (
-        <details className="forgot">
-          <summary>{t('Forgot your password?')}</summary>
-          <p>
-            {t("Mediarium can't send reset emails. Ask an administrator to set a new password in Settings > Account & Access > All accounts. If you're the only administrator, run this on the machine that runs Mediarium (swap 1000:1000 for your own PUID:PGID):")}
-          </p>
-          <code className="forgot-cmd">docker exec -it -u 1000:1000 mediarium /app/app reset-password &lt;username&gt;</code>
-          <p>
-            {tx('It asks for a new password and signs that account out everywhere. Not using Docker? See {link}.', {
-              link: (
-                <a href={`${DOCS_URL}/accounts.md`} target="_blank" rel="noreferrer">
-                  {t('the accounts page')}
-                </a>
-              ),
-            })}
-          </p>
-        </details>
+        {methods.passwordReset ? (
+          <button type="button" className="link-btn forgot-link" onClick={() => setResetting(true)}>
+            {t('Forgot your password?')}
+          </button>
+        ) : (
+          methods.local && (
+            <details className="forgot">
+              <summary>{t('Forgot your password?')}</summary>
+              <AdminPasswordHelp />
+            </details>
+          )
         )}
         <select
           aria-label={t('App language')}
@@ -243,6 +249,27 @@ export default function Login() {
           ))}
         </select>
       </form>
+      {/* Outside the sign-in form: React passes a dialog's submit up through the portal. */}
+      {resetting && (
+        <ForgotPasswordDialog
+          onClose={() => {
+            setResetting(false)
+            // Opening the dialog left the empty username box, which would now say it is empty.
+            v.reset()
+          }}
+        />
+      )}
+      {signingUp && (
+        <SignupDialog
+          onSignedIn={refresh}
+          onClose={(created) => {
+            setSigningUp(false)
+            // Opening the dialog left the empty username box, which would now say it is empty.
+            v.reset()
+            if (created) setUsername(created)
+          }}
+        />
+      )}
     </main>
   )
 }

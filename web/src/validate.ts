@@ -66,6 +66,25 @@ export function password(value: string): Message {
   return null
 }
 
+/**
+ * A password with its own length limits, for an account kept by another
+ * service. Mediarium's own accounts use `password`. Counts characters as typed.
+ */
+export function passwordLength(value: string, min: number, max: number): Message {
+  const v = str(value)
+  if (v === '') return null
+  if (v.length < min) return t('Passwords need at least {n} characters.', { n: min })
+  if (v.length > max) return t('Passwords can be at most {n} characters long.', { n: max })
+  return null
+}
+
+/** A phone number in international format: a +, the country code and the rest, digits only, 8 to 15 of them. */
+export function phone(value: string): Message {
+  const v = str(value).trim()
+  if (v === '') return null
+  return /^\+[1-9][0-9]{7,14}$/.test(v) ? null : t('Use the international format: a + and the country code, then the number with no spaces, for example +27821234567.')
+}
+
 export function passwordsMatch(pw: string, again: string): Message {
   if (again === '') return null
   return pw === again ? null : t("The two passwords don't match.")
