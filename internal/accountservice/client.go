@@ -79,16 +79,19 @@ type SignUp struct {
 
 // Account is what the service made. Username is empty while it has not given
 // the person a username yet; MediaLibraryReady says whether their account in
-// Mediarium exists.
+// Mediarium exists; DirectorySubject is the directory id that account is
+// linked to.
 type Account struct {
 	Username          string
 	MediaLibraryReady bool
+	DirectorySubject  string
 }
 
 type registerAnswer struct {
 	Provisioning *struct {
 		Username          string `json:"username"`
 		MediaLibraryReady bool   `json:"mediaLibraryReady"`
+		DirectorySubject  string `json:"directorySubject"`
 	} `json:"provisioning"`
 }
 
@@ -170,7 +173,8 @@ func (c *Client) Register(ctx context.Context, person SignUp) (Account, error) {
 		if answer.Provisioning == nil {
 			return Account{}, nil
 		}
-		return Account{Username: answer.Provisioning.Username, MediaLibraryReady: answer.Provisioning.MediaLibraryReady}, nil
+		p := answer.Provisioning
+		return Account{Username: p.Username, MediaLibraryReady: p.MediaLibraryReady, DirectorySubject: p.DirectorySubject}, nil
 	case http.StatusConflict:
 		return Account{}, ErrEmailTaken
 	case http.StatusBadRequest:

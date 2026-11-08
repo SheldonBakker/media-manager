@@ -20,6 +20,7 @@ import (
 type fakeLDAP struct {
 	mu       sync.Mutex
 	dials    int
+	binds    []string // the DNs bound as
 	filters  []string
 	users    []*dirUser
 	down     bool
@@ -58,7 +59,21 @@ type fakeConn struct{ f *fakeLDAP }
 
 func (c *fakeConn) StartTLS(*tls.Config) error { return nil }
 func (c *fakeConn) Close() error               { return nil }
+
+// errDown is what a connection that was open before the directory went down
+// gets from every request.
+var errDown = ldap.NewError(ldap.ErrorNetwork, errors.New("ldap: connection closed"))
+
 func (c *fakeConn) Bind(dn, pw string) error {
+	c.f.mu.Lock()
+	down := c.f.down
+	c.f.mu.Unlock()
+	if down {
+		return errDown
+	}
+	c.f.mu.Lock()
+	c.f.binds = append(c.f.binds, dn)
+	c.f.mu.Unlock()
 	if pw == "" {
 		return ldap.NewError(ldap.LDAPResultInvalidCredentials, errors.New("empty"))
 	}
@@ -94,6 +109,9 @@ func (c *fakeConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	f := c.f
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.down {
+		return nil, errDown
+	}
 	f.filters = append(f.filters, req.Filter)
 	if req.BaseDN == f.groupsDN {
 		// (&(objectClass=groupOfNames)(cn=mediarium-admins)(member=<dn>))
@@ -399,6 +417,26 @@ func TestLDAPAccountFollowsTheDirectoryIDNotTheName(t *testing.T) {
 	me := e.must(c, "GET", "/api/auth/me", nil, http.StatusOK)
 	if me["name"] == "Sam Example" {
 		t.Error("the new person got the old person's account")
+	}
+}
+
+func TestSavingDirectorySettingsDropsTheKeptConnection(t *testing.T) {
+	e := newLDAPEnv(t)
+	signIn := func() int {
+		t.Helper()
+		before := e.dir.dialCount()
+		if _, status, out := e.login("sam", "dir-password"); status != http.StatusOK {
+			t.Fatalf("sign-in: %d %v", status, out["_raw"])
+		}
+		return e.dir.dialCount() - before
+	}
+	signIn()
+	if n := signIn(); n != 1 {
+		t.Fatalf("a second sign-in opened %d connections, want 1 (only the password check)", n)
+	}
+	e.saveConfig(map[string]any{})
+	if n := signIn(); n != 2 {
+		t.Errorf("the first sign-in after saving opened %d connections, want 2", n)
 	}
 }
 

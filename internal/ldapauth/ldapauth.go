@@ -6,6 +6,12 @@
 // own password by binding as the entry that was found. No password is ever
 // stored; the one the person types is used for that one bind and dropped.
 //
+// The connection bound as the service account is kept between sign-ins, and
+// each person's bind happens on a connection of its own. Some directories take
+// seconds for every bind (Authentik's LDAP outpost runs a whole login flow for
+// each one), so binding the service account once instead of on every sign-in
+// halves the wait.
+//
 // Things this package is strict about, because this is a sign-in:
 //   - the user name goes into the search filter escaped (RFC 4515), so
 //     characters like * ( ) \ cannot change what is searched for;
@@ -27,6 +33,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -216,6 +223,71 @@ type Dialer func(cfg Config) (Conn, error)
 // Client talks to the directory.
 type Client struct {
 	Dial Dialer
+	// Now is the clock; nil means time.Now.
+	Now func() time.Time
+
+	mu   sync.Mutex
+	kept *serviceConn // bound as the service account, waiting for the next sign-in
+}
+
+// serviceConnLifetime is how long a kept service connection is used. A
+// directory that drops it sooner is noticed by the next search, which then
+// binds a new one.
+const serviceConnLifetime = 12 * time.Hour
+
+// serviceConn is a connection bound as the service account.
+type serviceConn struct {
+	conn    Conn
+	setup   connSetup
+	boundAt time.Time
+}
+
+// connSetup is the part of the setup a bound connection was made with.
+type connSetup struct {
+	URL, CACert, BindDN, BindPassword string
+	StartTLS, AllowPlain, SkipVerify  bool
+	TimeoutSeconds                    int
+}
+
+func setupOf(cfg Config) connSetup {
+	return connSetup{URL: cfg.URL, CACert: cfg.CACert, BindDN: cfg.BindDN, BindPassword: cfg.BindPassword,
+		StartTLS: cfg.StartTLS, AllowPlain: cfg.AllowPlain, SkipVerify: cfg.SkipVerify, TimeoutSeconds: cfg.TimeoutSeconds}
+}
+
+func (c *Client) now() time.Time {
+	if c.Now != nil {
+		return c.Now()
+	}
+	return time.Now()
+}
+
+// takeKept hands out the kept service connection when it was made with this
+// setup and is young enough. The caller has it to itself until keep.
+func (c *Client) takeKept(cfg Config) *serviceConn {
+	c.mu.Lock()
+	kept := c.kept
+	c.kept = nil
+	c.mu.Unlock()
+	if kept == nil {
+		return nil
+	}
+	if kept.setup != setupOf(cfg) || c.now().Sub(kept.boundAt) >= serviceConnLifetime {
+		kept.conn.Close()
+		return nil
+	}
+	return kept
+}
+
+// keep puts a working service connection aside for the next sign-in. Only one
+// is kept; the one it replaces is closed.
+func (c *Client) keep(sc *serviceConn) {
+	c.mu.Lock()
+	old := c.kept
+	c.kept = sc
+	c.mu.Unlock()
+	if old != nil {
+		old.conn.Close()
+	}
 }
 
 // NewClient makes a Client that connects through the given net.Dialer.
@@ -264,8 +336,8 @@ func tlsConfig(cfg Config) (*tls.Config, error) {
 	return tc, nil
 }
 
-// session opens a connection, encrypts it when asked and binds as the service account.
-func (c *Client) session(cfg Config) (Conn, error) {
+// connect opens a connection and encrypts it when asked. Nobody is bound yet.
+func (c *Client) connect(cfg Config) (Conn, error) {
 	conn, err := c.Dial(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrUnavailable, explain(cfg, err))
@@ -280,6 +352,15 @@ func (c *Client) session(cfg Config) (Conn, error) {
 			conn.Close()
 			return nil, fmt.Errorf("%w: %s", ErrUnavailable, explain(cfg, err))
 		}
+	}
+	return conn, nil
+}
+
+// session opens a connection and binds as the service account.
+func (c *Client) session(cfg Config) (Conn, error) {
+	conn, err := c.connect(cfg)
+	if err != nil {
+		return nil, err
 	}
 	if cfg.BindDN != "" {
 		if cfg.BindPassword == "" {
@@ -469,19 +550,21 @@ func (c *Client) Authenticate(ctx context.Context, cfg Config, username, passwor
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	conn, err := c.session(cfg)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-	entry, err := c.find(conn, cfg, username)
+	entry, err := c.searchAsService(cfg, username)
 	if err != nil {
 		return nil, err
 	}
 	if entry == nil {
 		return nil, ErrInvalidCredentials
 	}
-	// The password is checked by the directory itself, by binding as the person.
+	// The password is checked by the directory itself, by binding as the
+	// person, on a connection of its own: the kept one stays bound as the
+	// service account.
+	conn, err := c.connect(cfg)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
 	if err := conn.Bind(entry.DN, password); err != nil {
 		if ldap.IsErrorWithCode(err, ldap.LDAPResultInvalidCredentials) {
 			return nil, ErrInvalidCredentials
@@ -489,6 +572,58 @@ func (c *Client) Authenticate(ctx context.Context, cfg Config, username, passwor
 		return nil, fmt.Errorf("%w: %s", ErrUnavailable, explain(cfg, err))
 	}
 	return entry, nil
+}
+
+// searchAsService finds the person as the service account, on the kept
+// connection when there is one. When the directory has dropped the kept
+// connection, or no longer honours its bind, the search is tried once more on
+// a new one.
+func (c *Client) searchAsService(cfg Config, username string) (*Entry, error) {
+	if kept := c.takeKept(cfg); kept != nil {
+		entry, err := c.find(kept.conn, cfg, username)
+		if !errors.Is(err, ErrUnavailable) {
+			c.keep(kept)
+			return entry, err
+		}
+		kept.conn.Close()
+	}
+	conn, err := c.session(cfg)
+	if err != nil {
+		return nil, err
+	}
+	boundAt := c.now()
+	entry, err := c.find(conn, cfg, username)
+	if errors.Is(err, ErrUnavailable) {
+		conn.Close()
+		return nil, err
+	}
+	c.keep(&serviceConn{conn: conn, setup: setupOf(cfg), boundAt: boundAt})
+	return entry, err
+}
+
+// LookUp finds the person without checking a password, for someone another
+// service has just vouched for. It is nil when nobody matches.
+func (c *Client) LookUp(ctx context.Context, cfg Config, username string) (*Entry, error) {
+	cfg = cfg.Defaults()
+	if !validInput(username, "", false) {
+		return nil, nil
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return c.searchAsService(cfg, username)
+}
+
+// Reset closes the kept service connection, so the next sign-in starts with
+// the setup as it is now.
+func (c *Client) Reset() {
+	c.mu.Lock()
+	kept := c.kept
+	c.kept = nil
+	c.mu.Unlock()
+	if kept != nil {
+		kept.conn.Close()
+	}
 }
 
 // Probe connects and binds as the service account, nothing more. It is what

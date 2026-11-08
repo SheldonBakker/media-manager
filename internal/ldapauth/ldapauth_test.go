@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-ldap/ldap/v3"
 
@@ -19,6 +21,7 @@ type fakeDirectory struct {
 	startTLSOK error
 	binds      [][2]string
 	searches   []*ldap.SearchRequest
+	searchedAs []string // who the connection was bound as, for each search
 	closed     int
 
 	bindFn   func(dn, pw string) error
@@ -32,22 +35,36 @@ func (f *fakeDirectory) client() *ldapauth.Client {
 		if f.dialErr != nil {
 			return nil, f.dialErr
 		}
-		return f, nil
+		return &fakeConn{dir: f}, nil
 	}}
 }
-func (f *fakeDirectory) Bind(dn, pw string) error {
+
+// fakeConn is one connection to the fake directory. Like a real one, it
+// searches as whoever it was last bound as.
+type fakeConn struct {
+	dir     *fakeDirectory
+	boundAs string
+}
+
+func (c *fakeConn) Bind(dn, pw string) error {
+	f := c.dir
 	f.binds = append(f.binds, [2]string{dn, pw})
+	c.boundAs = ""
 	if f.bindFn != nil {
-		return f.bindFn(dn, pw)
+		if err := f.bindFn(dn, pw); err != nil {
+			return err
+		}
 	}
+	c.boundAs = dn
 	return nil
 }
-func (f *fakeDirectory) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
-	f.searches = append(f.searches, req)
-	return f.searchFn(req)
+func (c *fakeConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
+	c.dir.searches = append(c.dir.searches, req)
+	c.dir.searchedAs = append(c.dir.searchedAs, c.boundAs)
+	return c.dir.searchFn(req)
 }
-func (f *fakeDirectory) StartTLS(*tls.Config) error { f.startTLS++; return f.startTLSOK }
-func (f *fakeDirectory) Close() error               { f.closed++; return nil }
+func (c *fakeConn) StartTLS(*tls.Config) error { c.dir.startTLS++; return c.dir.startTLSOK }
+func (c *fakeConn) Close() error               { c.dir.closed++; return nil }
 
 func entry(dn string, attrs map[string][]string) *ldap.Entry { return ldap.NewEntry(dn, attrs) }
 
@@ -107,6 +124,147 @@ func TestSignInSucceeds(t *testing.T) {
 	}
 }
 
+const searchDN = "cn=search,dc=example,dc=com"
+
+// serviceBinds counts the binds as the service account.
+func (f *fakeDirectory) serviceBinds() int {
+	n := 0
+	for _, b := range f.binds {
+		if b[0] == searchDN {
+			n++
+		}
+	}
+	return n
+}
+
+func TestServiceAccountBindsOnceForSeveralSignIns(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	for i := 0; i < 3; i++ {
+		if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+			t.Fatalf("sign-in %d: %v", i, err)
+		}
+	}
+	want := [][2]string{{searchDN, "service-secret"}, {sam.DN, "right-password"}, {sam.DN, "right-password"}, {sam.DN, "right-password"}}
+	if !reflect.DeepEqual(f.binds, want) {
+		t.Errorf("binds = %v, want %v", f.binds, want)
+	}
+	// The person's bind never happens on the connection that is kept, so every
+	// search still runs as the service account.
+	for i, as := range f.searchedAs {
+		if as != searchDN {
+			t.Errorf("search %d ran as %q", i, as)
+		}
+	}
+	if f.dials != 4 || f.closed != 3 {
+		t.Errorf("dials = %d, closed = %d; want 4 and 3 (one kept connection, one per password check)", f.dials, f.closed)
+	}
+}
+
+func TestDroppedServiceConnectionIsReplaced(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	search := f.searchFn
+	f.searchFn = func(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
+		f.searchFn = search
+		return nil, ldap.NewError(ldap.ErrorNetwork, errors.New("ldap: connection closed"))
+	}
+	closed := f.closed
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatalf("after the directory dropped the kept connection: %v", err)
+	}
+	if f.serviceBinds() != 2 {
+		t.Errorf("service binds = %d, want 2", f.serviceBinds())
+	}
+	if f.closed != closed+2 {
+		t.Errorf("closed %d more connections, want 2 (the dropped one and the password check)", f.closed-closed)
+	}
+}
+
+func TestServiceConnectionIsRenewedAfterTwelveHours(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	now := time.Date(2026, 11, 8, 20, 0, 0, 0, time.UTC)
+	c := f.client()
+	c.Now = func() time.Time { return now }
+	signIn := func() {
+		t.Helper()
+		if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	signIn()
+	now = now.Add(12*time.Hour - time.Second)
+	signIn()
+	if f.serviceBinds() != 1 {
+		t.Fatalf("service binds before twelve hours = %d, want 1", f.serviceBinds())
+	}
+	now = now.Add(time.Second)
+	signIn()
+	if f.serviceBinds() != 2 {
+		t.Errorf("service binds after twelve hours = %d, want 2", f.serviceBinds())
+	}
+}
+
+func TestChangedSetupDoesNotReuseTheConnection(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	moved := baseConfig()
+	moved.URL = "ldaps://ldap2.example.com:636"
+	if _, err := c.Authenticate(context.Background(), moved, "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	if f.serviceBinds() != 2 {
+		t.Errorf("service binds = %d, want 2", f.serviceBinds())
+	}
+	if f.closed != 3 {
+		t.Errorf("closed = %d, want 3 (the old setup's connection and two password checks)", f.closed)
+	}
+}
+
+func TestLookUpChecksNoPassword(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	binds := len(f.binds)
+	e, err := c.LookUp(context.Background(), baseConfig(), "sam")
+	if err != nil || e == nil || e.ID != "1111-2222" || e.Username != "sam" {
+		t.Fatalf("entry = %+v, err = %v", e, err)
+	}
+	if len(f.binds) != binds || f.searchedAs[len(f.searchedAs)-1] != searchDN {
+		t.Errorf("looking up bound %d more times; last search ran as %q", len(f.binds)-binds, f.searchedAs[len(f.searchedAs)-1])
+	}
+	if e, err := c.LookUp(context.Background(), baseConfig(), "nobody"); e != nil || err != nil {
+		t.Errorf("unknown person: %+v, %v", e, err)
+	}
+}
+
+func TestResetClosesTheKeptConnection(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	closed := f.closed
+	c.Reset()
+	if f.closed != closed+1 {
+		t.Fatalf("Reset closed %d connections, want 1", f.closed-closed)
+	}
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	if f.serviceBinds() != 2 {
+		t.Errorf("service binds = %d, want 2", f.serviceBinds())
+	}
+}
+
 func TestSignInFailures(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -114,7 +272,7 @@ func TestSignInFailures(t *testing.T) {
 		wantErr  error
 		dials    int // how many connections the attempt may open
 	}{
-		{"wrong password", "sam", "wrong", ldapauth.ErrInvalidCredentials, 1},
+		{"wrong password", "sam", "wrong", ldapauth.ErrInvalidCredentials, 2},
 		{"unknown user", "nobody", "right-password", ldapauth.ErrInvalidCredentials, 1},
 		{"empty password", "sam", "", ldapauth.ErrInvalidCredentials, 0},
 		{"empty user", "", "right-password", ldapauth.ErrInvalidCredentials, 0},
@@ -236,7 +394,8 @@ func TestStartTLSBeforeAnyPassword(t *testing.T) {
 		if _, err := f.client().Authenticate(context.Background(), cfg, "sam", "right-password"); err != nil {
 			t.Fatal(err)
 		}
-		if f.startTLS != 1 {
+		// Both connections, the service account's and the one the password is checked on.
+		if f.startTLS != 2 {
 			t.Errorf("StartTLS called %d times", f.startTLS)
 		}
 	})

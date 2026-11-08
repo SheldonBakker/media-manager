@@ -180,6 +180,7 @@ func (s *Server) handlePutLDAP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "The setting couldn't be saved.")
 		return
 	}
+	s.sso().ldap.Reset()
 	actor := ""
 	if u := auth.UserFromContext(r.Context()); u != nil {
 		actor = u.Username
