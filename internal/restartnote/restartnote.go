@@ -1,4 +1,7 @@
-package selfupdate
+// Package restartnote keeps small note files in <config>/restart. They carry a
+// message across a restart, from the process that is stopping to the one that
+// starts.
+package restartnote
 
 import (
 	"fmt"
@@ -8,17 +11,22 @@ import (
 	"time"
 )
 
-// Small marker files in the update folder. They carry a message across a
-// restart, from the process that is stopping to the one that starts.
+// DirName is the folder inside the config folder that holds the notes.
+const DirName = "restart"
+
+// The note files.
 const (
 	FileSafeOnce = "safe-once"     // start once with automation paused
 	FileStuck    = "stuck-restart" // the app restarted itself because it stopped answering
 )
 
+// Dir is the notes folder inside the config folder.
+func Dir(configDir string) string { return filepath.Join(configDir, DirName) }
+
 // WriteSafeOnce asks for the next start to run in safe mode, once.
 func WriteSafeOnce(dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return fmt.Errorf("create the update folder: %w", err)
+		return fmt.Errorf("create the restart folder: %w", err)
 	}
 	return writeAtomic(filepath.Join(dir, FileSafeOnce), time.Now().UTC().Format(time.RFC3339)+"\n")
 }
@@ -37,7 +45,7 @@ func TakeSafeOnce(dir string) bool {
 // WriteStuck records that the app is about to restart itself, and why.
 func WriteStuck(dir, reason string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return fmt.Errorf("create the update folder: %w", err)
+		return fmt.Errorf("create the restart folder: %w", err)
 	}
 	reason = strings.NewReplacer("\n", " ", "\r", " ").Replace(reason)
 	return writeAtomic(filepath.Join(dir, FileStuck), time.Now().UTC().Format(time.RFC3339)+" "+reason+"\n")
@@ -55,4 +63,27 @@ func TakeStuck(dir string) (reason string, at time.Time, ok bool) {
 	first, rest, _ := strings.Cut(line, " ")
 	at, _ = time.Parse(time.RFC3339, first)
 	return rest, at, true
+}
+
+func readLine(path string) string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	if len(b) > 256 {
+		b = b[:256]
+	}
+	return strings.TrimSpace(strings.SplitN(string(b), "\n", 2)[0])
+}
+
+func writeAtomic(path, content string) error {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", filepath.Base(path), err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp)
+		return fmt.Errorf("write %s: %w", filepath.Base(path), err)
+	}
+	return nil
 }

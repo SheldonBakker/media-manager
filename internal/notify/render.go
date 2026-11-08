@@ -223,8 +223,6 @@ func eventTag(ev Event) string {
 		return "rotating_light"
 	case EventClientUp:
 		return "white_check_mark"
-	case EventUpdate:
-		return "package"
 	}
 	if ev.Type == "test" {
 		return "bell"

@@ -252,9 +252,9 @@ const sessionOnlyMessage = "This can only be done from the Mediarium web page wh
 // requireSession refuses a request made with an API key (X-API-Key), writing
 // the 403 itself. It guards the few things that would let a stolen key outlive
 // its own revocation or take over the server: making new accounts and API
-// keys, changing accounts, restoring a backup (which replaces every account,
-// key and setting) and switching on pushed updates. A person doing them signs
-// in first; scripts never need to.
+// keys, changing accounts and restoring a backup (which replaces every
+// account, key and setting). A person doing them signs in first; scripts never
+// need to.
 func requireSession(w http.ResponseWriter, r *http.Request) bool {
 	if r.Header.Get("X-API-Key") == "" {
 		return true

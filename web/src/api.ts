@@ -3058,67 +3058,6 @@ export interface BulkSearchResult {
   message: string
 }
 
-// ---- Updates and restarts (Settings > System, and the notice on the dashboard) ----
-
-export interface UpdateLatest {
-  version: string
-  name?: string
-  notes?: string
-  moreNotes?: boolean
-  url: string
-  prerelease?: boolean
-  publishedAt?: string
-}
-
-export interface UpdateJob {
-  state: 'downloading' | 'checking' | 'installing' | 'restarting' | 'failed'
-  version: string
-  message: string
-  error?: string
-  active: boolean
-  auto?: boolean
-}
-
-// GET /api/system/update/latest and POST /api/system/update/check.
-// The anonymous usage numbers (Settings > General; docs/usage-stats.md).
-export interface UsageStatsMessage {
-  schema: number
-  id: string
-  version: string
-  arch: string
-  docker: boolean
-  cores: string
-  memory: string
-  age: string
-  library: string
-  accounts: string
-  indexers: string
-  media: string[]
-  features: string[]
-  servers: string[]
-}
-export interface UsageStatsState {
-  choice: '' | 'yes' | 'no'
-  disabled: boolean
-  url: string
-  lastSent: string
-  hasId: boolean
-  preview: UsageStatsMessage
-}
-
-export interface UpdateNotice {
-  enabled: boolean // the daily check is on
-  running: string
-  available: boolean
-  latest?: UpdateLatest
-  checkedAt?: string
-  error?: string
-  install: { kind: 'docker' | 'native'; full: boolean }
-  canInstall: boolean
-  installNote?: string
-  job?: UpdateJob
-}
-
 // What's been watched and the cleanup rules (Settings > Media servers).
 export interface CleanupRules {
   enabled: boolean
@@ -3381,9 +3320,6 @@ export interface ScriptsState {
 }
 
 export interface SystemOptions {
-  updateCheck: boolean
-  autoInstall: boolean
-  allowPush: boolean
   autoRestartWhenStuck: boolean
 }
 
@@ -3423,25 +3359,13 @@ export interface OAuthRequest {
   canApprove: boolean
 }
 
+// GET /api/system/control: what the Restart and Shut down buttons can do.
 export interface SystemControl {
   kind: 'docker' | 'systemd' | 'launchd' | 'custom' | 'none'
   canRestart: boolean
   canShutdown: boolean
   note: string
-}
-
-// GET /api/system/update.
-export interface UpdateState {
-  running: string
-  image: string
-  pushed: { version: string; sha256?: string; installedAt: string; hasPrevious: boolean; previousVersion?: string; running: boolean } | null
-  failed?: { version: string; at: string }
-  allowPush: boolean
-  canInstall: boolean
-  platform: string
-  options: SystemOptions
-  control: SystemControl
-  selfRestart?: { at: string; reason: string }
+  selfRestart?: { at: string; reason: string } // this run began after Mediarium restarted itself
 }
 
 // A subtitle add-on: a site reached through a small web service. The host is
@@ -3934,9 +3858,6 @@ export const api = {
   migrateStatus: () => get<MigrateStatus>('/migrate/status'),
   systemStats: () => get<SystemStats>('/system/stats'),
   diagnostics: () => get<Diagnostics>('/system/diagnostics'),
-  usageStats: () => get<UsageStatsState>('/usage-stats'),
-  setUsageStats: (choice: 'yes' | 'no') => put<UsageStatsState>('/usage-stats', { choice }),
-  resetUsageStatsId: () => post<UsageStatsState>('/usage-stats/reset-id'),
   problems: (query = '') => get<ProblemList>(`/system/problems${query}`),
   problemCounts: () => get<{ counts: ProblemCounts }>('/system/problems?summary=1').then((r) => r.counts),
   // With all: true, `query` (the page's filters, as problemQuery makes them) limits it to what matches; without one it is every problem.
@@ -3946,12 +3867,7 @@ export const api = {
   flareSolverrStatus: () => get<FlareSolverrStatus>('/flaresolverr/status'),
   cleanupReport: () => get<CleanupReport>('/system/cleanup'),
   runCleanup: () => post<{ removedBytes: number; removed?: unknown[]; prunedQueueItems?: number; prunedActivity?: number; clientJobs?: number; errors?: unknown }>('/system/cleanup'),
-  updateState: () => get<UpdateState>('/system/update'),
-  updateLatest: () => get<UpdateNotice>('/system/update/latest'),
-  updateCheck: () => post<UpdateNotice>('/system/update/check'),
-  updateInstall: () => post<UpdateNotice>('/system/update/install'),
-  updateInstallStatus: () => get<UpdateNotice>('/system/update/install'),
-  removeUpdate: (restart = false) => del<{ removed: string; image: string; runningPushed: boolean; restarting: boolean; restartNeeded: boolean }>(`/system/update${restart ? '?restart=true' : ''}`),
+  systemControl: () => get<SystemControl>('/system/control'),
   systemOptions: () => get<SystemOptions>('/system/options'),
   putSystemOptions: (o: Partial<SystemOptions>) => put<SystemOptions>('/system/options', o),
   mcpSettings: () => get<McpSettings>('/system/mcp'),

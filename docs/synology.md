@@ -222,7 +222,7 @@ To open Mediarium on your phone away from home, or to share it with family, use 
 
 **If something isn't right:**
 - **"Blocked: this request came from another web site" when you save something:** the proxy changed the `Host` header. Leave the Destination host name as `localhost` and don't add a `Host` custom header. See [ALLOWED_ORIGINS](./security.md#allowed_origins) if you must.
-- **Updates pushed through the API or large backup restores fail:** DSM's proxy allows fairly big uploads, but if a restore stops part way, restore from your home network instead (`http://<NAS-IP>:8264`).
+- **Large backup restores fail:** DSM's proxy allows fairly big uploads, but if a restore stops part way, restore from your home network instead (`http://<NAS-IP>:8264`).
 - **Firewall:** if the Synology firewall is on, allow 443 from anywhere and 8264 only from your home network.
 
 The [security guide](./security.md) has the full checklist, and other proxies (Nginx Proxy Manager, Traefik, Caddy, Cloudflare Tunnel) if you use one of those instead. The **Sign in through your reverse proxy** option under Settings, Accounts is only for proxies that do the login themselves (Authelia, Authentik); the DSM proxy doesn't, so leave it off.
@@ -256,8 +256,6 @@ sudo docker compose up -d
 3. **Project, mediarium, Action, Build**, then **Start** if it doesn't start by itself. Container Manager downloads the newest image because the old one is gone.
 
 Your settings and library are kept, and Mediarium updates its database when it starts. Read the [changelog](../CHANGELOG.md) first and back up before a big update.
-
-When a new version is out, administrators see a card on the dashboard and on **Settings > General**. If the release is signed, the card also has an **Update now** button, which installs it without using Container Manager. See [Update now](./INSTALL.md#update-now-docker-image).
 
 ## Backing up
 

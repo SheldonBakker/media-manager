@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rdborg/mediarium/internal/selfupdate"
+	"github.com/rdborg/mediarium/internal/restartnote"
 )
 
 const (
@@ -40,17 +40,13 @@ func (w *watchdogState) observe(now time.Time, ok, busy bool) (restart bool) {
 }
 
 // maintenanceBusy reports whether something is running that must not be
-// interrupted, or that makes the app slow on purpose: a restore, an install of
-// an update, a move from another app, or filling in the details of an import.
+// interrupted, or that makes the app slow on purpose: a restore, a move from
+// another app, or filling in the details of an import.
 func (s *Server) maintenanceBusy() bool {
 	if !s.restoreMu.TryLock() {
 		return true
 	}
 	s.restoreMu.Unlock()
-	if !s.upd.opMu.TryLock() {
-		return true
-	}
-	s.upd.opMu.Unlock()
 	if s.migrator != nil && s.migrator.Status().Running {
 		return true
 	}
@@ -93,10 +89,10 @@ func (s *Server) probeWeb(ctx context.Context) bool {
 // process. The next start says so in the log. It also picks up the note a
 // previous run left. The returned function stops it.
 func (s *Server) StartWatchdog() (stop func()) {
-	if reason, at, ok := selfupdate.TakeStuck(s.updateDir()); ok {
-		s.upd.mu.Lock()
-		s.upd.stuck = stuckRestart{At: at, Reason: reason}
-		s.upd.mu.Unlock()
+	if reason, at, ok := restartnote.TakeStuck(s.restartDir()); ok {
+		s.rt.mu.Lock()
+		s.rt.stuck = stuckRestart{At: at, Reason: reason}
+		s.rt.mu.Unlock()
 		slog.Warn("Mediarium restarted itself because it stopped answering", "reason", reason, "at", at.Format(time.RFC3339))
 		noteRestartedItself(reason, at)
 	}
@@ -137,7 +133,7 @@ func (s *Server) watchdogLoop(ctx context.Context, every time.Duration) {
 		}
 		reason := fmt.Sprintf("the database answered: %t, the web server answered: %t", dbOK, webOK)
 		slog.Error("Mediarium has not answered for 3 minutes, so it is restarting itself", "database", dbOK, "web", webOK)
-		if err := selfupdate.WriteStuck(s.updateDir(), reason); err != nil {
+		if err := restartnote.WriteStuck(s.restartDir(), reason); err != nil {
 			slog.Warn("watchdog: could not leave a note for the next start", "err", err)
 		}
 		s.exitWith(1)
@@ -161,8 +157,8 @@ func (s *Server) watchdogRound(ctx context.Context, st *watchdogState, now time.
 
 // exitWith ends the process with a status. Tests replace it.
 func (s *Server) exitWith(code int) {
-	if s.upd.exitWith != nil {
-		s.upd.exitWith(code)
+	if s.rt.exitWith != nil {
+		s.rt.exitWith(code)
 		return
 	}
 	os.Exit(code)
@@ -175,7 +171,7 @@ var watchdogStuckFor = 3 * time.Minute
 // selfRestartNote is what the previous run left when it restarted itself, empty
 // when this run began normally.
 func (s *Server) selfRestartNote() stuckRestart {
-	s.upd.mu.Lock()
-	defer s.upd.mu.Unlock()
-	return s.upd.stuck
+	s.rt.mu.Lock()
+	defer s.rt.mu.Unlock()
+	return s.rt.stuck
 }

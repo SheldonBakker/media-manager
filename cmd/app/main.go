@@ -24,7 +24,7 @@ import (
 	"github.com/rdborg/mediarium/internal/config"
 	"github.com/rdborg/mediarium/internal/httpsec"
 	"github.com/rdborg/mediarium/internal/logbuf"
-	"github.com/rdborg/mediarium/internal/selfupdate"
+	"github.com/rdborg/mediarium/internal/restartnote"
 	"github.com/rdborg/mediarium/internal/store"
 	"github.com/rdborg/mediarium/internal/torrentclient"
 )
@@ -69,21 +69,7 @@ var (
 // `go build`/`go run` without ldflags reports "dev".
 var version = "dev"
 
-// updatePublicKey is the key that signs official releases (base64 of a raw
-// ed25519 public key). "Update now" installs a release only when the
-// sha256sums.txt.sig file that comes with it verifies against this key. A
-// fork that signs its own releases builds with
-//
-//	-ldflags "-X main.updatePublicKey=<base64 public key>"
-//
-// Only the public half belongs here; the private half stays with whoever
-// publishes releases (see docs/RELEASING.md).
-var updatePublicKey = "HM7xZn1frF+sxwYVWD/tyt+53pKr3vMtQ813g0Ccn6M="
-
 func main() {
-	if handled, code := handleProbeFlags(os.Args[1:], os.Stdout, os.Stderr); handled {
-		os.Exit(code)
-	}
 	if len(os.Args) > 1 && os.Args[1] == "config" {
 		os.Exit(runConfigCommand(os.Args[2:], os.Stdout, os.Stderr))
 	}
@@ -105,20 +91,17 @@ func main() {
 	if err := run(); err != nil {
 		log.Fatalf("mediarium: %v", err)
 	}
-	// After an update, a restore or the Restart button, start the next program
-	// in this same process: the container keeps running, so Docker never has
-	// to set up its published ports again (some NAS versions fail at that).
-	// If that can't be done, exiting lets the restart policy start it.
+	// After a restore or the Restart button, start the program again in this
+	// same process: the container keeps running, so Docker never has to set up
+	// its published ports again (some NAS versions fail at that). If that
+	// can't be done, exiting lets the restart policy start it.
 	if restartWanted != nil && restartWanted() {
-		restartInPlace(restartUpdateDir)
+		restartInPlace()
 	}
 }
 
-// Set by run: whether the app stopped to start again, and its update folder.
-var (
-	restartWanted    func() bool
-	restartUpdateDir string
-)
+// Set by run: whether the app stopped to start again.
+var restartWanted func() bool
 
 func run() error {
 	// The log also goes into a small in-memory buffer (secrets taken out), so
@@ -152,9 +135,7 @@ func run() error {
 	}
 	// "Restart with automation paused" leaves a note that applies to this start
 	// only, like MEDIARIUM_PAUSE_AUTOMATION=1 for one run.
-	updateDir := selfupdate.Dir(cfg.ConfigDir)
-	restartUpdateDir = updateDir
-	if selfupdate.TakeSafeOnce(updateDir) {
+	if restartnote.TakeSafeOnce(restartnote.Dir(cfg.ConfigDir)) {
 		cfg.PauseAutomation = true
 		log.Print("Started once in safe mode because a restart with automation paused was asked for.")
 	}
@@ -222,9 +203,6 @@ func run() error {
 		TraktClientID: defaultTraktClientID,
 		SimklClientID: defaultSimklClientID,
 	})
-	if err := server.SetUpdatePublicKey(updatePublicKey); err != nil {
-		log.Printf("warning: %v; installing updates from GitHub is switched off", err)
-	}
 
 	// With no administrator yet, the log says how to create one from outside
 	// the home network (a one-time setup code; see internal/api/setup.go).
@@ -241,12 +219,6 @@ func run() error {
 
 	stopAnnounce := server.StartAnnounce()
 	defer stopAnnounce()
-
-	stopUpdates := server.StartUpdates()
-	defer stopUpdates()
-
-	stopUsageStats := server.StartUsageStats()
-	defer stopUsageStats()
 
 	stopWatchdog := server.StartWatchdog()
 	defer stopWatchdog()
@@ -275,10 +247,6 @@ func run() error {
 	// "unless-stopped") brings it back. Without a restart policy the user
 	// starts it again by hand and the restore is applied on that start.
 	server.SetExitFunc(stop)
-
-	if selfupdate.RunningPushed(updateDir) {
-		go markHealthyWhenAnswering(ctx, cfg.Port, updateDir)
-	}
 
 	serveErr := make(chan error, 1)
 	go func() {

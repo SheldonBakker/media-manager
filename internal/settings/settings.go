@@ -277,18 +277,9 @@ const (
 	KeyModulesAudiobooks = "modules.audiobooks" // "1" switches it on; unset or "0" leaves it off
 	KeyModulesEbooks     = "modules.ebooks"     // "1" switches it on; unset or "0" leaves it off
 
-	// Updates and restarts (Settings > System). See docs/security.md.
-	KeyStatsChoice        = "stats.choice"                   // the administrator's answer about sharing anonymous usage numbers: "yes", "no", or unset when not asked yet. Nothing is sent unless it is "yes" (see docs/usage-stats.md)
-	KeyStatsInstallID     = "stats.install_id"               // a random number made when the answer is yes, sent with the numbers so one install counts once; set by the app, cleared on "no" and by "Reset my ID"
-	KeyStatsLastSent      = "stats.last_sent"                // the day (UTC) the numbers were last sent; set by the app, not user-editable
-	KeyUpdatesCheck       = "updates.check"                  // "0" turns the daily check for a new version off; anything else (including unset) leaves it on
-	KeyUpdatesAutoInstall = "updates.auto_install"           // "1" installs a new, signed release overnight when nothing is downloading; unset or "0" leaves updating to you
-	KeyUpdatesAllowPush   = "updates.allow_push"             // "1" lets an administrator replace the program by uploading a file through the API; unset or "0" refuses. Only a signed-in browser session can switch it on, not an API key
-	KeyUpdatesLatest      = "updates.latest"                 // the newest release the last check found (JSON; set by the app, not user-editable)
-	KeyUpdatesCheckedAt   = "updates.last_checked_at"        // when the last check ran (RFC 3339; set by the app, not user-editable)
-	KeyUpdatesNotified    = "updates.notified_version"       // the version the "new version" message was last sent for (set by the app, not user-editable)
-	KeyAutoRestartStuck   = "system.auto_restart_when_stuck" // "0" stops Mediarium restarting itself when it has not answered for three minutes; anything else (including unset) leaves it on
-	KeyMCPEnabled         = "mcp.enabled"                    // "1" lets AI assistants connect to the MCP address (POST /mcp) with an administrator's API key; unset or "0" keeps it off. Only a signed-in browser session can switch it on, not an API key
+	// Restarts (Settings > System).
+	KeyAutoRestartStuck = "system.auto_restart_when_stuck" // "0" stops Mediarium restarting itself when it has not answered for three minutes; anything else (including unset) leaves it on
+	KeyMCPEnabled       = "mcp.enabled"                    // "1" lets AI assistants connect to the MCP address (POST /mcp) with an administrator's API key; unset or "0" keeps it off. Only a signed-in browser session can switch it on, not an API key
 
 	// Watched status and cleanup rules (Settings > Connections > Media servers). Both off by default.
 	KeyWatchedSync   = "watched.sync"   // "1" reads what's been watched from Plex, Jellyfin and Emby every six hours; unset or "0" leaves it off

@@ -25,14 +25,13 @@ Mediarium does not host or provide any content. See [LEGAL.md](./LEGAL.md).
 11. [Optional: getting past Cloudflare checks](#optional-getting-past-cloudflare-checks)
 12. [Everyday commands](#everyday-commands)
 13. [Updating](#updating)
-14. [Updating without rebuilding the container](#updating-without-rebuilding-the-container)
-15. [Backup and restore](#backup-and-restore)
-16. [Monitoring with Prometheus](#monitoring-with-prometheus)
-17. [Uninstalling](#uninstalling)
-18. [One command instead: docker run](#one-command-instead-docker-run)
-19. [Using a Docker app (Portainer, Container Manager, Container Station...)](#using-a-docker-app)
-20. [Troubleshooting](#troubleshooting)
-21. [Building from source](#building-from-source)
+14. [Backup and restore](#backup-and-restore)
+15. [Monitoring with Prometheus](#monitoring-with-prometheus)
+16. [Uninstalling](#uninstalling)
+17. [One command instead: docker run](#one-command-instead-docker-run)
+18. [Using a Docker app (Portainer, Container Manager, Container Station...)](#using-a-docker-app)
+19. [Troubleshooting](#troubleshooting)
+20. [Building from source](#building-from-source)
 
 ---
 
@@ -289,12 +288,11 @@ Most settings live under **Settings**. Besides the folders, `PUID`, `PGID` and `
 | `TRUSTED_PROXIES`, `ALLOWED_ORIGINS` | For a reverse proxy: see [security.md](./security.md#trusted_proxies). |
 | `URL_BASE` | Set it when your reverse proxy serves Mediarium under a sub-path, for example `/mediarium`. Empty (the default) means the root. See [Running under a sub-path](#running-under-a-sub-path-url-base). |
 | `NAME_FILE` | Any variable above can be given as a file instead, like `URL_BASE_FILE=/run/secrets/x`. See [Secrets from files](#secrets-from-files-docker-secrets). |
-| `MEDIARIUM_PAUSE_AUTOMATION` | Set to `1` to start in **safe mode**: nothing searches, downloads, refreshes, checks connections or looks for new versions by itself. Downloads waiting in line come back paused. You can still search and download by hand, and the dashboard says "Safe mode is on". Remove it to go back to normal. See [Troubleshooting](#troubleshooting). |
+| `MEDIARIUM_PAUSE_AUTOMATION` | Set to `1` to start in **safe mode**: nothing searches, downloads, refreshes or checks connections by itself. Downloads waiting in line come back paused. You can still search and download by hand, and the dashboard says "Safe mode is on". Remove it to go back to normal. See [Troubleshooting](#troubleshooting). |
 | `MEDIARIUM_DISABLE_SSO` | Set to `1` as a way back in if single sign-on or directory sign-in locked people out: both are switched off and password sign-in is on, whatever is saved in Settings. Remove it to use the saved settings again. See [accounts.md](./accounts.md#if-you-are-locked-out). |
 | `MEDIARIUM_SUPERVISED` | Set to `1` only for a program you run yourself when a service manager other than Docker, systemd or launchd starts it again after it exits. It lets the Restart buttons work. |
-| `MEDIARIUM_SKIP_INSTALLED_UPDATE` | Set to any value to make the Docker entrypoint ignore an [installed update](#update-now-docker-image) and start the program inside the image. |
 
-The Docker images set `BUNDLED_FLARESOLVERR` (the `-full` image only) and `MEDIARIUM_IMAGE_VERSION` themselves. Don't set those two.
+The `-full` Docker image sets `BUNDLED_FLARESOLVERR` itself. Don't set it.
 
 ## Running under a sub-path (URL base)
 
@@ -452,7 +450,7 @@ docker compose pull
 docker compose up -d
 ```
 
-That downloads the newest image and restarts Mediarium with it. Your settings and library stay put, and the database updates itself on start. Nothing updates on its own unless you switch on **Install new versions overnight** (see below). A restart pauses running downloads; press **Resume** in Activity.
+That downloads the newest image and restarts Mediarium with it. Your settings and library stay put, and the database updates itself on start. Nothing updates on its own. A restart pauses running downloads; press **Resume** in Activity.
 
 - Read the [changelog](../CHANGELOG.md) first, and [back up](#backup-and-restore) `/config` before a big update. There is no way back to an older version once the database has been updated, except restoring a backup. When an update is going to change the database, Mediarium first saves a copy next to it (`pre-migration-<number>-<date>-<time>.db` in `/config`, the newest two are kept); that is the file to put back as `app.db` if an update goes wrong. From 3.1.3 on, if that version or a later one is started on a database that a newer version already changed, it still starts, but writes a warning to the log and to Health that says so. Versions before 3.1.3 don't check this and start without any warning.
 - `:latest` always follows the newest release. To stay on a version, use its number instead. Each release has these tags (add `-full` for the [Cloudflare helper version](#optional-getting-past-cloudflare-checks)):
@@ -465,60 +463,15 @@ That downloads the newest image and restarts Mediarium with it. Your settings an
 
   A pre-release (for example `3.1.0-beta.1`) only gets its exact tag. What the numbers mean: [RELEASING.md](./RELEASING.md#what-the-version-numbers-mean).
 
-### Knowing when there is a new version
-
-Once a day Mediarium asks GitHub for the newest release (the first time about two minutes after it starts, and again in an hour after a failed try). If yours is older, administrators see a card on the dashboard and in the **Updates** box under **Settings > General**. It shows what is new and the steps for your kind of install (Synology Container Manager, Unraid or Docker Compose, plus a note for the `-full` image; a program you run yourself gets its own steps). The card has **Hide until the next version**. If a [notification](./notifications.md) target has **New version** ticked, you also get one message per new version. A pre-release is only offered to someone already running one.
-
-- **What it sends:** one plain web request to `api.github.com` with the program name and version (`Mediarium/3.0.0`) and nothing else: no account, no library, no settings. GitHub sees your address, as any website does.
-- **Turning it off:** untick **Look for new versions once a day** in the Updates box (stored as `updates.check`). Then Mediarium never contacts GitHub by itself. **Check now** still works when you press it.
-- If GitHub cannot be reached or is limiting requests, the card says "Couldn't check just now." with the reason (for example that GitHub is limiting requests, or that the address could not be found), and Mediarium tries again later. A failed check (other than one held back by GitHub's limit) is also listed under Settings > System > Logs and errors. Nothing else is affected.
-
-![The Updates, Restart and Updates pushed through the API boxes on Settings > General and Settings > System > Server](images/system-updates.png)
-
-*Updates and the pushed-updates switch on General, and Restart on Server. This one shows an up-to-date install.*
-
 ### What's new after an update
 
 The first time you open Mediarium after it moves to a newer version, a short note lists the highlights, with a link to every change. It shows once in each browser and not at all on a fresh install.
-
-### Update now (Docker image)
-
-If the release is signed by the Mediarium project, the card and the Updates box also have an **Update now** button. It asks you to confirm first. Mediarium then downloads the program for your system from the GitHub release, checks the signature of the checksum list against the public key built into your copy, checks the download against that list, starts the new program once to see that it answers as Mediarium, and restarts into it. It takes about a minute. Running downloads are paused, so press **Resume** afterwards. If any step fails, nothing is installed and the card says why (it is also under Settings > System > Logs and errors). A release without a signature never gets the button, so update the way you installed Mediarium.
-
-- The new program is kept in `/config/update/`, next to your database, and the previous one is kept beside it. Your image is not changed. **If you later recreate the container from a newer image, Mediarium starts whichever is newer, the image's or the installed one.** So updating this way and updating the image later work together.
-- **Going back:** the Updates box shows what is installed and has **Go back to the image's version**. That removes the installed program; Mediarium uses the version inside the image again after a restart. If you change your mind again, press Update now.
-- **A bad update cannot stop Mediarium from starting.** If an installed program stops within 20 seconds of starting, three times in a row, the container's next start puts it aside (as `/config/update/app.failed`) and starts the program in the image instead. The card tells you when that happened, and has **Remove it** to delete the put-aside file.
-- **Overnight:** the switch **Install new versions overnight** installs a new signed release between 2 and 5 in the morning (server time), when nothing is downloading. It does nothing in safe mode.
-- **Restart:** the restart at the end needs Docker to start Mediarium again by itself, which the `restart: unless-stopped` line in the supplied compose files does. Without a restart policy Mediarium stops after installing, and the installed version runs the next time you start the container.
-- **Only in the Docker images, on Linux.** A program you run yourself has no entrypoint to start the new file, so it shows the steps instead.
 
 ### Restarting Mediarium
 
 The **Restart** box under **Settings > System > Server** has **Restart Mediarium** and **Restart with automation paused**. The second one starts Mediarium once in [safe mode](#other-environment-variables) (no automatic searching, downloading or refreshing) so the pages load and you can fix a setting. The next restart is normal. Both ask you to confirm and pause running downloads (press **Resume** in Activity afterwards). Both need something that starts Mediarium again after it exits. Docker, systemd and launchd are found automatically (in Docker that means a restart policy such as the `restart: unless-stopped` line in the supplied compose file), and `MEDIARIUM_SUPERVISED=1` covers any other service manager. Where nothing would start it again, the box says "Restart is not available here. Start Mediarium again yourself." and, on a program you run yourself, offers **Shut down** instead. To stop a container, use your container manager.
 
-Mediarium also watches itself. Every 30 seconds it checks that its database and web server answer. If either fails for three minutes in a row it restarts itself (never during a restore, an update or a move from another app). The next start says so in the Updates box, under Logs and errors and in the support report. Switch this off with **Restart by itself if it stops answering**. The Docker images also have a health check on `/api/version`, so Docker, Synology and other tools show healthy or unhealthy.
-
-## Updating without rebuilding the container
-
-This is for testing, and for people who can't rebuild their container. An administrator sends a new program file to the running Mediarium, which restarts into it. It needs no Docker socket and no extra privileges. Leave it off unless you use it: [security.md](./security.md#updating-the-program) explains what it allows.
-
-1. As an administrator, switch on **Allow updates pushed through the API** in **Advanced: updates pushed through the API** under **Settings > General**. It asks you to confirm. This can only be switched on here, while you are signed in, never with an API key.
-2. Create an administrator API key under **Settings > Account & Access > Security > API keys**.
-3. Send the file:
-
-   ```bash
-   sha=$(sha256sum mediarium | cut -d ' ' -f 1)
-   curl -X POST "http://your-server:8264/api/system/update" \
-        -H "X-API-Key: $MEDIARIUM_API_KEY" -H "X-Update-SHA256: $sha" \
-        -H "Content-Type: application/octet-stream" --data-binary @mediarium
-   ```
-
-   The body is the raw Linux program (at most 200 MB) and `X-Update-SHA256` is required. Mediarium refuses the file unless its SHA-256 matches, it is a Mediarium program for the same system (it is started once with `--version-check`, which only prints its version and exits), and its version is newer than the running one. Add `?force=true` to allow the same or an older version, for example to go back; the checksum is still required. A version older than the one inside the image is never accepted, because the image's entrypoint would ignore it. The answer is `202` with `{"version": "...", "restartingIn": 2}`, then Mediarium exits and Docker's restart policy starts it again.
-4. `GET /api/system/update` shows what is running and what is installed. `DELETE /api/system/update` removes the installed program (add `?restart=true` to restart at once); Mediarium then uses the image's own version. Removing works even while pushing is switched off.
-
-Maintainers can use `tools/push-update.sh`, which builds the program from the committed source in Docker, works out the checksum and uploads it: see [RELEASING.md](./RELEASING.md#pushing-a-test-build). The user interface is part of the program, so a pushed program brings its new pages; the browser is told to re-check the page every time, so it never keeps showing the old ones.
-
-**If something goes wrong,** the installed program lives in `/config/update/`. Deleting the `update` folder (with Mediarium stopped) goes back to the image. Starting the container with `MEDIARIUM_SKIP_INSTALLED_UPDATE=1` ignores an installed program without deleting it.
+Mediarium also watches itself. Every 30 seconds it checks that its database and web server answer. If either fails for three minutes in a row it restarts itself (never during a restore or a move from another app). The next start says so in the Restart box, under Logs and errors and in the support report. Switch this off with **Restart by itself if it stops answering**. The Docker images also have a health check on `/api/version`, so Docker, Synology and other tools show healthy or unhealthy.
 
 ## Backup and restore
 
@@ -526,7 +479,7 @@ Everything that is not a media file lives in `/config`. The two files that matte
 
 **From the app (easiest):** administrators can download a backup zip with **Download a backup** on **Settings > System > Backup and restore**. It is safe to make while downloads are running. The zip holds `app.db`, `secret.key` and a small note about the version, and no media files. It contains your encryption key, so keep it as private as a password. To restore, choose the zip in the **Restore** box on the same page and press **Restore this backup**: Mediarium checks it (a backup made by a newer version of Mediarium than yours is refused; a backup can be up to 1 GB), restarts, and keeps your previous files in a `before-restore-<date>` folder inside `/config`. After the restart you sign in again (with an account from the backup), and the sign-in page says the backup was restored. Restoring needs something that starts Mediarium again, like `restart: unless-stopped`; otherwise start it yourself and the restore is applied then.
 
-**Automatic backups:** every night, and just before every update, Mediarium saves the same zip in `/config/backups` and keeps the newest 7 (change it to 3, 5, 14 or 30 in the **Backup** box). The box lists them with the time and size, each with **Download**, and has **Back up now**. To restore one, download it and choose it under **Restore**. Switch the nightly backup off with **Save a backup every night** (stored as `backup.auto`; how many are kept is `backup.keep`). The files sit next to your database, so also keep a copy somewhere else: switch on [cloud backups](#cloud-backups), or copy one by hand now and then. A backup on the same disk does not help if that disk fails. A backup that was cut short (the container was stopped while it was being written) leaves no file behind: half-written files are removed at the next start. If a nightly backup can't be saved, it is listed in Logs and errors. Scripts: `GET /api/system/backups`, `POST /api/system/backups` and `GET /api/system/backups/{name}` (the last two need a signed-in administrator, not an API key, because a backup holds every stored secret).
+**Automatic backups:** every night Mediarium saves the same zip in `/config/backups` and keeps the newest 7 (change it to 3, 5, 14 or 30 in the **Backup** box). The box lists them with the time and size, each with **Download**, and has **Back up now**. To restore one, download it and choose it under **Restore**. Switch the nightly backup off with **Save a backup every night** (stored as `backup.auto`; how many are kept is `backup.keep`). The files sit next to your database, so also keep a copy somewhere else: switch on [cloud backups](#cloud-backups), or copy one by hand now and then. A backup on the same disk does not help if that disk fails. A backup that was cut short (the container was stopped while it was being written) leaves no file behind: half-written files are removed at the next start. If a nightly backup can't be saved, it is listed in Logs and errors. Scripts: `GET /api/system/backups`, `POST /api/system/backups` and `GET /api/system/backups/{name}` (the last two need a signed-in administrator, not an API key, because a backup holds every stored secret).
 
 ### When `secret.key` is lost
 

@@ -60,30 +60,24 @@ const table: { name: string; input: Diagnostics; has: string[]; lacks?: string[]
     has: ['Usenet news.example.com:563: 3 of 3 connections in use (set to 20, lowered because the provider said too many)'],
   },
   {
-    name: 'an update is installed and pushing is on',
+    name: 'the app restarted itself',
     input: sample({
-      update: {
-        image: '1.1.0', installed: '1.2.0', latest: '1.3.0', checkedAt: '2026-10-01T10:00:00Z', check: true, autoInstall: false,
-        allowPush: true, autoRestartWhenStuck: true, supervisor: 'docker', selfRestart: '2026-10-01T09:00:00Z: the web server answered: false',
-      },
+      restart: { autoRestartWhenStuck: true, supervisor: 'docker', selfRestart: '2026-10-01T09:00:00Z: the web server answered: false' },
     }),
-    has: [
-      'Updates: image 1.1.0, installed update 1.2.0, newest known 1.3.0 (checked 2026-10-01T10:00:00Z)',
-      'Update settings: daily check on, overnight install off, pushed updates ON, restart when stuck on, restarted by docker',
-      'Restarted itself: 2026-10-01T09:00:00Z: the web server answered: false',
-    ],
+    has: ['Restart: restart when stuck on, restarted by docker', 'Restarted itself: 2026-10-01T09:00:00Z: the web server answered: false'],
+    lacks: ['Updates:'],
   },
   {
-    name: 'a check that could not reach GitHub',
-    input: sample({ update: { check: true, autoInstall: false, allowPush: false, autoRestartWhenStuck: true, supervisor: 'none', checkError: "Couldn't check just now." } }),
-    has: ['Updates: image not used, installed update none, newest known unknown', "Couldn't check just now.", 'pushed updates off'],
+    name: 'restart when stuck is off and nothing starts it again',
+    input: sample({ restart: { autoRestartWhenStuck: false, supervisor: 'none' } }),
+    has: ['Restart: restart when stuck off, restarted by none'],
     lacks: ['Restarted itself'],
   },
   {
-    name: 'an older server with no update row',
+    name: 'an older server with no restart row',
     input: sample(),
     has: ['Mediarium support report'],
-    lacks: ['Updates:'],
+    lacks: ['Restart:'],
   },
   {
     name: 'problems from the problem log',

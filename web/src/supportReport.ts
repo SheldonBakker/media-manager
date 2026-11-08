@@ -24,16 +24,8 @@ export interface Diagnostics {
     waitCount: number
     waitSeconds: string
   }
-  // How updating is set up; left out by servers from before it existed.
-  update?: {
-    image?: string
-    installed?: string
-    latest?: string
-    checkedAt?: string
-    checkError?: string
-    check: boolean
-    autoInstall: boolean
-    allowPush: boolean
+  // How restarting is set up; left out by servers from before it existed.
+  restart?: {
     autoRestartWhenStuck: boolean
     supervisor: string
     selfRestart?: string
@@ -76,14 +68,10 @@ export function formatSupportReport(d: Diagnostics): string {
     `Database connections: ${db.inUse} of ${db.maxOpen} in use, ${db.idle} idle, ${db.waitCount} waits so far (${db.waitSeconds} in total)`,
   ]
   if (d.downloadsRunning !== undefined) lines.push(`Downloads running: ${d.downloadsRunning}`)
-  const up = d.update
-  if (up) {
-    const onOff = (v: boolean) => (v ? 'on' : 'off')
-    lines.push(
-      `Updates: image ${up.image || 'not used'}, installed update ${up.installed || 'none'}, newest known ${up.latest || 'unknown'}${up.checkedAt ? ` (checked ${up.checkedAt})` : ''}${up.checkError ? `, ${up.checkError}` : ''}`,
-      `Update settings: daily check ${onOff(up.check)}, overnight install ${onOff(up.autoInstall)}, pushed updates ${up.allowPush ? 'ON' : 'off'}, restart when stuck ${onOff(up.autoRestartWhenStuck)}, restarted by ${up.supervisor}`,
-    )
-    if (up.selfRestart) lines.push(`Restarted itself: ${up.selfRestart}`)
+  const rs = d.restart
+  if (rs) {
+    lines.push(`Restart: restart when stuck ${rs.autoRestartWhenStuck ? 'on' : 'off'}, restarted by ${rs.supervisor}`)
+    if (rs.selfRestart) lines.push(`Restarted itself: ${rs.selfRestart}`)
   }
   for (const u of d.usenet ?? []) {
     const lowered = u.limit < u.configured ? ` (set to ${u.configured}, lowered because the provider said too many)` : ''

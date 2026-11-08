@@ -111,7 +111,6 @@ func TestComposeTextSubjects(t *testing.T) {
 		{"login refused", "health", "Your Usenet login was refused", "Check the password.", "Mediarium needs attention: your Usenet login was refused", "https://m.example.com/settings/logs"},
 		{"named provider keeps its capital", "health", "Eweka is not working", "Timed out.", "Mediarium needs attention: Eweka is not working", "https://m.example.com/settings/logs"},
 		{"recovered", "health", "Eweka is working again", "The last check passed.", "Mediarium: Eweka is working again", ""},
-		{"update", "update", "Mediarium 1.3.0 is available", "You are running 1.2.0.", "Mediarium 1.3.0 is available", ""},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

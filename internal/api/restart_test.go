@@ -8,12 +8,59 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/rdborg/mediarium/internal/api"
 )
 
+// restartEnv is a running server that believes a container's restart policy
+// starts it again after it exits.
+type restartEnv struct {
+	server *api.Server
+	base   string
+	client *http.Client
+	exited <-chan struct{}
+	dir    string
+}
+
+func newRestartEnv(t *testing.T) *restartEnv {
+	t.Helper()
+	server, base, client := loginNewServer(t)
+	server.TestSetSupervisor("docker")
+	return &restartEnv{server: server, base: base, client: client, exited: exitSpy(server), dir: server.TestRestartDir()}
+}
+
+// control is what GET /api/system/control answers.
+func (e *restartEnv) control(t *testing.T) map[string]any {
+	t.Helper()
+	return getJSON[map[string]any](t, e.client, e.base+"/api/system/control")
+}
+
+func (e *restartEnv) mustNotExit(t *testing.T) {
+	t.Helper()
+	select {
+	case <-e.exited:
+		t.Fatal("the app stopped although it should not have")
+	case <-time.After(120 * time.Millisecond):
+	}
+}
+
+func (e *restartEnv) mustExit(t *testing.T) {
+	t.Helper()
+	select {
+	case <-e.exited:
+	case <-time.After(3 * time.Second):
+		t.Fatal("the app did not restart")
+	}
+}
+
+func message(m map[string]any) string {
+	s, _ := m["error"].(string)
+	return s
+}
+
 func TestRestartInDocker(t *testing.T) {
-	e := newUpdateEnv(t) // an image version is set: the container restarts it
-	st := e.state(t)
-	control, _ := st["control"].(map[string]any)
+	e := newRestartEnv(t)
+	control := e.control(t)
 	if control["kind"] != "docker" || control["canRestart"] != true || control["canShutdown"] != false {
 		t.Fatalf("control = %v", control)
 	}
@@ -38,7 +85,7 @@ func TestRestartInDocker(t *testing.T) {
 }
 
 func TestRestartWithAutomationPausedLeavesAOneShotNote(t *testing.T) {
-	e := newUpdateEnv(t)
+	e := newRestartEnv(t)
 	out := postJSON[map[string]any](t, e.client, e.base+"/api/system/restart?safe=true", nil, http.StatusAccepted)
 	if out["safe"] != true {
 		t.Fatalf("%v", out)
@@ -50,9 +97,9 @@ func TestRestartWithAutomationPausedLeavesAOneShotNote(t *testing.T) {
 }
 
 func TestRestartWhereNothingWouldStartTheAppAgain(t *testing.T) {
-	e := newUpdateEnv(t)
+	e := newRestartEnv(t)
 	e.server.TestSetSupervisor("none")
-	control := e.state(t)["control"].(map[string]any)
+	control := e.control(t)
 	if control["canRestart"] != false || control["canShutdown"] != true {
 		t.Fatalf("control = %v", control)
 	}
@@ -76,7 +123,7 @@ func TestRestartWhereNothingWouldStartTheAppAgain(t *testing.T) {
 
 func TestShutdownIsNotOfferedUnderAContainerOrServiceManager(t *testing.T) {
 	for _, kind := range []string{"docker", "systemd", "launchd", "custom"} {
-		e := newUpdateEnv(t)
+		e := newRestartEnv(t)
 		e.server.TestSetSupervisor(kind)
 		code, body := doStatus(t, e.client, http.MethodPost, e.base+"/api/system/shutdown")
 		if code != http.StatusConflict || !strings.Contains(message(body), "container manager") {
@@ -84,17 +131,6 @@ func TestShutdownIsNotOfferedUnderAContainerOrServiceManager(t *testing.T) {
 		}
 		e.mustNotExit(t)
 	}
-}
-
-func TestRestartWaitsForAnUpdateInProgress(t *testing.T) {
-	e := newUpdateEnv(t)
-	release := e.server.TestHoldUpdateLock()
-	code, body := doStatus(t, e.client, http.MethodPost, e.base+"/api/system/restart")
-	release()
-	if code != http.StatusConflict || !strings.Contains(message(body), "busy") {
-		t.Fatalf("%d %v", code, body)
-	}
-	e.mustNotExit(t)
 }
 
 // ---- The watchdog ----
@@ -122,7 +158,7 @@ func waitUntil(t *testing.T, cond func() bool, what string) {
 // In these tests the app's own web address is not listening (its port is 0),
 // so the watchdog sees it as not answering.
 func TestWatchdogRestartsAStuckApp(t *testing.T) {
-	e := newUpdateEnv(t)
+	e := newRestartEnv(t)
 	x := &exits{}
 	e.server.TestSetExitWith(x.record)
 	stop := e.server.TestWatchdog(10*time.Millisecond, 150*time.Millisecond)
@@ -137,7 +173,7 @@ func TestWatchdogRestartsAStuckApp(t *testing.T) {
 	}
 	// The next start says so.
 	e.server.TestNoteSelfRestart()
-	st := e.state(t)
+	st := e.control(t)
 	self, _ := st["selfRestart"].(map[string]any)
 	if self == nil || !strings.Contains(self["reason"].(string), "web server answered: false") {
 		t.Fatalf("selfRestart = %v", st["selfRestart"])
@@ -146,29 +182,28 @@ func TestWatchdogRestartsAStuckApp(t *testing.T) {
 		t.Fatal("the note must be read once")
 	}
 	diag := getJSON[map[string]any](t, e.client, e.base+"/api/system/diagnostics")
-	if up := diag["update"].(map[string]any); up["selfRestart"] == nil {
-		t.Fatalf("diagnostics do not mention the self-restart: %v", up)
+	if rs := diag["restart"].(map[string]any); rs["selfRestart"] == nil {
+		t.Fatalf("diagnostics do not mention the self-restart: %v", rs)
 	}
 }
 
 func TestWatchdogStaysQuietWhen(t *testing.T) {
 	cases := []struct {
 		name  string
-		setup func(e *updateEnv) (undo func())
+		setup func(e *restartEnv) (undo func())
 	}{
-		{"the switch is off", func(e *updateEnv) func() {
+		{"the switch is off", func(e *restartEnv) func() {
 			postJSONMethod[map[string]any](t, e.client, http.MethodPut, e.base+"/api/system/options", map[string]any{"autoRestartWhenStuck": false}, http.StatusOK)
 			return func() {}
 		}},
-		{"an update is being installed", func(e *updateEnv) func() { return e.server.TestHoldUpdateLock() }},
-		{"nothing would start the app again", func(e *updateEnv) func() {
+		{"nothing would start the app again", func(e *restartEnv) func() {
 			e.server.TestSetSupervisor("none")
 			return func() {}
 		}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			e := newUpdateEnv(t)
+			e := newRestartEnv(t)
 			x := &exits{}
 			e.server.TestSetExitWith(x.record)
 			undo := tc.setup(e)

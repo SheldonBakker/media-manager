@@ -51,26 +51,25 @@ func TestDetectSupervisor(t *testing.T) {
 	dockerenv := func(p string) bool { return p == "/.dockerenv" }
 
 	cases := []struct {
-		name         string
-		byHand       bool
-		imageVersion string
-		getenv       func(string) string
-		exists       func(string) bool
-		want         string
+		name   string
+		byHand bool
+		getenv func(string) string
+		exists func(string) bool
+		want   string
 	}{
-		{"started by the image entrypoint", false, "1.1.0", env(), none, "docker"},
-		{"a container without our entrypoint", false, "", env(), dockerenv, "docker"},
-		{"podman", false, "", env("container", "podman"), none, "docker"},
-		{"systemd service", false, "", env("INVOCATION_ID", "abc123"), none, "systemd"},
-		{"launchd job", false, "", env("XPC_SERVICE_NAME", "io.github.rdborg.mediarium"), none, "launchd"},
-		{"a terminal on a Mac (launchd sets 0)", false, "", env("XPC_SERVICE_NAME", "0"), none, "none"},
-		{"told by hand", true, "", env(), none, "custom"},
-		{"a plain terminal", false, "", env(), none, "none"},
-		{"docker wins over a hand-set flag", true, "1.1.0", env(), none, "docker"},
+		{"a container (Docker makes /.dockerenv)", false, env(), dockerenv, "docker"},
+		{"the image says so", false, env("container", "docker"), none, "docker"},
+		{"podman", false, env("container", "podman"), none, "docker"},
+		{"systemd service", false, env("INVOCATION_ID", "abc123"), none, "systemd"},
+		{"launchd job", false, env("XPC_SERVICE_NAME", "io.github.rdborg.mediarium"), none, "launchd"},
+		{"a terminal on a Mac (launchd sets 0)", false, env("XPC_SERVICE_NAME", "0"), none, "none"},
+		{"told by hand", true, env(), none, "custom"},
+		{"a plain terminal", false, env(), none, "none"},
+		{"docker wins over a hand-set flag", true, env(), dockerenv, "docker"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := detectSupervisor(tc.byHand, tc.imageVersion, tc.getenv, tc.exists); got != tc.want {
+			if got := detectSupervisor(tc.byHand, tc.getenv, tc.exists); got != tc.want {
 				t.Fatalf("detectSupervisor = %q, want %q", got, tc.want)
 			}
 		})

@@ -81,9 +81,9 @@ func TestAPIKeyCannotMakeAccountsKeysOrRestore(t *testing.T) {
 
 // What an administrator did to the program itself, and from which address,
 // is not shown to basic users on the Activity page.
-func TestMemberDoesNotSeeUpdateActivity(t *testing.T) {
+func TestMemberDoesNotSeeSystemActivity(t *testing.T) {
 	server, base, admin, member, _ := familyServer(t)
-	if err := server.QueueRepo.LogActivity(0, "update", "Mediarium 9.9.9 was installed by ryan (pushed through the API from 203.0.113.9, checksum abcdef123456). It restarts to use it."); err != nil {
+	if err := server.QueueRepo.LogActivity(0, "update", "Mediarium was restarted by ryan."); err != nil {
 		t.Fatal(err)
 	}
 	if err := server.QueueRepo.LogActivity(0, "added", "Fixture added to library"); err != nil {

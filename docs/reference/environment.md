@@ -13,8 +13,6 @@ Container-level settings only. Everything else (indexers, Usenet servers, naming
 | `DOWNLOADS_DIR` | `/downloads` |
 | `EBOOKS_DIR` | `/ebooks` |
 | `MEDIARIUM_DISABLE_SSO` | `` |
-| `MEDIARIUM_DISABLE_STATS` | `` |
-| `MEDIARIUM_IMAGE_VERSION` | `` |
 | `MEDIARIUM_PAUSE_AUTOMATION` | `` |
 | `MEDIARIUM_SUPERVISED` | `` |
 | `MOVIES_DIR` | `/movies` |

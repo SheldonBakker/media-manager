@@ -85,8 +85,6 @@ To add one later, edit the application's YAML, then save it with **Update** so t
 
 If your Container Station version has no such option, delete the application (your mapped folders are kept) and create it again with the same YAML: the newest image is used. Your settings and library stay, because they live in the folders you mapped. The menu names above can differ slightly between Container Station versions.
 
-When a new version is out, administrators see a card on the dashboard and on **Settings → General**. If the release is signed, the card also has an **Update now** button. See [Update now](./INSTALL.md#update-now-docker-image).
-
 ## Backing up
 
 Back up `/share/Container/mediarium` (`app.db` and `secret.key`; keep them together) with Hybrid Backup Sync, or use **Settings → System → Backup and restore** in Mediarium to download a backup zip.

@@ -34,7 +34,7 @@ Accounts that existed before roles were added became admins, so nobody lost acce
 | Dismiss subtitles, run the subtitle sweep, see the OpenSubtitles quota | No | Yes |
 | Manage accounts | No | Yes |
 
-When a basic user tries something only an admin can do, Mediarium says "Only an administrator can do this." An API key has the rights of the account that made it. A few things need you signed in on the web page, even with an admin key: making API keys, adding or changing accounts, downloading or restoring a backup and switching on pushed updates. That way a leaked key can't open a second way back in.
+When a basic user tries something only an admin can do, Mediarium says "Only an administrator can do this." An API key has the rights of the account that made it. A few things need you signed in on the web page, even with an admin key: making API keys, adding or changing accounts, and downloading or restoring a backup. That way a leaked key can't open a second way back in.
 
 The [HTTP API reference](./reference/api.md) marks every route as **public**, **any account** or **admin**.
 

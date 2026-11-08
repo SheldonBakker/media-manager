@@ -180,10 +180,9 @@ type Server struct {
 	arrFillState                   // reading missing TVDB ids for the Sonarr-style API (arr_series.go)
 	anime        animeState        // scene and anime numbering of shows (anime_numbering.go)
 
-	offered       offeredURLs       // download URLs recently handed out in search results (see grab_urls.go)
-	flareProbe    flareSolverrProbe // last answer from the Cloudflare helper (see flaresolverr.go)
-	statsEndpoint string            // where the anonymous usage numbers go; empty means usagestats.URL (tests set it)
-	stats         sysinfoSampler    // CPU and memory readings for the server card (see handlers_stats.go)
+	offered    offeredURLs       // download URLs recently handed out in search results (see grab_urls.go)
+	flareProbe flareSolverrProbe // last answer from the Cloudflare helper (see flaresolverr.go)
+	stats      sysinfoSampler    // CPU and memory readings for the server card (see handlers_stats.go)
 
 	Monitor *monitor.Monitor // connectivity monitor (Usenet servers, indexers)
 
@@ -199,7 +198,7 @@ type Server struct {
 	mcp   mcpState   // AI assistants connecting over MCP (mcp.go)
 	oauth oauthState // their OAuth sign-in (mcp_oauth.go)
 
-	upd updateRuntime // the new-version notice, pushed and downloaded updates, and the self-restart marker (update_*.go, watchdog.go)
+	rt restartRuntime // the self-restart note and restart test hooks (handlers_restart.go, watchdog.go)
 }
 
 // New wires every module's repo/service together (api depends on the
@@ -942,21 +941,12 @@ func (s *Server) protectedRoutes() *routeTable {
 	admin.HandleFunc("GET /api/system/stats", s.handleSystemStats)
 	admin.HandleFunc("POST /api/stats/reset", s.handleResetStats)
 	admin.HandleFunc("GET /api/system/diagnostics", s.handleDiagnostics)
-	admin.HandleFunc("GET /api/usage-stats", s.handleGetStats)
-	admin.HandleFunc("PUT /api/usage-stats", s.handlePutStats)
-	admin.HandleFunc("POST /api/usage-stats/reset-id", s.handleResetStatsID)
 	admin.HandleFunc("GET /api/system/problems", s.handleProblems)
 	admin.HandleFunc("POST /api/system/problems/read", s.handleProblemsRead)
 	admin.HandleFunc("GET /api/system/problems/export", s.handleProblemsExport)
 	admin.HandleFunc("PUT /api/system/problems/notify", s.handleProblemsNotify)
 	admin.HandleFunc("PUT /api/system/problems/debug", s.handleDebugLogging)
-	admin.HandleFunc("GET /api/system/update", s.handleUpdateState)
-	admin.HandleFunc("POST /api/system/update", s.handlePushUpdate)
-	admin.HandleFunc("DELETE /api/system/update", s.handleRemoveUpdate)
-	admin.HandleFunc("GET /api/system/update/latest", s.handleUpdateLatest)
-	admin.HandleFunc("POST /api/system/update/check", s.handleUpdateCheck)
-	admin.HandleFunc("GET /api/system/update/install", s.handleInstallStatus)
-	admin.HandleFunc("POST /api/system/update/install", s.handleInstallUpdate)
+	admin.HandleFunc("GET /api/system/control", s.handleControl)
 	admin.HandleFunc("GET /api/system/options", s.handleGetOptions)
 	admin.HandleFunc("PUT /api/system/options", s.handlePutOptions)
 	admin.HandleFunc("GET /api/system/mcp", s.handleGetMCP)

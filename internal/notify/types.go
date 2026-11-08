@@ -21,7 +21,6 @@ const (
 	EventConflict = "conflict" // an import hit a file that already exists
 	EventSubtitle = "subtitle" // a subtitle was downloaded
 	EventHealth   = "health"   // something is wrong with the app (or recovered)
-	EventUpdate   = "update"   // a new version of Mediarium is available
 	EventRequest  = "request"  // someone asked for a title (see Activity > Requests)
 	EventDigest   = "digest"   // the weekly summary
 
@@ -48,7 +47,6 @@ func EventKinds() []EventInfo {
 		{EventConflict, "Needs attention", "An imported file already exists and needs your decision."},
 		{EventSubtitle, "Subtitles", "A subtitle file was downloaded."},
 		{EventHealth, "Health", "A Usenet server or indexer stopped working, or came back."},
-		{EventUpdate, "New version", "A new version of Mediarium is available."},
 		{EventRequest, "Requests", "Someone asked for a movie, show, artist or book."},
 		{EventDigest, "Weekly summary", "Once a week: what arrived, what failed and what is still missing."},
 		{EventClientDown, "Download client down", "A download client (built-in or external) can't be reached."},
@@ -84,16 +82,26 @@ func EventKind(eventType string) string {
 	return eventType
 }
 
+// retiredEvents are kinds older versions offered ("update": a new version is
+// out). A target saved with one still saves; the kind is left out.
+var retiredEvents = map[string]bool{"update": true}
+
 // NormalizeEvents keeps the valid, de-duplicated kinds in canonical order. An
-// empty input yields DefaultEvents; input with only unknown kinds is an error.
+// empty input yields DefaultEvents; an unknown kind is an error, and so is a
+// list that holds nothing but retired kinds.
 func NormalizeEvents(in []string) ([]string, error) {
 	if len(in) == 0 {
 		return DefaultEvents(), nil
 	}
 	want := map[string]bool{}
+	retired := ""
 	for _, e := range in {
 		e = strings.TrimSpace(strings.ToLower(e))
 		if e == "" {
+			continue
+		}
+		if retiredEvents[e] {
+			retired = e
 			continue
 		}
 		known := false
@@ -106,6 +114,9 @@ func NormalizeEvents(in []string) ([]string, error) {
 			return nil, fmt.Errorf("unknown event %q", e)
 		}
 		want[e] = true
+	}
+	if len(want) == 0 && retired != "" {
+		return nil, fmt.Errorf("unknown event %q", retired)
 	}
 	var out []string
 	for _, k := range EventKinds() {

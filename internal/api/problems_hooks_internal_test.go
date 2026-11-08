@@ -128,19 +128,11 @@ func TestNotificationFailuresAndServiceLimitsAreLogged(t *testing.T) {
 	}
 }
 
-func TestUpdateAndRestartTroubleIsLogged(t *testing.T) {
+func TestRestartTroubleIsLogged(t *testing.T) {
 	l := hookLog(t)
-	noteUpdateCheckFailed(errors.New(`Get "https://api.github.com/x": dial tcp: no such host`))
-	noteUpdateInstallFailed("1.4.0", "The download did not match its checksum.", errors.New("sha256 differs"))
 	noteRestartedItself("the database answered: false", time.Date(2026, 9, 30, 9, 0, 0, 0, time.UTC))
 	rows := hookRows(t, l)
-	got := map[string]problems.Entry{}
-	for _, r := range rows {
-		got[r.Code] = r
-	}
-	if len(rows) != 3 || got[problems.CodeUpdateCheckFailed].Level != problems.LevelWarning ||
-		got[problems.CodeUpdateInstallFailed].Level != problems.LevelError || got[problems.CodeUpdateInstallFailed].Subject != "1.4.0" ||
-		got[problems.CodeAppRestartedItself].Detail != "the database answered: false" {
+	if len(rows) != 1 || rows[0].Code != problems.CodeAppRestartedItself || rows[0].Detail != "the database answered: false" {
 		t.Fatalf("rows = %+v", rows)
 	}
 }

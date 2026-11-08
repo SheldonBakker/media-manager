@@ -27,7 +27,7 @@ import (
 
 // Event is one activity-feed-worthy occurrence.
 type Event struct {
-	Type      string // "grabbed" | "imported" | "failed" | "conflict" | "subtitle" | "health" | "update" | "test"
+	Type      string // "grabbed" | "imported" | "failed" | "conflict" | "subtitle" | "health" | "test"
 	Title     string // the subject: "Titanic (1997) is ready to watch"
 	Message   string // the whole message as plain text
 	Timestamp time.Time

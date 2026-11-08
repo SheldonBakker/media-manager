@@ -79,13 +79,6 @@ Every problem on Settings > System > Logs and errors has one of these codes. The
 | `tmdb.key_rejected` | error | **TMDB rejected the key.** TMDB didn't accept the API key. | Copy the key again from your TMDB account. | `/settings/metadata` |
 | `subtitles.rate_limited` | warning | **OpenSubtitles limit reached.** Today's OpenSubtitles download limit is used up. | It resets tomorrow. A free OpenSubtitles account raises the limit. | `/settings/subtitles` |
 
-## Updates
-
-| Code | Level | What it means | What to try | Where |
-|---|---|---|---|---|
-| `update.check_failed` | warning | **Could not check for updates.** Mediarium couldn't check for a new version. | It tries again daily. Check the server can reach the internet. | `/settings/system` |
-| `update.install_failed` | error | **The update could not be installed.** The new version was downloaded but couldn't be put in place. The old version keeps running. | Try again from Settings > System, or update the container image. | `/settings/system` |
-
 ## Notifications
 
 | Code | Level | What it means | What to try | Where |

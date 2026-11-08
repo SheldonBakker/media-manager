@@ -219,7 +219,6 @@ var mustBeAdmin = []string{
 	"GET /api/settings/simkl", "DELETE /api/settings/simkl", "POST /api/settings/simkl/pin", "GET /api/settings/simkl/pin/{code}",
 	"GET /api/requests/settings", "PUT /api/requests/settings", "POST /api/issues/{id}/resolve", "POST /api/issues/{id}/reopen", "DELETE /api/issues/{id}",
 	"GET /api/system/backups/cloud", "PUT /api/system/backups/cloud", "POST /api/system/backups/cloud/test", "POST /api/system/backups/cloud/upload", "GET /api/system/backups/cloud/list",
-	"GET /api/usage-stats", "PUT /api/usage-stats", "POST /api/usage-stats/reset-id",
 	"GET /api/system/problems", "POST /api/system/problems/read", "GET /api/system/problems/export", "PUT /api/system/problems/notify", "PUT /api/system/problems/debug",
 	"DELETE /api/movies/{id}", "DELETE /api/books/{id}", "GET /api/books/import", "POST /api/books/import", "DELETE /api/series/{id}", "DELETE /api/music/artists/{id}", "PUT /api/music/artists/{id}",
 	"POST /api/music/profiles", "PUT /api/music/profiles/{id}", "DELETE /api/music/profiles/{id}",

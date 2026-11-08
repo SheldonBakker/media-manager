@@ -30,7 +30,6 @@ const (
 	AreaDisk          Area = "disk"
 	AreaDatabase      Area = "database"
 	AreaMetadata      Area = "metadata"
-	AreaUpdates       Area = "updates"
 	AreaNotifications Area = "notifications"
 	AreaSystem        Area = "system"
 )
@@ -52,7 +51,6 @@ func Areas() []AreaInfo {
 		{AreaDisk, "Disk and folders"},
 		{AreaDatabase, "Database"},
 		{AreaMetadata, "Movie and show info"},
-		{AreaUpdates, "Updates"},
 		{AreaNotifications, "Notifications"},
 		{AreaSystem, "System"},
 	}
@@ -103,8 +101,6 @@ const (
 	CodeTMDBRateLimited      = "tmdb.rate_limited"
 	CodeTMDBKeyRejected      = "tmdb.key_rejected"
 	CodeNotificationFailed   = "notification.send_failed"
-	CodeUpdateCheckFailed    = "update.check_failed"
-	CodeUpdateInstallFailed  = "update.install_failed"
 	CodeAppRestartedItself   = "app.restarted_itself"
 	CodeSubtitlesRateLimited = "subtitles.rate_limited"
 	CodeBackupFailed         = "backup.failed"
@@ -333,16 +329,6 @@ var catalog = []Help{
 		"Mediarium saved its backup here but couldn't copy it to your cloud storage.",
 		"Press Test in Settings > System > Backup and restore to see what the storage says. Check the keys or password and that there's space left.",
 		"Open backup settings", pathBackup},
-	{CodeUpdateCheckFailed, LevelWarning, AreaUpdates,
-		"Could not check for updates",
-		"Mediarium couldn't check for a new version.",
-		"It tries again daily. Check the server can reach the internet.",
-		"Open System settings", pathSystem},
-	{CodeUpdateInstallFailed, LevelError, AreaUpdates,
-		"The update could not be installed",
-		"The new version was downloaded but couldn't be put in place. The old version keeps running.",
-		"Try again from Settings > System, or update the container image.",
-		"Open System settings", pathSystem},
 	{CodeAppRestartedItself, LevelWarning, AreaSystem,
 		"Mediarium restarted itself",
 		"It stopped answering for a few minutes.",

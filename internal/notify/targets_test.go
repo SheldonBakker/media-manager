@@ -238,6 +238,15 @@ func TestEventNormalizationAndMapping(t *testing.T) {
 	if _, err := notify.NormalizeEvents([]string{"lunch"}); err == nil {
 		t.Fatal("unknown events must be rejected")
 	}
+	// "update" (a new version is out) is no longer offered; targets saved
+	// with it must still save, without it.
+	got, err = notify.NormalizeEvents([]string{"update", "failed"})
+	if err != nil || strings.Join(got, ",") != "failed" {
+		t.Fatalf("a retired kind must be dropped quietly, got %v, %v", got, err)
+	}
+	if _, err := notify.NormalizeEvents([]string{"update"}); err == nil {
+		t.Fatal("a list with only a retired kind must be refused, not widened to every event")
+	}
 	// Empty means every event except the three that must be asked for (a
 	// download client going down or coming back, a TRaSH Guides sync).
 	if def, _ := notify.NormalizeEvents(nil); len(def) != len(notify.EventKinds())-3 {

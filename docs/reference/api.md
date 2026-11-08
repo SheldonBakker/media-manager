@@ -753,6 +753,7 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | GET | `/api/system/backups/{name}` | admin | sends one saved backup. |
 | GET | `/api/system/cleanup` | admin | lists what clean-up would remove from the downloads working folder right now (never the library), with the space it frees, when it last ran and whether it ru... |
 | POST | `/api/system/cleanup` | admin | runs the clean-up now and reports what it removed and how much history it pruned. |
+| GET | `/api/system/control` | admin | reports what the Restart card shows (administrators only). |
 | GET | `/api/system/diagnostics` | admin | returns what a person needs to send with a support request: version and platform, how the database is doing, the setup warnings and the recent log. |
 | GET | `/api/system/info` | admin | returns facts the backup page shows. |
 | GET | `/api/system/mcp` | admin |  |
@@ -761,7 +762,7 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | DELETE | `/api/system/mcp/apps/{id}` | admin |  |
 | POST | `/api/system/mcp/clients` | admin | makes a client by hand, for programs that ask for a client ID and secret (Home Assistant's application credentials). |
 | DELETE | `/api/system/mcp/clients/{id}` | admin |  |
-| GET | `/api/system/options` | admin | reports the switches for checking for updates, installing them, pushed updates and restarting when stuck. |
+| GET | `/api/system/options` | admin | reports the switch for restarting when stuck. |
 | PUT | `/api/system/options` | admin | changes the switches named in the body and leaves the rest. |
 | GET | `/api/system/problems` | admin | lists the problems that match the filters, with the counts for the cards at the top of the page. |
 | PUT | `/api/system/problems/debug` | admin | switches detailed logging on or off. |
@@ -772,13 +773,6 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | POST | `/api/system/restore` | admin | takes a backup zip (form field "file", at most 1 GB), or a cloud copy locked with a passphrase (form field "passphrase"), checks it strictly, stages it in <c... |
 | POST | `/api/system/shutdown` | admin | stops Mediarium for good. |
 | GET | `/api/system/stats` | admin | reports how busy the server is (CPU, memory, load, uptime, and Mediarium's own CPU as app.cpuPercent), the free space for each folder Mediarium uses, and the... |
-| DELETE | `/api/system/update` | admin | removes the installed update, so the next start uses the program inside the container image. |
-| GET | `/api/system/update` | admin | reports the update state (administrators only). |
-| POST | `/api/system/update` | admin | takes the raw program file as the request body, and its SHA-256 in the X-Update-SHA256 header, checks both, and restarts into it. |
-| POST | `/api/system/update/check` | admin | asks GitHub right now (the Check now button) and returns the result. |
-| GET | `/api/system/update/install` | admin | reports how "Update now" is going. |
-| POST | `/api/system/update/install` | admin | starts "Update now". |
-| GET | `/api/system/update/latest` | admin | returns what is known about the newest release. |
 
 ## tags
 
@@ -824,14 +818,6 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | Method | Path | Access | What it does |
 |---|---|---|---|
 | GET | `/api/usage` | admin | reports, per third-party service, how much Mediarium used it in the last 24 hours and whether it refused because a limit was reached. |
-
-## usage-stats
-
-| Method | Path | Access | What it does |
-|---|---|---|---|
-| GET | `/api/usage-stats` | admin |  |
-| PUT | `/api/usage-stats` | admin |  |
-| POST | `/api/usage-stats/reset-id` | admin |  |
 
 ## usenet-client
 
@@ -901,4 +887,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-556 routes.
+547 routes.
