@@ -225,7 +225,7 @@ If something goes wrong the sign-in page tells you in a sentence, for example "T
 
 ### Directory sign-in (LDAP and Active Directory)
 
-People use the normal sign-in form with their directory user name and password. Mediarium looks the person up with a service account, then asks the directory to check the password by signing in as that person. The password is used once and dropped.
+People use the normal sign-in form with their directory user name and password. Mediarium looks the person up with a service account, then asks the directory to check the password by signing in as that person. The password is used once and dropped. The connection signed in as the service account is kept for up to 12 hours and used for the next look-ups, so a directory that is slow to sign in (Authentik's LDAP outpost runs a whole login for each one) only pays that once; settings that change, or a connection the directory drops, start a new one.
 
 Open **Settings > Account & Access > Ways to sign in > Directory sign-in** and fill in:
 
@@ -277,7 +277,7 @@ With an account service that makes directory accounts this way (it puts the pers
 - The form asks for first name, last name, email address, phone number (international format, for example `+27821234567`) and a password of 12 to 128 characters. **Send code** has the account service email a 6-digit confirmation code (`POST /api/auth/signup/code`, passed on to its `POST /api/v1/auth/email-codes`), and the account is only made with that code (`POST /api/auth/signup`, passed on to its `POST /api/v1/auth/register`). The code expires after 15 minutes; **Resend code** works once a minute. Mediarium talks to the service from the server; the browser never does, and the password and code are never stored or logged here.
 - One address can ask for 10 codes an hour. The account service also limits how often a code can go to the same email address, and says so.
 - Anyone who can open the sign-in page can sign up, and every new account is a **Basic user**. One address can make 5 sign-up attempts an hour. Attempts whose details the service refuses, or that it can't answer, don't count; trying an email address that already has an account does.
-- When the account here is ready, Mediarium signs the person in through the directory with the password they chose, the same way the sign-in form does, so directory sign-in must be on. Otherwise the answer says the account is still being set up and gives the new user name; they sign in with it a few minutes later.
+- When the account here is ready, Mediarium signs the person in straight away. The account service has just set their password in the directory, so Mediarium doesn't ask the directory to check it again; it signs them in to the account linked to the directory id the service answers with, and only when that account has the user name the service gave. Directory sign-in must be on, as for any later sign-in. Otherwise the answer says the account is still being set up and gives the new user name; they sign in with it a few minutes later.
 - The service's reasons for refusing the details (a password that is too short, a phone number in the wrong format) are shown as it gives them. An email address that already has an account is refused with `409`.
 
 #### Forgotten passwords of accounts that signed up

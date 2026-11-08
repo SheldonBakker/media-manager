@@ -28,6 +28,9 @@ type fakeAccountService struct {
 	mediarium  string // the Mediarium under test, for provisioning
 	// pending makes a sign-up answer 202 before the Mediarium account exists.
 	pending bool
+	// subject, when set, is the directory id the sign-up answers with instead
+	// of the one the account was made with.
+	subject func(username string) string
 }
 
 func (f *fakeAccountService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -126,10 +129,14 @@ func (f *fakeAccountService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.provision(username, in.FirstName+" "+in.LastName, in.Email)
 		status, ready = http.StatusCreated, true
 	}
+	subject := "uid-" + username
+	if f.subject != nil {
+		subject = f.subject(username)
+	}
 	reply(status, map[string]any{
 		"id": "0193", "email": in.Email, "firstName": in.FirstName, "lastName": in.LastName,
 		"provisioning": map[string]any{"username": username, "status": map[bool]string{true: "completed", false: "pending"}[ready],
-			"directoryReady": true, "mediaLibraryReady": ready, "mediaServerReady": ready},
+			"directoryReady": true, "mediaLibraryReady": ready, "mediaServerReady": ready, "directorySubject": subject},
 		"tokenType": "Bearer", "accessToken": "not-used-by-mediarium", "expiresIn": 3600,
 	})
 }
@@ -230,7 +237,13 @@ func TestSignUpMakesABasicAccountAndSignsIn(t *testing.T) {
 	e, _ := newSignUpEnv(t)
 	sendCode(e, signUpBody["email"])
 	c := e.client()
+	dials := e.dir.dialCount()
 	out := e.must(c, "POST", "/api/auth/signup", signUpBody, http.StatusOK)
+	// The account service has just set the password in the directory, so the
+	// new person is signed in to the account it made without asking again.
+	if n := e.dir.dialCount() - dials; n != 0 {
+		t.Errorf("signing up opened %d directory connections, want 0", n)
+	}
 	if out["username"] != "sam.signup" || out["role"] != "member" || out["source"] != "ldap" {
 		t.Fatalf("answer = %v", out["_raw"])
 	}
@@ -259,6 +272,25 @@ func TestSignUpStillBeingSetUpIsAcceptedWithoutSigningIn(t *testing.T) {
 	}
 	if user, _ := e.signedInAs(c); user != "" {
 		t.Fatalf("signed in as %q while the account is still being set up", user)
+	}
+}
+
+func TestSignUpSignsInOnlyTheAccountMadeForThatDirectoryID(t *testing.T) {
+	for name, subject := range map[string]string{"no directory id": "", "another directory id": "uid-sam"} {
+		t.Run(name, func(t *testing.T) {
+			e, f := newSignUpEnv(t)
+			f.provision("sam", "Sam Example", "sam@example.com") // sam's account here, linked to uid-sam
+			f.subject = func(string) string { return subject }
+			sendCode(e, signUpBody["email"])
+			c := e.client()
+			out := e.must(c, "POST", "/api/auth/signup", signUpBody, http.StatusAccepted)
+			if out["pending"] != true || out["username"] != "sam.signup" {
+				t.Fatalf("answer = %v", out["_raw"])
+			}
+			if user, _ := e.signedInAs(c); user != "" {
+				t.Fatalf("signed in as %q", user)
+			}
+		})
 	}
 }
 

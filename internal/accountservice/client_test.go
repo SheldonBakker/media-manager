@@ -38,13 +38,13 @@ func TestRegisterSendsThePersonAndReadsTheirAccount(t *testing.T) {
 				}
 			}
 			w.WriteHeader(status)
-			_, _ = w.Write([]byte(`{"email":"sam@example.com","provisioning":{"username":"sam.signup","status":"pending","mediaLibraryReady":true},"accessToken":"x"}`))
+			_, _ = w.Write([]byte(`{"email":"sam@example.com","provisioning":{"username":"sam.signup","status":"pending","mediaLibraryReady":true,"directorySubject":"uid-42"},"accessToken":"x"}`))
 		})
 		got, err := c.Register(context.Background(), person)
 		if err != nil {
 			t.Fatalf("status %d: %v", status, err)
 		}
-		if got != (Account{Username: "sam.signup", MediaLibraryReady: true}) {
+		if got != (Account{Username: "sam.signup", MediaLibraryReady: true, DirectorySubject: "uid-42"}) {
 			t.Fatalf("status %d: account = %+v", status, got)
 		}
 	}

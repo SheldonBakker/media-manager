@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -16,11 +15,11 @@ import (
 // Signing up: a person makes their own basic account from the sign-in page.
 // They first ask for a confirmation code, which the account service emails to
 // them, and sign up with it. The account service (MEDIARIUM_ACCOUNT_SERVICE_URL)
-// signs them up, which puts
-// them in the directory and makes their account here through the provisioning
-// route. Mediarium then signs them in through the directory with the password
-// they just chose, exactly as the sign-in form would. Without the setting the
-// route doesn't exist.
+// signs them up, which puts them in the directory with the password they chose
+// and makes their account here through the provisioning route. Mediarium then
+// signs them in to that account, found by the directory id the service answers
+// with, without asking the directory to check the password it has just set.
+// Without the setting the route doesn't exist.
 
 const (
 	// signUpsPerAddress is how many accounts one address may make per
@@ -173,7 +172,7 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("auth: account made by signing up", "user", account.Username, "ip", ip)
-	user := s.signInAfterSignUp(r.Context(), account, req.Password)
+	user := s.signInAfterSignUp(account)
 	if user == nil {
 		writeJSON(w, http.StatusAccepted, signUpPending{Pending: true, Username: account.Username})
 		return
@@ -181,20 +180,20 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 	s.finishSignInVia(w, r, user, auth.MethodLDAP, nil)
 }
 
-// signInAfterSignUp signs the new person in through the directory with the
-// password they just chose. It returns nil while their account here isn't
-// ready, or while directory sign-in is off.
-func (s *Server) signInAfterSignUp(ctx context.Context, account accountservice.Account, password string) *auth.User {
-	if account.Username == "" || !account.MediaLibraryReady {
+// signInAfterSignUp is the account the service has just made for the new
+// person: the one linked to the directory id it answered with, under the user
+// name it gave. It is nil while that account isn't ready, or while directory
+// sign-in is off (the account couldn't sign in either way).
+func (s *Server) signInAfterSignUp(account accountservice.Account) *auth.User {
+	if account.Username == "" || account.DirectorySubject == "" || !account.MediaLibraryReady {
 		return nil
 	}
-	cfg, on := s.ldapActive()
-	if !on {
+	if _, on := s.ldapActive(); !on {
 		return nil
 	}
-	user, err := s.directorySignIn(ctx, cfg, account.Username, password)
-	if err != nil {
-		slog.Warn("auth: a new account could not sign in yet", "user", account.Username, "err", err)
+	user, err := s.Auth.UserByIdentity(auth.SourceLDAP, account.DirectorySubject)
+	if err != nil || user.Disabled || user.Username != account.Username {
+		slog.Warn("auth: a new account could not be signed in yet", "user", account.Username, "err", err)
 		return nil
 	}
 	return user
