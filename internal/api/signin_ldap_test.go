@@ -58,7 +58,18 @@ type fakeConn struct{ f *fakeLDAP }
 
 func (c *fakeConn) StartTLS(*tls.Config) error { return nil }
 func (c *fakeConn) Close() error               { return nil }
+
+// errDown is what a connection that was open before the directory went down
+// gets from every request.
+var errDown = ldap.NewError(ldap.ErrorNetwork, errors.New("ldap: connection closed"))
+
 func (c *fakeConn) Bind(dn, pw string) error {
+	c.f.mu.Lock()
+	down := c.f.down
+	c.f.mu.Unlock()
+	if down {
+		return errDown
+	}
 	if pw == "" {
 		return ldap.NewError(ldap.LDAPResultInvalidCredentials, errors.New("empty"))
 	}
@@ -94,6 +105,9 @@ func (c *fakeConn) Search(req *ldap.SearchRequest) (*ldap.SearchResult, error) {
 	f := c.f
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.down {
+		return nil, errDown
+	}
 	f.filters = append(f.filters, req.Filter)
 	if req.BaseDN == f.groupsDN {
 		// (&(objectClass=groupOfNames)(cn=mediarium-admins)(member=<dn>))
