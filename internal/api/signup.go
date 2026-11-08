@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -17,9 +18,9 @@ import (
 // them, and sign up with it. The account service (MEDIARIUM_ACCOUNT_SERVICE_URL)
 // signs them up, which puts them in the directory with the password they chose
 // and makes their account here through the provisioning route. Mediarium then
-// signs them in to that account, found by the directory id the service answers
-// with, without asking the directory to check the password it has just set.
-// Without the setting the route doesn't exist.
+// signs them in to that account (see signInAfterSignUp) without asking the
+// directory to check the password it has just set. Without the setting the
+// route doesn't exist.
 
 const (
 	// signUpsPerAddress is how many accounts one address may make per
@@ -172,7 +173,7 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("auth: account made by signing up", "user", account.Username, "ip", ip)
-	user := s.signInAfterSignUp(account)
+	user := s.signInAfterSignUp(r.Context(), account)
 	if user == nil {
 		writeJSON(w, http.StatusAccepted, signUpPending{Pending: true, Username: account.Username})
 		return
@@ -181,20 +182,50 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 // signInAfterSignUp is the account the service has just made for the new
-// person: the one linked to the directory id it answered with, under the user
-// name it gave. It is nil while that account isn't ready, or while directory
-// sign-in is off (the account couldn't sign in either way).
-func (s *Server) signInAfterSignUp(account accountservice.Account) *auth.User {
+// person, or nil while it can't be signed in yet. The directory is still asked
+// who the person is (its user filter and groups apply, as for any directory
+// sign-in), but not to check the password the service has just set. So that
+// an answer naming somebody else can't open their account, the directory's
+// entry must be the one the service named, and the account here must never
+// have been signed in. Directory sign-in must be on: the account couldn't sign
+// in otherwise.
+func (s *Server) signInAfterSignUp(ctx context.Context, account accountservice.Account) *auth.User {
 	if account.Username == "" || account.DirectorySubject == "" || !account.MediaLibraryReady {
 		return nil
 	}
-	if _, on := s.ldapActive(); !on {
+	cfg, on := s.ldapActive()
+	if !on {
 		return nil
 	}
-	user, err := s.Auth.UserByIdentity(auth.SourceLDAP, account.DirectorySubject)
-	if err != nil || user.Disabled || user.Username != account.Username {
+	entry, err := s.sso().ldap.LookUp(ctx, cfg, account.Username)
+	if err != nil || entry == nil {
+		slog.Warn("auth: a new account isn't in the directory yet", "user", account.Username, "err", err)
+		return nil
+	}
+	if entry.ID != account.DirectorySubject || entry.Username != account.Username {
+		slog.Warn("auth: the account service named another directory entry", "user", account.Username,
+			"subject", account.DirectorySubject)
+		return nil
+	}
+	if !s.neverSignedIn(entry.ID) {
+		slog.Warn("auth: the account service named an account that is already in use", "user", account.Username)
+		return nil
+	}
+	user, err := s.accountForDirectory(cfg, entry)
+	if err != nil {
 		slog.Warn("auth: a new account could not be signed in yet", "user", account.Username, "err", err)
 		return nil
 	}
 	return user
+}
+
+// neverSignedIn says whether the directory account with this id exists here
+// and has never been signed in.
+func (s *Server) neverSignedIn(subject string) bool {
+	u, err := s.Auth.UserByIdentity(auth.SourceLDAP, subject)
+	if err != nil {
+		return false
+	}
+	a, err := s.Auth.GetAccount(u.ID)
+	return err == nil && a.LastLoginAt == nil
 }

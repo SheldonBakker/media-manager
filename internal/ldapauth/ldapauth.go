@@ -550,7 +550,7 @@ func (c *Client) Authenticate(ctx context.Context, cfg Config, username, passwor
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	entry, err := c.lookUp(cfg, username)
+	entry, err := c.searchAsService(cfg, username)
 	if err != nil {
 		return nil, err
 	}
@@ -574,10 +574,11 @@ func (c *Client) Authenticate(ctx context.Context, cfg Config, username, passwor
 	return entry, nil
 }
 
-// lookUp finds the person as the service account, on the kept connection when
-// there is one. When the directory has dropped the kept connection, or no
-// longer honours its bind, the search is tried once more on a new one.
-func (c *Client) lookUp(cfg Config, username string) (*Entry, error) {
+// searchAsService finds the person as the service account, on the kept
+// connection when there is one. When the directory has dropped the kept
+// connection, or no longer honours its bind, the search is tried once more on
+// a new one.
+func (c *Client) searchAsService(cfg Config, username string) (*Entry, error) {
 	if kept := c.takeKept(cfg); kept != nil {
 		entry, err := c.find(kept.conn, cfg, username)
 		if !errors.Is(err, ErrUnavailable) {
@@ -598,6 +599,31 @@ func (c *Client) lookUp(cfg Config, username string) (*Entry, error) {
 	}
 	c.keep(&serviceConn{conn: conn, setup: setupOf(cfg), boundAt: boundAt})
 	return entry, err
+}
+
+// LookUp finds the person without checking a password, for someone another
+// service has just vouched for. It is nil when nobody matches.
+func (c *Client) LookUp(ctx context.Context, cfg Config, username string) (*Entry, error) {
+	cfg = cfg.Defaults()
+	if !validInput(username, "", false) {
+		return nil, nil
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return c.searchAsService(cfg, username)
+}
+
+// Reset closes the kept service connection, so the next sign-in starts with
+// the setup as it is now.
+func (c *Client) Reset() {
+	c.mu.Lock()
+	kept := c.kept
+	c.kept = nil
+	c.mu.Unlock()
+	if kept != nil {
+		kept.conn.Close()
+	}
 }
 
 // Probe connects and binds as the service account, nothing more. It is what

@@ -227,6 +227,44 @@ func TestChangedSetupDoesNotReuseTheConnection(t *testing.T) {
 	}
 }
 
+func TestLookUpChecksNoPassword(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	binds := len(f.binds)
+	e, err := c.LookUp(context.Background(), baseConfig(), "sam")
+	if err != nil || e == nil || e.ID != "1111-2222" || e.Username != "sam" {
+		t.Fatalf("entry = %+v, err = %v", e, err)
+	}
+	if len(f.binds) != binds || f.searchedAs[len(f.searchedAs)-1] != searchDN {
+		t.Errorf("looking up bound %d more times; last search ran as %q", len(f.binds)-binds, f.searchedAs[len(f.searchedAs)-1])
+	}
+	if e, err := c.LookUp(context.Background(), baseConfig(), "nobody"); e != nil || err != nil {
+		t.Errorf("unknown person: %+v, %v", e, err)
+	}
+}
+
+func TestResetClosesTheKeptConnection(t *testing.T) {
+	f := samDirectory("(&(objectClass=person)(uid=sam))")
+	c := f.client()
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	closed := f.closed
+	c.Reset()
+	if f.closed != closed+1 {
+		t.Fatalf("Reset closed %d connections, want 1", f.closed-closed)
+	}
+	if _, err := c.Authenticate(context.Background(), baseConfig(), "sam", "right-password"); err != nil {
+		t.Fatal(err)
+	}
+	if f.serviceBinds() != 2 {
+		t.Errorf("service binds = %d, want 2", f.serviceBinds())
+	}
+}
+
 func TestSignInFailures(t *testing.T) {
 	cases := []struct {
 		name     string
