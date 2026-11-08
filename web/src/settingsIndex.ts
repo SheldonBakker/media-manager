@@ -48,7 +48,7 @@ const PAGE_WORDS: Record<string, string> = {
   notifications: 'discord telegram email webhook alerts push ntfy gotify',
   'other-apps': 'overseerr jellyseerr homepage nzb360 lunasea ruddarr radarr sonarr api',
   addons: 'links apps sidebar',
-  profile: 'name email password api key avatar',
+  profile: 'password api key',
   security: 'passkey sessions devices api keys',
   services: 'plex listenbrainz kobo e-reader hardcover',
   accounts: 'users people roles admin member viewer invite',
@@ -151,7 +151,6 @@ function cardSpecs(): Spec[] {
     { to: 'other-apps', label: t('The API key'), words: 'api key token integration' },
     { to: 'other-apps', label: t('Let AI assistants connect (MCP)'), words: 'mcp ai assistant chat voice home assistant llm' },
     // Your profile
-    { to: 'profile', label: t('Your details'), words: 'name email avatar picture' },
     { to: 'profile', label: t('Change password'), words: 'password reset' },
     { to: 'profile', label: t('API keys'), words: 'api key token integration x-api-key' },
     { to: 'profile', label: t('Messages about your requests'), words: 'request notifications email' },

@@ -28,70 +28,6 @@ import { locale, plural, t, tx } from '../i18n'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
-function ProfileForm() {
-  const { user, setUser } = useAuth()
-  const toast = useToast()
-  const [name, setName] = useState(user?.name && user.name !== user.username ? user.name : '')
-  const [email, setEmail] = useState(user?.email ?? '')
-  const [username, setUsername] = useState(user?.username ?? '')
-  const [busy, setBusy] = useState(false)
-  // An older username that breaks today's rules can stay as it is; the format
-  // is only checked when it is changed.
-  const v = useValidation({
-    name: check.maxLength(name, 100, t('Your name')),
-    username: check.firstError(
-      check.required(username, t('Enter the username you sign in with.')),
-      username.trim() !== user?.username && check.username(username),
-    ),
-    email: check.email(email),
-  })
-
-  async function save() {
-    if (!v.attempt()) return
-    setBusy(true)
-    try {
-      const updated = await api.updateAccount({ username: username.trim(), name: name.trim(), email: email.trim() })
-      setUser({ ...user, ...updated })
-      toast.success(t('Profile saved.'))
-    } catch (e) {
-      toast.error(errorText(e))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <fieldset className="group">
-      <legend>
-        <Icon name="user" size={14} /> {t('Your details')}
-      </legend>
-      <div className="form-cols">
-        <label>
-          {t('Name')} <small style={{ color: 'var(--text-dim)' }}>{t('(shown in your greeting)')}</small>
-          <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder={t('Leave empty to use your username')} {...v.bind('name', name, setName)} />
-          <FieldError v={v} name="name" />
-        </label>
-        <label>
-          {t('Username')} <small style={{ color: 'var(--text-dim)' }}>{t('(what you sign in with)')}</small>
-          <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" {...v.bind('username', username, setUsername)} />
-          <FieldError v={v} name="username" />
-        </label>
-        <label>
-          {t('Email')} <small style={{ color: 'var(--text-dim)' }}>{t('(used for email notifications)')}</small>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" {...v.bind('email', email, setEmail)} />
-          <FieldError v={v} name="email" />
-        </label>
-      </div>
-      <div style={{ marginTop: 14 }}>
-        <button className="primary" onClick={save} disabled={busy}>
-          {t('Save details')}
-        </button>
-        <FormProblem v={v} action="save" />
-      </div>
-    </fieldset>
-  )
-}
-
 function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -700,7 +636,7 @@ function Accounts() {
   )
 }
 
-// Settings > Account & Access > Your profile: your name, password and request messages.
+// Settings > Account & Access > Your profile: password and request messages.
 export default function Profile() {
   const { user } = useAuth()
   const location = useLocation()
@@ -718,15 +654,7 @@ export default function Profile() {
           {user && ` · ${roleName(admin ? 'admin' : viewer ? 'viewer' : 'member')}`}
         </span>
       </div>
-      <div className="half-cols profile-cols">
-        <ProfileForm />
-        {local && <PasswordForm />}
-      </div>
-      {!local && (
-        <p className="hint">
-          {t('You sign in through {where}, so there is no password to change here. Your name and email are updated each time you sign in.', { where: sourceName(user?.source) })}
-        </p>
-      )}
+      {local && <PasswordForm />}
       {!viewer && <RequestNoticesCard />}
     </div>
   )
