@@ -272,12 +272,10 @@ func (s *Server) metricsFolders() []metricsFolder {
 func metricsBearer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-API-Key") == "" {
-			if auth := r.Header.Get("Authorization"); len(auth) > 7 && strings.EqualFold(auth[:7], "bearer ") {
-				if key := strings.TrimSpace(auth[7:]); key != "" {
-					r2 := r.Clone(r.Context())
-					r2.Header.Set("X-API-Key", key)
-					r = r2
-				}
+			if key := bearerToken(r); key != "" {
+				r2 := r.Clone(r.Context())
+				r2.Header.Set("X-API-Key", key)
+				r = r2
 			}
 		}
 		next.ServeHTTP(w, r)

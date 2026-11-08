@@ -291,6 +291,7 @@ Most settings live under **Settings**. Besides the folders, `PUID`, `PGID` and `
 | `MEDIARIUM_PAUSE_AUTOMATION` | Set to `1` to start in **safe mode**: nothing searches, downloads, refreshes or checks connections by itself. Downloads waiting in line come back paused. You can still search and download by hand, and the dashboard says "Safe mode is on". Remove it to go back to normal. See [Troubleshooting](#troubleshooting). |
 | `MEDIARIUM_DISABLE_SSO` | Set to `1` as a way back in if single sign-on or directory sign-in locked people out: both are switched off and password sign-in is on, whatever is saved in Settings. Remove it to use the saved settings again. See [accounts.md](./accounts.md#if-you-are-locked-out). |
 | `MEDIARIUM_SUPERVISED` | Set to `1` only for a program you run yourself when a service manager other than Docker, systemd or launchd starts it again after it exits. It lets the Restart buttons work. |
+| `MEDIARIUM_PROVISIONING_TOKEN` | A random value of at least 32 characters that lets another service, such as a sign-up page in front of your directory, make directory accounts before their first sign-in. Not set (the default), that is off. It is a secret: give it as `MEDIARIUM_PROVISIONING_TOKEN_FILE` to keep it out of the compose file. See [accounts.md](./accounts.md#making-directory-accounts-from-another-service). |
 
 The `-full` Docker image sets `BUNDLED_FLARESOLVERR` itself. Don't set it.
 
@@ -357,7 +358,7 @@ secrets:
 
 Mediarium reads the file when it starts and uses what is in it, without the spaces and line breaks around it. This works for every variable on the [environment reference](./reference/environment.md) that the app reads (not `PUID`, `PGID` and `TZ`, which the container script reads). If the plain variable is also set, it wins. A file that can't be read is mentioned in the container log (`docker logs mediarium`) and the variable is treated as not set. The log shows the file's path, never what is in it.
 
-Today none of those variables is a password or a key: indexers, Usenet logins, API keys, notification tokens and the like are set inside the app and stored encrypted in `/config`, which is why there is nothing secret to put in the compose file. `_FILE` is there so that, if you do keep any value out of the compose file, it works the way Docker expects.
+The only one of those variables that is a secret is `MEDIARIUM_PROVISIONING_TOKEN`, which most installs don't set; give it as a file like this. Indexers, Usenet logins, API keys, notification tokens and the like are set inside the app and stored encrypted in `/config`, which is why there is otherwise nothing secret to put in the compose file. `_FILE` is there so that, if you do keep any value out of the compose file, it works the way Docker expects.
 
 ## The setup wizard
 

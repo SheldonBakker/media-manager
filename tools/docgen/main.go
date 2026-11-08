@@ -84,8 +84,8 @@ type route struct {
 }
 
 // accessLabel names who may call a route, from the variable it is
-// registered on in internal/api/server.go: public (signed out), member (any
-// account) or admin.
+// registered on in internal/api: public (signed out), member (any account),
+// admin, or provisioning (another service with the provisioning token).
 func accessLabel(receiver string) string {
 	switch receiver {
 	case "public":
@@ -94,6 +94,8 @@ func accessLabel(receiver string) string {
 		return "any account"
 	case "admin":
 		return "admin"
+	case "provisioning":
+		return "provisioning token"
 	}
 	return "signed in"
 }
@@ -178,7 +180,7 @@ func apiDoc(root string) ([]byte, error) {
 
 	var b strings.Builder
 	b.WriteString("# HTTP API reference\n\n" + banner)
-	b.WriteString("Every route the server exposes. Routes marked **public** need no sign-in; all others need a session cookie or an `X-API-Key` header (see the Profile page). Routes marked **any account** work for members and administrators; routes marked **admin** answer members with 403 `{\"error\": \"Only an administrator can do this.\"}` (see [accounts.md](../accounts.md)). Responses are JSON; errors are `{\"error\": \"...\"}`.\n\n")
+	b.WriteString("Every route the server exposes. Routes marked **public** need no sign-in; all others need a session cookie or an `X-API-Key` header (see the Profile page). Routes marked **any account** work for members and administrators; routes marked **admin** answer members with 403 `{\"error\": \"Only an administrator can do this.\"}` (see [accounts.md](../accounts.md)). Routes marked **provisioning token** take only `Authorization: Bearer` with the value of `MEDIARIUM_PROVISIONING_TOKEN`, never a session or an API key, and answer 404 while it is not set (see [accounts.md](../accounts.md#making-directory-accounts-from-another-service)). Responses are JSON; errors are `{\"error\": \"...\"}`.\n\n")
 	last := ""
 	for _, r := range routes {
 		g := group(r.Path)

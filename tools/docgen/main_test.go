@@ -52,3 +52,29 @@ func (s *Server) handleAddMovie() {}
 		}
 	}
 }
+
+// Routes another service calls with the provisioning token say so, rather
+// than looking open to anyone.
+func TestAPIDocMarksProvisioningRoutes(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "internal", "api")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	src := `package api
+
+func (s *Server) provisioningRoutes(provisioning *http.ServeMux) {
+	provisioning.HandleFunc("POST /api/provisioning/things", s.handleThing)
+}
+`
+	if err := os.WriteFile(filepath.Join(dir, "provisioning.go"), []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	b, err := apiDoc(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "| POST | `/api/provisioning/things` | provisioning token |"; !strings.Contains(string(b), want) {
+		t.Errorf("missing %q in:\n%s", want, b)
+	}
+}

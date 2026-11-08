@@ -118,8 +118,8 @@ func (s *Server) allowMCP(userID int64) bool {
 // mcpKey is the API key a request carries: "Authorization: Bearer <key>" (what
 // MCP clients send) or "X-Api-Key" (what the rest of the API takes).
 func mcpKey(r *http.Request) string {
-	if h := strings.TrimSpace(r.Header.Get("Authorization")); len(h) > 7 && strings.EqualFold(h[:7], "bearer ") {
-		return strings.TrimSpace(h[7:])
+	if key := bearerToken(r); key != "" {
+		return key
 	}
 	return strings.TrimSpace(r.Header.Get("X-Api-Key"))
 }

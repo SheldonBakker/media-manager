@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode/utf8"
 )
 
 type Config struct {
@@ -68,7 +69,17 @@ type Config struct {
 	// launchd are recognised by themselves; MEDIARIUM_SUPERVISED=1 says so for
 	// any other service manager.
 	Supervised bool
+
+	// ProvisioningToken lets another service make directory accounts ahead of
+	// a person's first sign-in (MEDIARIUM_PROVISIONING_TOKEN). Empty means
+	// that is switched off; a token shorter than provisioningTokenMin is
+	// reported (see Problems) and leaves it off.
+	ProvisioningToken string
 }
+
+// provisioningTokenMin is the shortest provisioning token accepted, in
+// characters: anything shorter could be guessed.
+const provisioningTokenMin = 32
 
 func Load() Config {
 	fileMu.Lock()
@@ -93,6 +104,8 @@ func Load() Config {
 		DisableSSO: truthy(envStr("MEDIARIUM_DISABLE_SSO", "")),
 
 		Supervised: truthy(envStr("MEDIARIUM_SUPERVISED", "")),
+
+		ProvisioningToken: provisioningToken(envStr("MEDIARIUM_PROVISIONING_TOKEN", "")),
 	}
 	cfg.URLBase, cfg.urlBaseErr = NormalizeURLBase(envStr("URL_BASE", ""))
 	cfg.DownloadsIncomplete = filepath.Join(cfg.DownloadsDir, "incomplete")
@@ -183,6 +196,17 @@ func envInt(key string, def int) int {
 		}
 	}
 	return def
+}
+
+// provisioningToken is the token without the spaces around it, or "" when it
+// is too short to use (noted, without the token itself; see Problems).
+func provisioningToken(v string) string {
+	v = strings.TrimSpace(v)
+	if v != "" && utf8.RuneCountInString(v) < provisioningTokenMin {
+		noteProblem("MEDIARIUM_PROVISIONING_TOKEN is shorter than %d characters, so making accounts from another service stays off.", provisioningTokenMin)
+		return ""
+	}
+	return v
 }
 
 // truthy is true for 1, true, yes or on (any case); anything else is false.

@@ -264,6 +264,15 @@ func requireSession(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
+// bearerToken is the token in an "Authorization: Bearer <token>" header, or ""
+// when there is none.
+func bearerToken(r *http.Request) string {
+	if h := strings.TrimSpace(r.Header.Get("Authorization")); len(h) > 7 && strings.EqualFold(h[:7], "bearer ") {
+		return strings.TrimSpace(h[7:])
+	}
+	return ""
+}
+
 // isAdminRequest reports whether the signed-in caller is an administrator,
 // for member routes that show members a trimmed view (health, dashboard).
 func isAdminRequest(r *http.Request) bool {
