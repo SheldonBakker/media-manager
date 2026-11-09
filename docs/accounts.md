@@ -23,7 +23,8 @@ Accounts that existed before roles were added became admins, so nobody lost acce
 | Pause, resume or stop a download (also Pause all and Resume all) | No | Yes |
 | Get subtitles for titles in the library (when subtitles are switched on) | Yes | Yes |
 | See a title's files, play a downloaded video and preview its pictures and text files (nfo, subtitles) in the browser | Yes (file names relative to the title's folder, never full server paths) | Yes |
-| Their own profile, password and API keys | Yes | Yes |
+| Their own profile and password | Yes | Yes |
+| API keys, and Linked services (the Plex watchlist, ListenBrainz and an e-reader) | No | Yes |
 | Remove a title from the library, or delete its files | No | Yes |
 | Select several titles in the Library and change them together (monitor, better versions, quality profile, download source, search now, remove) | No | Yes |
 | Change a title's quality profile or downloaders after it was added | No | Yes |
@@ -34,7 +35,7 @@ Accounts that existed before roles were added became admins, so nobody lost acce
 | Dismiss subtitles, run the subtitle sweep, see the OpenSubtitles quota | No | Yes |
 | Manage accounts | No | Yes |
 
-When a basic user tries something only an admin can do, Mediarium says "Only an administrator can do this." An API key has the rights of the account that made it. A few things need you signed in on the web page, even with an admin key: making API keys, adding or changing accounts, and downloading or restoring a backup. That way a leaked key can't open a second way back in.
+When a basic user tries something only an admin can do, Mediarium says "Only an administrator can do this." Only admins have API keys: a key a basic account still has (made before keys were for admins only, or while it was an admin) no longer signs in. The same goes for its e-reader password and Kobo address, and its Plex watchlist adds nothing. A few things need you signed in on the web page, even with an admin key: making API keys, adding or changing accounts, and downloading or restoring a backup. That way a leaked key can't open a second way back in.
 
 The [HTTP API reference](./reference/api.md) marks every route as **public**, **any account** or **admin**.
 
@@ -79,7 +80,7 @@ The card on someone's profile has a switch, **Send me these messages**, for peop
 
 ## What a basic user sees
 
-- Under **Settings** they have **General** (app language and light or dark), their own **Your profile**, **Security** (passkeys, two-step sign-in, API keys), **Linked services** (not for view-only accounts) and Statistics. Any other settings address lands on General. The profile menu in the top-right corner has **Your profile** and **App language**.
+- Under **Settings** they have **General** (app language and light or dark), their own **Your profile**, **Security** (passkeys, two-step sign-in) and Statistics. API keys and **Linked services** are for admins only. Any other settings address lands on General. The profile menu in the top-right corner has **Your profile** and **App language**.
 - The **Library** has no Select, Import existing, Remove or quality-profile controls.
 - **Activity** shows the queue and history (file names, but not the folders on the server), with a Retry button on failed and stopped downloads. There's no Pause, Resume, Stop, Remove, Clear finished, Blocklist or conflict button, and no Blocklist tab. A download waiting for a decision about an existing file is listed as waiting for an administrator.
 - The **Dashboard** leaves out setup warnings, folder locations and links into settings.
@@ -90,10 +91,10 @@ The card on someone's profile has a switch, **Send me these messages**, for peop
 A viewer can open the library, Discover, the calendar and Activity, and play what is already there, but nothing they do changes anything. It is for someone you want to show the library to, or for a screen on the wall.
 
 - A viewer can't add or request titles, search for releases, retry or pause downloads, change monitoring or tags, or get subtitles. The buttons are hidden, and the server refuses the calls anyway ("This account can only look, not change anything.").
-- A viewer doesn't see the buttons for things that change something: asking for a 4K copy, reporting a problem, making a playlist or putting music on one, marking a title as not interested, and the ListenBrainz, e-reader and request message cards on the profile page. They can still open and play the playlists other people shared.
+- A viewer doesn't see the buttons for things that change something: asking for a 4K copy, reporting a problem, making a playlist or putting music on one, marking a title as not interested, and the request message card on the profile page. They can still open and play the playlists other people shared.
 - A viewer can't see settings, other accounts, API keys, the secret calendar address or the Plex watchlist connection, and can't make API keys.
 - A viewer can still change their own name, email and password, set up two-step sign-in and passkeys, and keep their place in a book.
-- This holds for every route, in one place: the route table refuses any call that changes something before the handler runs. A test walks every route of the server to prove it. An API key made by a viewer follows the role, so it can't change anything either.
+- This holds for every route, in one place: the route table refuses any call that changes something before the handler runs. A test walks every route of the server to prove it. An API key made while the account was an admin stops working once it is a viewer.
 
 Pick **Viewer** when you add an account, or change the role of an existing one under **Edit**. Single sign-on and directory sign-in can make new accounts viewers too (see [Ways to sign in](#ways-to-sign-in)).
 
@@ -103,7 +104,7 @@ When you make an API key under **Settings > Account & Access > Security > API ke
 
 ## The account list
 
-Everyone has their own pages under **Settings > Account & Access** (the profile menu has a shortcut): **Your profile** (name, email and Change password side by side), **Security** (passkeys, two-step sign-in and your API keys) and **Linked services** (the Plex watchlist, ListenBrainz and your e-reader). The language of the app is under **Settings > General**. Admins also have **Settings > Account & Access > All accounts** (the **Accounts** list, then **Add an account**), **Requests and reports** and **Ways to sign in** (including sign-in through your reverse proxy). Each account has a card with its name and username, an **Admin** or **Basic user** badge, its email address and when it last signed in ("Signed in 3 days ago", "Never signed in"). Your own card is marked **You**.
+Everyone has their own pages under **Settings > Account & Access** (the profile menu has a shortcut): **Your profile** (name, email and Change password side by side) and **Security** (passkeys and two-step sign-in, and for admins their API keys). The language of the app is under **Settings > General**. Admins also have **Linked services** (the Plex watchlist, ListenBrainz and an e-reader), **Settings > Account & Access > All accounts** (the **Accounts** list, then **Add an account**), **Requests and reports** and **Ways to sign in** (including sign-in through your reverse proxy). Each account has a card with its name and username, an **Admin** or **Basic user** badge, its email address and when it last signed in ("Signed in 3 days ago", "Never signed in"). Your own card is marked **You**.
 
 **Revoke** stops an API key working straight away. A revoked key stays in the list, so you can see it was there. Press **Delete** next to a revoked key to take it off the list for good. Scripts: `DELETE /api/auth/api-keys/{id}` revokes, and `DELETE /api/auth/api-keys/{id}?remove=true` deletes a key that is already revoked (an active key answers 409).
 

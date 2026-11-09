@@ -156,7 +156,7 @@ func TestMemberIsRefusedEveryAdminRouteAndAllowedEveryMemberRoute(t *testing.T) 
 	// The everyday pages load for a member.
 	for _, path := range []string{
 		"/api/auth/me", "/api/movies", "/api/series", "/api/queue", "/api/activity", "/api/calendar",
-		"/api/wanted", "/api/dashboard", "/api/health", "/api/quality-profiles", "/api/auth/api-keys",
+		"/api/wanted", "/api/dashboard", "/api/health", "/api/quality-profiles",
 		"/api/subtitles/wanted", "/api/discover/genres?kind=movie",
 	} {
 		if status, body := doStatus(t, member, http.MethodGet, base+path); status != http.StatusOK {

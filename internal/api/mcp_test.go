@@ -17,7 +17,8 @@ import (
 )
 
 // mcpEnv is a server with the MCP address switched on, an administrator's key,
-// a read-only key and a member's key.
+// a read-only key and a key a member still has from before keys were for
+// administrators only.
 type mcpEnv struct {
 	server   *api.Server
 	base     string
@@ -29,7 +30,7 @@ type mcpEnv struct {
 
 func newMCPEnv(t *testing.T) *mcpEnv {
 	t.Helper()
-	server, base, admin, member, _ := familyServer(t)
+	server, base, admin, _, memberID := familyServer(t)
 	server.TestSetTMDBBaseURL("fixture-key", arrTMDB(t).URL)
 	mk := func(c *http.Client, body map[string]any) string {
 		return postJSON[map[string]any](t, c, base+"/api/auth/api-keys", body, http.StatusCreated)["key"].(string)
@@ -37,8 +38,12 @@ func newMCPEnv(t *testing.T) *mcpEnv {
 	e := &mcpEnv{server: server, base: base, admin: admin,
 		adminKey: mk(admin, map[string]any{"name": "assistant"}),
 		roKey:    mk(admin, map[string]any{"name": "looker", "readOnly": true}),
-		member:   mk(member, map[string]any{"name": "mine"}),
 	}
+	key, err := server.Auth.CreateAPIKey(int64(memberID), "mine")
+	if err != nil {
+		t.Fatal(err)
+	}
+	e.member = key
 	return e
 }
 
@@ -127,7 +132,7 @@ func TestMCPSwitchAndSignIn(t *testing.T) {
 	}{
 		{"no key", "", nil, http.StatusUnauthorized},
 		{"wrong key", "not-a-key", nil, http.StatusUnauthorized},
-		{"member key", e.member, nil, http.StatusForbidden},
+		{"member key", e.member, nil, http.StatusUnauthorized},
 		{"admin key as Bearer", e.adminKey, nil, http.StatusOK},
 		{"admin key as X-Api-Key", "", []string{"X-Api-Key", e.adminKey}, http.StatusOK},
 		{"read-only key", e.roKey, nil, http.StatusOK},

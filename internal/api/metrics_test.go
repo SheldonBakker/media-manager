@@ -80,9 +80,13 @@ func TestMetricsAreProtectedAndAcceptBearerKeys(t *testing.T) {
 }
 
 func TestMetricsMembersAreRefused(t *testing.T) {
-	_, base, _, member, _ := familyServer(t)
-	key := postJSON[map[string]any](t, member, base+"/api/auth/api-keys", map[string]any{"name": "mine"}, http.StatusCreated)["key"].(string)
-	if code, _, _ := metricsGet(t, base+"/metrics", map[string]string{"Authorization": "Bearer " + key}); code != http.StatusForbidden {
+	server, base, _, _, memberID := familyServer(t)
+	// A key a member still has from before keys were for administrators only.
+	key, err := server.Auth.CreateAPIKey(int64(memberID), "mine")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code, _, _ := metricsGet(t, base+"/metrics", map[string]string{"Authorization": "Bearer " + key}); code != http.StatusUnauthorized && code != http.StatusForbidden {
 		t.Fatalf("a member's key must not read the metrics, got %d", code)
 	}
 }

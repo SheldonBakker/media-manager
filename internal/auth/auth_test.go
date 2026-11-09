@@ -281,3 +281,26 @@ func TestUpdateProfile(t *testing.T) {
 		t.Fatalf("display name should fall back to the username, got %q", bare.DisplayName())
 	}
 }
+
+// API keys are for administrators only: a key a basic account still has (made
+// before that, or while it was an administrator) does not sign in.
+func TestOnlyAnAdministratorsAPIKeySignsIn(t *testing.T) {
+	svc := newTestService(t)
+	admin, err := svc.CreateAccountWithRole("ada", "long-enough-password", "Ada", "", "", auth.RoleAdmin)
+	if err != nil {
+		t.Fatalf("create admin: %v", err)
+	}
+	member, err := svc.CreateAccountWithRole("sam", "long-enough-password", "Sam", "", "", auth.RoleMember)
+	if err != nil {
+		t.Fatalf("create member: %v", err)
+	}
+	adminKey, _ := svc.CreateAPIKey(admin.ID, "script")
+	memberKey, _ := svc.CreateAPIKey(member.ID, "phone")
+
+	if u, err := svc.UserForAPIKey(adminKey); err != nil || u.ID != admin.ID {
+		t.Fatalf("an administrator's key: user %v, err %v", u, err)
+	}
+	if _, err := svc.UserForAPIKey(memberKey); err != auth.ErrSessionNotFound {
+		t.Fatalf("a basic account's key signed in: err %v", err)
+	}
+}
