@@ -9,18 +9,22 @@ import Icon from './Icon'
 import ProfileMenu from './ProfileMenu'
 import ThemeToggle from './ThemeToggle'
 import PageLoading from './PageLoading'
+import { useMenuDrawer } from './useMenuDrawer'
 
 // What a member sees while their access waits on a subscription: the brand,
 // the three Account & Access pages and a way to sign out. It leaves out
 // everything the rest of the app loads (downloads, search, the music player),
-// so nothing there asks the server for what this account may not open.
+// so nothing there asks the server for what this account may not open. On a
+// phone the menu is the same drawer as in the full app.
 export default function LockedShell() {
   const { user } = useAuth()
   const { pathname } = useLocation()
+  const { menuOpen, setMenuOpen, navRef, menuButton } = useMenuDrawer()
   const pages = settingsGroupsFor(false, false, subscriptionNav(user)).flatMap((g) => g.pages)
   return (
     <div className="app-shell" data-section="settings">
-      <nav id="main-menu" className="sidebar" aria-label={tc('menu', 'Main')}>
+      <div className={`sidebar-backdrop${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(false)} />
+      <nav id="main-menu" ref={navRef} className={`sidebar${menuOpen ? ' open' : ''}`} aria-label={tc('menu', 'Main')}>
         <div className="brand">
           <BrandMark />
           <span className="brand-text">
@@ -42,6 +46,9 @@ export default function LockedShell() {
       </nav>
       <div className="main-area">
         <header className="topbar">
+          <button ref={menuButton} className="menu-button" aria-controls="main-menu" onClick={() => setMenuOpen((o) => !o)} aria-label={t('Open menu')} aria-expanded={menuOpen}>
+            <Icon name="menu" size={20} />
+          </button>
           <p className="top-title">{t('Your account')}</p>
           <div className="top-actions">
             <span className="top-theme">

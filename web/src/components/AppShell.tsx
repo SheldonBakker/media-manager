@@ -1,3 +1,4 @@
+import { useMenuDrawer } from './useMenuDrawer'
 import { useMoreBelow } from './useMoreBelow'
 import { usePauseWhileScrolling } from './usePauseWhileScrolling'
 import { MiniPlayer, MusicPlayerProvider } from './MusicPlayer'
@@ -74,7 +75,7 @@ export default function AppShell() {
 }
 
 function Shell() {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { menuOpen, setMenuOpen, navRef, menuButton } = useMenuDrawer()
   const [active, setActive] = useState(0)
   const location = useLocation()
   const [homes, setHomes] = useState<WatchLink[]>([])
@@ -143,11 +144,6 @@ function Shell() {
   // Errors from the last day that nobody has marked as read (administrators only).
   const unreadErrors = useUnreadErrors(admin)
   const errorDot = <span className="nav-dot" role="img" aria-label={t('New errors')} title={t('New errors. See Settings, System, Logs and errors.')} />
-
-  // Close the mobile drawer whenever the page changes (a Library line only changes the address's query).
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname, location.search])
 
   // On a phone the search is an icon that opens a bar over the header.
   const [searchOpen, setSearchOpen] = useState(false)
@@ -235,42 +231,9 @@ function Shell() {
     document.title = titleFor(specificTitle || heading)
   }, [specificTitle, heading])
   const mainRef = useRef<HTMLElement>(null)
-  const navRef = useRef<HTMLElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const moreBelow = useMoreBelow(scrollRef)
   usePauseWhileScrolling(mainRef)
-  const menuButton = useRef<HTMLButtonElement>(null)
-  // The open drawer (phones and tablets): Escape closes it, Tab stays inside
-  // it, and focus goes back to the menu button when it closes.
-  useEffect(() => {
-    if (!menuOpen) return
-    const nav = navRef.current
-    if (!nav || !window.matchMedia('(max-width: 900px)').matches) return
-    const items = () => [...nav.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])')].filter((el) => el.getClientRects().length > 0)
-    items()[0]?.focus({ preventScroll: true })
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpen(false)
-        menuButton.current?.focus({ preventScroll: true })
-        return
-      }
-      if (e.key !== 'Tab') return
-      const list = items()
-      if (list.length === 0) return
-      const first = list[0]
-      const last = list[list.length - 1]
-      const at = document.activeElement
-      if (e.shiftKey && (at === first || !nav.contains(at))) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && (at === last || !nav.contains(at))) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [menuOpen])
   const [pageHasHeading, setPageHasHeading] = useState(false)
   // Title, show, book and artist pages get a Back button: it returns to
   // wherever the page was opened from, or to its section when it was opened
