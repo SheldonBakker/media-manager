@@ -18,6 +18,9 @@ project. Licensed AGPL-3.0 (see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](
   checkout, pushes `ghcr.io/sheldonbakker/media-manager:latest` and `:<sha>`, joins the
   tailnet and deploys `:<sha>` to the VM over SSH.
 - `deploy/docker-compose.yml` is the compose file the VM runs.
+- Paid subscriptions: an account the Coordinator locks can only use Account & Access, where a Subscription page
+  lets the person subscribe, update their card and cancel. See
+  [Subscriptions](docs/accounts.md#subscriptions-this-fork).
 
 ## What this fork removes
 
