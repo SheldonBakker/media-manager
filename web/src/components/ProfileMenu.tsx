@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom'
 import { api, displayName, isAdmin } from '../api'
 import { useAuth } from '../AuthContext'
 import { demoEnabled, setDemo } from '../demo'
-import { DOCS_URL, FEEDBACK_URL, REDDIT_URL, REPO_URL, WEBSITE_URL } from '../docs'
+import { WEBSITE_URL } from '../docs'
 import { LANGUAGES, chooseLanguage, currentLanguage, t } from '../i18n'
 import { QUEUE_STORAGE_KEY } from '../musicQueue'
 import { SKIP_ONCE_KEY } from '../autoSignIn'
 import Icon from './Icon'
-import ShareDialog from './ShareDialog'
 import { useToast } from './Toast'
 
 function initials(name?: string, username?: string): string {
@@ -21,7 +20,6 @@ export default function ProfileMenu() {
   const { user, setUser } = useAuth()
   const toast = useToast()
   const [open, setOpen] = useState(false)
-  const [sharing, setSharing] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const demo = demoEnabled()
@@ -98,32 +96,9 @@ export default function ProfileMenu() {
               <Icon name="sliders" size={16} /> {t('Settings')}
             </Link>
           )}
-          <div className="menu-sep" role="separator" />
           <a href={WEBSITE_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
             <Icon name="globe" size={16} /> {t('Website')}
           </a>
-          <a href={DOCS_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="external" size={16} /> {t('Documentation')}
-          </a>
-          <a href={REPO_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="star" size={16} /> {t('Star on GitHub')}
-          </a>
-          <a href={FEEDBACK_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="chat" size={16} /> {t('Questions and discussions')}
-          </a>
-          <a href={REDDIT_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="chat" size={16} /> {t('Reddit community')}
-          </a>
-          <button
-            role="menuitem"
-            onClick={() => {
-              setOpen(false)
-              setSharing(true)
-            }}
-          >
-            <Icon name="share" size={16} /> {t('Share Mediarium')}
-          </button>
-          <div className="menu-sep" role="separator" />
           {admin && (
             <button role="menuitem" onClick={() => setDemo(!demo)} title={t('Made-up titles for screenshots and trying the app out. Only in this browser; nothing is saved to your library.')}>
               <Icon name="flask" size={16} /> {demo ? t('Turn off demo data') : t('Show demo data')}
@@ -134,7 +109,6 @@ export default function ProfileMenu() {
           </button>
         </div>
       )}
-      {sharing && <ShareDialog onClose={() => setSharing(false)} />}
     </div>
   )
 }
