@@ -1517,9 +1517,9 @@ fieldset.group { border-radius: 6px 26px 26px 26px; }
 }
 
 /* ==== Layout pass: small placement fixes ================================ */
-/* Header on a narrow desktop window: the demo chip keeps only its flask and Back only its arrow, so the console never runs past the edge. */
+/* Header on a narrow desktop window: Back keeps only its arrow, so the console never runs past the edge. */
 @media (min-width: 901px) and (max-width: 1100px) {
-  .topbar .demo-chip-label, .topbar .back-btn span { display: none; }
+  .topbar .back-btn span { display: none; }
   .topbar .back-btn { width: 40px; padding: 0; justify-content: center; }
 }
 /* Upcoming: the Missing / Upgrades switch starts at the left under the Calendar and Wanted tabs, as the tabs of Activity do. */

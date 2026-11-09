@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, displayName, isAdmin } from '../api'
 import { useAuth } from '../AuthContext'
-import { demoEnabled, setDemo } from '../demo'
 import { LANGUAGES, chooseLanguage, currentLanguage, t } from '../i18n'
 import { QUEUE_STORAGE_KEY } from '../musicQueue'
 import { SKIP_ONCE_KEY } from '../autoSignIn'
@@ -14,14 +13,13 @@ function initials(name?: string, username?: string): string {
   return first.toUpperCase() || '?'
 }
 
-// Avatar in the top-right corner: opens the profile, demo mode and sign out.
+// Avatar in the top-right corner: opens the profile and account actions.
 export default function ProfileMenu() {
   const { user, setUser } = useAuth()
   const toast = useToast()
   const [open, setOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const demo = demoEnabled()
 
   useEffect(() => {
     if (!open) return
@@ -94,11 +92,6 @@ export default function ProfileMenu() {
             <Link to="/settings" role="menuitem" onClick={() => setOpen(false)}>
               <Icon name="sliders" size={16} /> {t('Settings')}
             </Link>
-          )}
-          {admin && (
-            <button role="menuitem" onClick={() => setDemo(!demo)} title={t('Made-up titles for screenshots and trying the app out. Only in this browser; nothing is saved to your library.')}>
-              <Icon name="flask" size={16} /> {demo ? t('Turn off demo data') : t('Show demo data')}
-            </button>
           )}
           <button role="menuitem" className="danger" onClick={() => void signOut()}>
             <Icon name="logout" size={16} /> {t('Sign out')}

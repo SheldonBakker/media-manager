@@ -186,25 +186,11 @@
 .menu-pop button:hover { background: var(--surface-2); text-decoration: none; }
 .menu-pop .danger { color: var(--danger); }
 
-.demo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--c-wanted);
-  border: 1px solid color-mix(in srgb, var(--c-wanted) 50%, transparent);
-  background: color-mix(in srgb, var(--c-wanted) 12%, transparent);
-}
-
 @keyframes pop-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 900px) {
   .sidebar a { padding: 10px 12px; }
   .topbar { gap: 8px; }
-  .demo-chip { display: none; }
 }
 
 /* ---- Page headings --------------------------------------------------- */

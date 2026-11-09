@@ -7,7 +7,6 @@ import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } fr
 import { scrollToTop } from '../scrollTop'
 import { api, isAdmin, subscriptionNav, type AppLink, type WatchLink } from '../api'
 import { useAuth } from '../AuthContext'
-import { demoEnabled } from '../demo'
 import { titleFor, useSpecificTitle } from '../documentTitle'
 import { sectionFor, type SectionKey } from '../sections'
 import { inPage, pageParts, pageTitle, settingsGroupsFor } from '../settingsNav'
@@ -487,11 +486,6 @@ function Shell() {
             <Icon name="search" size={19} />
           </button>
           <div className="top-actions">
-            {demoEnabled() && (
-              <span className="demo-chip" title={t('Sample data is showing. Turn it off from your profile menu.')}>
-                <Icon name="flask" size={14} /> <span className="demo-chip-label">{t('Demo data')}</span>
-              </span>
-            )}
             <SideTools ebooksOn={ebooksOn} audiobooksOn={audiobooksOn} musicOn={musicOn} homes={homes} apps={apps} variant="top" />
             <span className="top-theme">
               <ThemeToggle />
@@ -507,7 +501,7 @@ function Shell() {
         </main>
         <BackToTop target={mainRef} />
         <MiniPlayer />
-        {!demoEnabled() && <WhatsNew version={version} />}
+        <WhatsNew version={version} />
         <FeedbackNudge />
       </div>
     </div>
