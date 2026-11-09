@@ -19,9 +19,9 @@ export interface SharePlace {
 }
 
 export const SHARE_IMAGES: { id: SharePlace['image']; file: string; size: string }[] = [
-  { id: 'wide', file: withBase('/share/mediarium-wide.jpg'), size: '1200 × 630' },
-  { id: 'square', file: withBase('/share/mediarium-square.jpg'), size: '1080 × 1080' },
-  { id: 'story', file: withBase('/share/mediarium-story.jpg'), size: '1080 × 1920' },
+  { id: 'wide', file: withBase('/share/share-wide.png'), size: '1200 × 630' },
+  { id: 'square', file: withBase('/share/share-square.png'), size: '1080 × 1080' },
+  { id: 'story', file: withBase('/share/share-story.png'), size: '1080 × 1920' },
 ]
 
 // Communities where a post about a self-hosted media app usually fits.

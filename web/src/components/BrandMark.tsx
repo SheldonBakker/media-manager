@@ -6,7 +6,7 @@
 export default function BrandMark({ className }: { className?: string }) {
   return (
     <svg className={className ?? 'brand-mark'} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M5 28V15a11 11 0 0 1 22 0v13h-6l-5-11-5 11z" fill="currentColor" />
+      <path fillRule="evenodd" d="M7 5h18a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4zM13 10.5v11l9-5.5z" fill="currentColor" />
     </svg>
   )
 }

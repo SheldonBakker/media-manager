@@ -55,6 +55,8 @@ perl -pi -e '
 ' "${FILES[@]}"
 
 # Upstream's website and Reddit links leave the profile menu (they are about upstream, not this build).
+# New upstream versions may already have removed one or both links, so this is
+# intentionally idempotent and handles both states before checking the result.
 rep web/src/components/ProfileMenu.tsx 's#\s*<a href=\{(WEBSITE_URL|REDDIT_URL)\}[^\n]*\n[^\n]*\n\s*</a>##g; s/(?:,\s*(?:WEBSITE_URL|REDDIT_URL)\b)|(?:\b(?:WEBSITE_URL|REDDIT_URL),\s*)//g'
 grep -qE 'WEBSITE_URL|REDDIT_URL' web/src/components/ProfileMenu.tsx && die "ProfileMenu still links upstream website/reddit"
 perl -pi -e 's#/Mediarium/blob/#/media-manager/blob/#g' "${FILES[@]}"

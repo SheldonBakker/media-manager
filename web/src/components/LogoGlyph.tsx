@@ -6,7 +6,7 @@ import { useId } from 'react'
 // from the current text colour; the .g-logo class sets it to the accent.
 export default function LogoGlyph({ size = 64, className = '' }: { size?: number; className?: string }) {
   const id = useId().replace(/:/g, '')
-  const arch = 'M5 28V15a11 11 0 0 1 22 0v13h-6l-5-11-5 11z'
+  const arch = 'M7 5h18a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4zM13 10.5v11l9-5.5z'
   return (
     <svg className={`kind-glyph solid-glyph g-logo ${className}`.trim()} width={size} height={size} viewBox="0 0 32 32" fill="none" strokeWidth={1.2} strokeLinejoin="round" aria-hidden="true">
       <defs>
@@ -16,9 +16,9 @@ export default function LogoGlyph({ size = 64, className = '' }: { size?: number
           <stop offset="1" className="g-low" />
         </linearGradient>
       </defs>
-      <path className="logo-depth" d={arch} transform="translate(1.1 1.5)" />
-      <path className="logo-face" d={arch} fill={`url(#l${id})`} />
-      <path className="shine" d="M7.4 15.5a8.6 8.6 0 0 1 7.2-8.1" />
+      <path className="logo-depth" fillRule="evenodd" d={arch} transform="translate(1.1 1.5)" />
+      <path className="logo-face" fillRule="evenodd" d={arch} fill={`url(#l${id})`} />
+      <path className="shine" d="M5.6 10a3.4 3.4 0 0 1 2.9-2.9" />
     </svg>
   )
 }
