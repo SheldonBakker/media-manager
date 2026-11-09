@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { Subscription, SubscriptionStatus } from './api.ts'
-import { accessState, planLine, returnReference, subscriptionActions } from './subscriptionView.ts'
+import { accessState, planLine, refusal, returnReference, subscriptionActions } from './subscriptionView.ts'
 
 const sub = (status: SubscriptionStatus, complimentary = false): Subscription => ({
   status,
@@ -46,4 +46,27 @@ test('paid but still locked means access is being switched on', () => {
   assert.equal(accessState(sub('active'), false), 'unlocked')
   assert.equal(accessState(sub('payment_failed'), true), 'none')
   assert.equal(accessState(sub('none'), false), 'none')
+})
+
+test('an account the Coordinator does not know simply has no subscription', () => {
+  assert.deepEqual(refusal(404, 'Subscription.MemberNotFound', true), { tone: 'calm', reload: false })
+  assert.deepEqual(refusal(404, undefined, true), { tone: 'calm', reload: false })
+})
+
+test('any other failure to read the subscription is an error', () => {
+  assert.deepEqual(refusal(502, undefined, true), { tone: 'error', reload: false })
+  assert.deepEqual(refusal(0, undefined, true), { tone: 'error', reload: false })
+})
+
+test('a 409 on an action reads the subscription again', () => {
+  assert.deepEqual(refusal(409, 'StartCheckout.AlreadyPaid', false), { tone: 'info', reload: true })
+  assert.deepEqual(refusal(409, 'StartCheckout.NotAllowed', false), { tone: 'error', reload: true })
+  assert.deepEqual(refusal(409, 'CancelSubscription.NotAllowed', false), { tone: 'error', reload: true })
+  assert.deepEqual(refusal(409, 'ConfirmCheckout.NotPaid', false), { tone: 'error', reload: true })
+})
+
+test('any other failed action is an error and changes nothing on the page', () => {
+  assert.deepEqual(refusal(500, undefined, false), { tone: 'error', reload: false })
+  assert.deepEqual(refusal(404, undefined, false), { tone: 'error', reload: false })
+  assert.deepEqual(refusal(0, undefined, false), { tone: 'error', reload: false })
 })

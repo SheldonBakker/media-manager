@@ -6,9 +6,10 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { locale, t } from '../../i18n'
-import { accessState, planLine, returnReference, subscriptionActions } from '../../subscriptionView'
+import { accessState, planLine, refusal, returnReference, subscriptionActions, type RefusalTone } from '../../subscriptionView'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
+const refusalOf = (e: unknown, reading: boolean) => (e instanceof ApiError ? refusal(e.status, e.code, reading) : refusal(0, undefined, reading))
 const dateText = (iso: string) => new Date(iso).toLocaleDateString(locale())
 
 // The sentence under the status: what the person has and until when.
@@ -38,7 +39,8 @@ export default function SubscriptionSettings() {
   const toast = useToast()
   const { user, setUser } = useAuth()
   const [sub, setSub] = useState<Subscription | null>(null)
-  const [problem, setProblem] = useState('')
+  // What the last load or action had to say, and how it is shown.
+  const [notice, setNotice] = useState<{ text: string; tone: RefusalTone } | null>(null)
   const [busy, setBusy] = useState(false)
   const [asking, setAsking] = useState(false)
   // The payment reference this load already sent, so React's double effect run
@@ -51,21 +53,40 @@ export default function SubscriptionSettings() {
     try {
       setUser(await api.me())
     } catch (e) {
-      setProblem(errorText(e))
+      setNotice({ text: errorText(e), tone: 'error' })
     }
   }, [setUser])
 
   const load = useCallback(
     async (syncAccess = false) => {
+      setNotice(null)
       try {
         const s = await api.getSubscription()
         setSub(s)
         if (syncAccess && s.hasAccess) await syncUser()
       } catch (e) {
-        setProblem(errorText(e))
+        const { tone } = refusalOf(e, true)
+        if (tone === 'calm') {
+          setSub(null)
+          setNotice({ text: t('This account has no subscription.'), tone })
+        } else {
+          setNotice({ text: errorText(e), tone })
+        }
       }
     },
     [syncUser],
+  )
+
+  // An action the server turned down. A 409 means the subscription changed
+  // meanwhile (a payment in another tab, a late notice from Paystack), so the
+  // page shows what the server now says before the message.
+  const turnedDown = useCallback(
+    async (e: unknown) => {
+      const { tone, reload } = refusalOf(e, false)
+      if (reload) await load(true)
+      setNotice({ text: errorText(e), tone })
+    },
+    [load],
   )
 
   useEffect(() => {
@@ -78,31 +99,57 @@ export default function SubscriptionSettings() {
     if (confirmed.current === reference) return
     confirmed.current = reference
     setBusy(true)
+    setNotice(null)
     api
       .confirmCheckout(reference)
       .then(async (s) => {
         setSub(s)
-        setProblem('')
         navigate(location.pathname, { replace: true })
         if (s.hasAccess) await syncUser()
       })
       .catch((e) => {
-        setProblem(errorText(e))
         navigate(location.pathname, { replace: true })
-        // The payment may have gone through even so (a second tab, a late notice): show what the server now says.
-        if (e instanceof ApiError && e.status === 409) return load(true)
+        return turnedDown(e)
       })
       .finally(() => setBusy(false))
-  }, [location.search, location.pathname, navigate, load, syncUser])
+  }, [location.search, location.pathname, navigate, load, syncUser, turnedDown])
+
+  // Coming back to the tab (from Paystack's card page, say) reads the
+  // subscription again, and lets a locked account in once it has paid. A
+  // message stays: closing the card tab after a failed link brings the focus
+  // back too, and that message is still news. It goes only when the page had
+  // nothing else to show and now has.
+  const locked = isLocked(user)
+  const shown = sub !== null
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const s = await api.getSubscription()
+        setSub(s)
+        if (!shown) setNotice(null)
+        if (locked && s.hasAccess) await syncUser()
+      } catch {
+        // Keep what the page shows; Try again is there when it shows nothing.
+      }
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onVisible)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onVisible)
+    }
+  }, [shown, locked, syncUser])
 
   async function run(job: () => Promise<void>) {
     setBusy(true)
+    setNotice(null)
     try {
       await job()
     } catch (e) {
-      setProblem(errorText(e))
-      // An earlier payment went through: the subscription is already active.
-      if (e instanceof ApiError && e.code === 'StartCheckout.AlreadyPaid') void load(true)
+      await turnedDown(e)
     } finally {
       setBusy(false)
     }
@@ -110,13 +157,11 @@ export default function SubscriptionSettings() {
 
   const pay = () =>
     run(async () => {
-      setProblem('')
       window.location.href = (await api.startCheckout()).paymentUrl
     })
 
   const updateCard = () =>
     run(async () => {
-      setProblem('')
       // Open the tab first, while this is still the click, or the browser blocks it; the link is fetched fresh each time and never kept.
       const tab = window.open('', '_blank')
       try {
@@ -135,7 +180,6 @@ export default function SubscriptionSettings() {
 
   const cancel = () =>
     run(async () => {
-      setProblem('')
       setAsking(false)
       setSub(await api.cancelSubscription())
       toast.success(t('Your subscription is cancelled.'))
@@ -143,7 +187,7 @@ export default function SubscriptionSettings() {
 
   const actions = sub ? subscriptionActions(sub) : []
   const plan = sub ? planLine(sub.plan) : ''
-  const switching = sub ? accessState(sub, isLocked(user)) === 'switching' : false
+  const switching = sub ? accessState(sub, locked) === 'switching' : false
   const until = sub?.paidThrough ? dateText(sub.paidThrough) : ''
 
   return (
@@ -152,7 +196,8 @@ export default function SubscriptionSettings() {
         <legend>
           <Icon name="star" size={14} /> {t('Your subscription')}
         </legend>
-        {!sub && !problem && <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>{t('Loading')}</p>}
+        {!sub && !notice && <p style={{ color: 'var(--text-dim)', marginTop: 0 }}>{t('Loading')}</p>}
+        {notice?.tone === 'calm' && <p style={{ marginTop: 0 }}>{notice.text}</p>}
         {sub && (
           <>
             <p style={{ marginTop: 0 }}>{statusLine(sub)}</p>
@@ -172,12 +217,17 @@ export default function SubscriptionSettings() {
             </button>
           </>
         )}
-        {problem && (
+        {notice?.tone === 'info' && (
+          <div className="notice notice-info" role="status">
+            {notice.text}
+          </div>
+        )}
+        {notice?.tone === 'error' && (
           <p role="alert" style={{ color: 'var(--danger)' }}>
-            {problem}
+            {notice.text}
           </p>
         )}
-        {!sub && problem && (
+        {!sub && notice?.tone === 'error' && (
           <button onClick={() => void run(() => load())} disabled={busy}>
             {t('Try again')}
           </button>

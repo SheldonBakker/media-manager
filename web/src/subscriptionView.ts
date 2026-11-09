@@ -66,3 +66,19 @@ export function accessState(s: Subscription, locked: boolean): AccessState {
   if (!s.hasAccess) return 'none'
   return locked ? 'switching' : 'unlocked'
 }
+
+// How the Subscription page shows a call the server turned down: calm text
+// with nothing to try again, news that is not a problem, or an error.
+export type RefusalTone = 'calm' | 'info' | 'error'
+
+// reading is true for loading the subscription, false for an action
+// (subscribing, paying, updating the card, cancelling, confirming a payment).
+// A 404 on reading means the Coordinator does not know the account: it simply
+// has no subscription, and trying again would not change that. A 409 on an
+// action means the subscription changed since the page read it, so the page
+// reads it again; AlreadyPaid (an earlier payment went through) is news.
+export function refusal(status: number, code: string | undefined, reading: boolean): { tone: RefusalTone; reload: boolean } {
+  if (reading) return { tone: status === 404 ? 'calm' : 'error', reload: false }
+  if (status !== 409) return { tone: 'error', reload: false }
+  return { tone: code === 'StartCheckout.AlreadyPaid' ? 'info' : 'error', reload: true }
+}
