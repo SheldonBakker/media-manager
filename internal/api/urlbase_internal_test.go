@@ -152,7 +152,7 @@ func TestFrontendHandlerServesPreparedPages(t *testing.T) {
 	}
 	for _, path := range []string{"/", "/library", "/settings/system", "/title/603"} {
 		rec := get(path, nil)
-		if rec.Code != 200 || rec.Header().Get("Cache-Control") != "no-cache" || !strings.Contains(rec.Body.String(), `<meta name="mediarium-base" content="/mediarium" />`) {
+		if rec.Code != 200 || rec.Header().Get("Cache-Control") != pageCacheControl || !strings.Contains(rec.Body.String(), `<meta name="mediarium-base" content="/mediarium" />`) {
 			t.Errorf("GET %s: %d %q %.120q", path, rec.Code, rec.Header().Get("Cache-Control"), rec.Body.String())
 		}
 	}
