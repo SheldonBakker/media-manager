@@ -300,13 +300,15 @@ function SettingsTab() {
         <small>{t('Uses the ReplayGain tags in the files. A file without them plays as it is.')}</small>
       </div>
       <p className="np-note">{t('These two are kept on this device. On an iPhone or iPad they may stop working while the screen is locked.')}</p>
-      <div className="np-field">
-        <span className="np-label">{t('ListenBrainz')}</span>
-        <small>
-          {p.scrobbling?.connected && p.scrobbling.enabled ? t('Your plays are sent to ListenBrainz.') : p.scrobbling?.connected ? t('Connected, but switched off.') : t('Not connected.')}{' '}
-          <Link to="/settings/services#listenbrainz">{t('Set it up in your profile')}</Link>
-        </small>
-      </div>
+      {admin && (
+        <div className="np-field">
+          <span className="np-label">{t('ListenBrainz')}</span>
+          <small>
+            {p.scrobbling?.connected && p.scrobbling.enabled ? t('Your plays are sent to ListenBrainz.') : p.scrobbling?.connected ? t('Connected, but switched off.') : t('Not connected.')}{' '}
+            <Link to="/settings/services#listenbrainz">{t('Set it up in your profile')}</Link>
+          </small>
+        </div>
+      )}
       {admin && online !== null && (
         <Switch
           checked={online}

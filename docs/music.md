@@ -213,7 +213,7 @@ Crossfade and ReplayGain use the browser's Web Audio. It is only switched on whe
 
 ### Sending your plays to ListenBrainz
 
-Each account can send what it plays to its own [ListenBrainz](https://listenbrainz.org) account. In **Settings > Profile > ListenBrainz** copy your user token from listenbrainz.org/settings, paste it and press **Connect**. Mediarium asks ListenBrainz whether the token is good before keeping it. It is stored encrypted, belongs to your account, is never shown again and never written to the log. **Send my plays to ListenBrainz** switches sending on and off without losing the token, and **Disconnect** forgets it.
+Each administrator account can send what it plays to its own [ListenBrainz](https://listenbrainz.org) account. In **Settings > Account & Access > Linked services > ListenBrainz** copy your user token from listenbrainz.org/settings, paste it and press **Connect**. Mediarium asks ListenBrainz whether the token is good before keeping it. It is stored encrypted, belongs to your account, is never shown again and never written to the log. **Send my plays to ListenBrainz** switches sending on and off without losing the token, and **Disconnect** forgets it.
 
 - When a track starts, ListenBrainz is told what is playing now.
 - A track counts as a listen once you have heard half of it or four minutes, whichever is less (seeking ahead doesn't count as listening). It is sent with the time it started.

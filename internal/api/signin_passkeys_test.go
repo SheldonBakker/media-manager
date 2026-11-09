@@ -351,7 +351,7 @@ func TestPasskeyRegistrationNeedsThePasswordAndABrowserSession(t *testing.T) {
 		t.Errorf("no password: %d", status)
 	}
 	// An API key can't add one, whatever its owner's rights.
-	key := e.must(e.sam, "POST", "/api/auth/api-keys", map[string]any{"name": "k"}, http.StatusCreated)["key"].(string)
+	key := e.must(e.admin, "POST", "/api/auth/api-keys", map[string]any{"name": "k"}, http.StatusCreated)["key"].(string)
 	anon := e.client()
 	for _, tc := range [][2]string{{"POST", "/api/auth/passkeys/register/begin"}, {"POST", "/api/auth/passkeys/register/finish"}, {"DELETE", "/api/auth/passkeys/1"}, {"PUT", "/api/auth/passkeys/1"}} {
 		if got, _ := e.call(anon, tc[0], tc[1], map[string]any{"password": "long-enough-password"}, "X-API-Key", key); got != http.StatusForbidden {

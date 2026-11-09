@@ -15,8 +15,6 @@ import (
 // It is spelled out here on purpose: opening a route to members has to be a
 // visible, reviewed change to this list, not a side effect.
 var memberRoutes = []string{
-	"GET /api/plex-watchlist", "PUT /api/plex-watchlist", "DELETE /api/plex-watchlist", "POST /api/plex-watchlist/pin",
-	"GET /api/plex-watchlist/pin/{pinId}", "POST /api/plex-watchlist/check", "GET /api/plex-watchlist/items",
 	"GET /api/auth/me",
 	"GET /api/auth/two-step",
 	"POST /api/auth/two-step/setup",
@@ -27,17 +25,8 @@ var memberRoutes = []string{
 	"POST /api/auth/change-password",
 	"GET /api/auth/sessions",
 	"DELETE /api/auth/sessions",
-	"GET /api/auth/api-keys",
-	"POST /api/auth/api-keys",
-	"DELETE /api/auth/api-keys/{id}",
 	"GET /api/oauth/requests/{id}",
 	"POST /api/oauth/requests/{id}",
-	"GET /api/auth/ereader",
-	"POST /api/auth/ereader/opds",
-	"DELETE /api/auth/ereader/opds",
-	"POST /api/auth/ereader/kobo",
-	"DELETE /api/auth/ereader/kobo",
-	"POST /api/auth/ereader/kobo/resync",
 	"GET /api/auth/passkeys",
 	"POST /api/auth/passkeys/register/begin",
 	"POST /api/auth/passkeys/register/finish",
@@ -185,8 +174,6 @@ var memberRoutes = []string{
 	"GET /api/music/playlists", "POST /api/music/playlists", "GET /api/music/playlists/{id}", "PUT /api/music/playlists/{id}", "DELETE /api/music/playlists/{id}",
 	"POST /api/music/playlists/{id}/tracks", "DELETE /api/music/playlists/{id}/tracks/{entry}", "PUT /api/music/playlists/{id}/order",
 	"GET /api/music/tracks/{id}/lyrics", "GET /api/music/tracks/{id}/gain", "GET /api/music/player-settings",
-	"GET /api/music/listenbrainz", "PUT /api/music/listenbrainz", "DELETE /api/music/listenbrainz",
-	"POST /api/music/listenbrainz/playing", "POST /api/music/listenbrainz/listen",
 	"GET /api/movies/{id}/files", "GET /api/movies/{id}/copies", "GET /api/series/{id}/copies",
 	"GET /api/series/{id}/files",
 	"GET /api/movies/{id}/events",
@@ -245,6 +232,15 @@ var mustBeAdmin = []string{
 	"POST /api/indexers/{id}/resume", "GET /api/stats/indexers",
 	"GET /api/irc-announce", "POST /api/irc-announce", "POST /api/irc-announce/test", "PUT /api/irc-announce/{id}", "DELETE /api/irc-announce/{id}", "PUT /api/irc-announce/{id}/enabled", "GET /api/irc-announce/{id}/log",
 	"PUT /api/music/player-settings", "PUT /api/music/filters",
+	// API keys and Linked services (the Plex watchlist, ListenBrainz and the
+	// e-reader) are for administrators only.
+	"GET /api/auth/api-keys", "POST /api/auth/api-keys", "DELETE /api/auth/api-keys/{id}",
+	"GET /api/auth/ereader", "POST /api/auth/ereader/opds", "DELETE /api/auth/ereader/opds",
+	"POST /api/auth/ereader/kobo", "DELETE /api/auth/ereader/kobo", "POST /api/auth/ereader/kobo/resync",
+	"GET /api/plex-watchlist", "PUT /api/plex-watchlist", "DELETE /api/plex-watchlist", "POST /api/plex-watchlist/pin",
+	"GET /api/plex-watchlist/pin/{pinId}", "POST /api/plex-watchlist/check", "GET /api/plex-watchlist/items",
+	"GET /api/music/listenbrainz", "PUT /api/music/listenbrainz", "DELETE /api/music/listenbrainz",
+	"POST /api/music/listenbrainz/playing", "POST /api/music/listenbrainz/listen",
 	"PUT /api/apps", "GET /api/automation/quiet", "PUT /api/automation/quiet", "POST /api/notifications/digest", "POST /api/books/import/retry", "POST /api/books/import/match",
 }
 

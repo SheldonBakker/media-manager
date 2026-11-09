@@ -48,8 +48,8 @@ const PAGE_WORDS: Record<string, string> = {
   notifications: 'discord telegram email webhook alerts push ntfy gotify',
   'other-apps': 'overseerr jellyseerr homepage nzb360 lunasea ruddarr radarr sonarr api',
   addons: 'links apps sidebar',
-  profile: 'password api key',
-  security: 'passkey sessions devices api keys',
+  profile: 'password',
+  security: 'passkey sessions devices',
   services: 'plex listenbrainz kobo e-reader hardcover',
   accounts: 'users people roles admin member viewer invite',
   requests: 'quota limit approve problem reports',
@@ -152,13 +152,13 @@ function cardSpecs(): Spec[] {
     { to: 'other-apps', label: t('Let AI assistants connect (MCP)'), words: 'mcp ai assistant chat voice home assistant llm' },
     // Your profile
     { to: 'profile', label: t('Change password'), words: 'password reset' },
-    { to: 'profile', label: t('API keys'), words: 'api key token integration x-api-key' },
     { to: 'profile', label: t('Messages about your requests'), words: 'request notifications email' },
     // Security
     { to: 'security', label: t('Passkeys'), words: 'passkey webauthn fingerprint face login' },
     { to: 'security', label: t('Two-step sign-in'), words: '2fa totp authenticator mfa two factor code' },
     { to: 'security', label: t('Signed-in devices'), words: 'sessions logout devices browsers' },
     { to: 'security', label: t('Sign out idle browsers'), words: 'timeout inactivity idle logout', admin: true },
+    { to: 'security', label: t('API keys'), words: 'api key token integration x-api-key', admin: true },
     // Linked services
     { to: 'services', label: t('Plex watchlist'), words: 'plex watchlist link' },
     { to: 'services', label: t('ListenBrainz'), words: 'scrobble listens music' },

@@ -6,7 +6,8 @@ import (
 )
 
 // lockedEReaderFamily is a server with ebooks on and a member "sam" holding an
-// OPDS password and a Kobo address, plus the admin's own pair.
+// OPDS password and a Kobo address (left from before e-readers were for
+// administrators only), plus the admin's own pair.
 type lockedEReaderFamily struct {
 	base, opdsPass, koboPath string
 	adminPass, adminKobo     string
@@ -17,12 +18,17 @@ func newLockedEReaderFamily(t *testing.T) (f lockedEReaderFamily, memberID, admi
 	t.Helper()
 	server, base, admin, _, id := familyServer(t)
 	postJSONMethod[map[string]any](t, admin, http.MethodPut, base+"/api/modules", map[string]any{"ebooks": true}, http.StatusOK)
-	web := erLoginAs(t, base, "sam", "kids-password")
-	opds := postJSON[ereaderAccess](t, web, base+"/api/auth/ereader/opds", nil, http.StatusOK)
-	kobo := postJSON[ereaderAccess](t, web, base+"/api/auth/ereader/kobo", nil, http.StatusOK)
+	opds, err := server.EReader.NewOPDSPassword(int64(id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	kobo, err := server.EReader.NewKoboToken(int64(id))
+	if err != nil {
+		t.Fatal(err)
+	}
 	adminOPDS := postJSON[ereaderAccess](t, admin, base+"/api/auth/ereader/opds", nil, http.StatusOK)
 	adminKobo := postJSON[ereaderAccess](t, admin, base+"/api/auth/ereader/kobo", nil, http.StatusOK)
-	f = lockedEReaderFamily{base: base, opdsPass: opds.Password, koboPath: kobo.Kobo.Path, adminPass: adminOPDS.Password, adminKobo: adminKobo.Kobo.Path}
+	f = lockedEReaderFamily{base: base, opdsPass: opds, koboPath: "/kobo/" + kobo, adminPass: adminOPDS.Password, adminKobo: adminKobo.Kobo.Path}
 	f.lock = func(userID int64) {
 		if err := server.TestExec(`UPDATE users SET subscription_locked = 1 WHERE id = ?`, userID); err != nil {
 			t.Fatalf("lock the account: %v", err)
@@ -34,7 +40,7 @@ func newLockedEReaderFamily(t *testing.T) (f lockedEReaderFamily, memberID, admi
 func TestLockedAccountIsRefusedOnTheOPDSCatalogue(t *testing.T) {
 	f, memberID, adminID := newLockedEReaderFamily(t)
 	client := erClient()
-	if resp, _ := erOPDSGet(t, client, f.base+"/opds/", "sam", f.opdsPass); resp.StatusCode != http.StatusOK {
+	if resp, _ := erOPDSGet(t, client, f.base+"/opds/", "ryan", f.adminPass); resp.StatusCode != http.StatusOK {
 		t.Fatalf("before the lock: %d", resp.StatusCode)
 	}
 	f.lock(memberID)
@@ -49,7 +55,7 @@ func TestLockedAccountIsRefusedOnTheOPDSCatalogue(t *testing.T) {
 
 func TestLockedAccountIsRefusedOnKoboSync(t *testing.T) {
 	f, memberID, adminID := newLockedEReaderFamily(t)
-	if resp, _ := erGet(t, f.base+f.koboPath+"/v1/library/sync"); resp.StatusCode != http.StatusOK {
+	if resp, _ := erGet(t, f.base+f.adminKobo+"/v1/library/sync"); resp.StatusCode != http.StatusOK {
 		t.Fatalf("before the lock: %d", resp.StatusCode)
 	}
 	f.lock(memberID)

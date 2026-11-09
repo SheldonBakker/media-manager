@@ -716,7 +716,8 @@ func (s *Service) DeleteRevokedAPIKey(userID, id int64) (bool, error) {
 	return n > 0, nil
 }
 
-// UserForAPIKey resolves a raw API key header value to its user.
+// UserForAPIKey resolves a raw API key header value to its user, who must be
+// an administrator.
 func (s *Service) UserForAPIKey(rawKey string) (*User, error) {
 	u := &User{}
 	var readOnly bool
@@ -731,7 +732,9 @@ func (s *Service) UserForAPIKey(rawKey string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("lookup api key: %w", err)
 	}
-	if u.Disabled {
+	// API keys are for administrators only: a key a basic account still has
+	// (made before that, or while it was an administrator) signs nothing in.
+	if u.Disabled || !u.IsAdmin {
 		return nil, ErrSessionNotFound
 	}
 	u.ReadOnlyKey = readOnly

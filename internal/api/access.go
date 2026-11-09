@@ -64,9 +64,10 @@ const lockedMessage = "This account needs a subscription. Open Settings > Accoun
 // link), never the library, the downloads or the settings. It is checked for
 // every route in one place, so a route added later stays closed to a locked
 // account until someone adds it here. Three ways in sign the person in outside
-// this table: the OPDS catalogue and the Kobo address (ereaderUserAllowed) and
-// the calendar feed (handleCalendarFeed). Each checks Locked() itself, and so
-// must any new one.
+// this table: the OPDS catalogue and the Kobo address (ereaderUserAllowed,
+// which lets in administrators only, and the lock never applies to one) and
+// the calendar feed (handleCalendarFeed, which checks Locked() itself). Any new
+// way in must check Locked() too.
 var lockedAllowed = map[string]bool{
 	"GET /api/auth/me":                        true,
 	"PUT /api/auth/profile":                   true,

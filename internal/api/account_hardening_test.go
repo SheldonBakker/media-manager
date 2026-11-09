@@ -35,7 +35,7 @@ func TestAccountChangesNeedASession(t *testing.T) {
 // calendar feed, which work without the password.
 func TestAdminPasswordResetRevokesKeys(t *testing.T) {
 	e := newSignInEnv(t, nil)
-	id := e.addAccount("kim", "member")
+	id := e.addAccount("kim", "admin")
 	kim, status, _ := e.login("kim", "long-enough-password")
 	if status != http.StatusOK {
 		t.Fatalf("sign in: %d", status)

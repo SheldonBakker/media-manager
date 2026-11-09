@@ -82,17 +82,21 @@ func obj(v any) map[string]any { m, _ := v.(map[string]any); return m }
 func list(v any) []any         { l, _ := v.([]any); return l }
 
 func TestArrAPIForOverseerr(t *testing.T) {
-	server, base, admin, member, _ := familyServer(t)
+	server, base, admin, _, memberID := familyServer(t)
 	server.TestSetTMDBBaseURL("fixture-key", arrTMDB(t).URL)
 	key := postJSON[map[string]any](t, admin, base+"/api/auth/api-keys", map[string]any{"name": "Overseerr"}, http.StatusCreated)["key"].(string)
-	memberKey := postJSON[map[string]any](t, member, base+"/api/auth/api-keys", map[string]any{"name": "mine"}, http.StatusCreated)["key"].(string)
+	// A key a member still has from before keys were for administrators only.
+	memberKey, err := server.Auth.CreateAPIKey(int64(memberID), "mine")
+	if err != nil {
+		t.Fatal(err)
+	}
 	radarr, sonarr := base+"/radarr/api/v3", base+"/sonarr/api/v3"
 
 	// Signing in: a key is needed, it must be an administrator's, and the
 	// query parameter works like the header.
 	arrCall(t, "GET", radarr+"/system/status", "", nil, http.StatusUnauthorized)
 	arrCall(t, "GET", radarr+"/system/status", "not-a-key", nil, http.StatusUnauthorized)
-	arrCall(t, "GET", radarr+"/system/status", memberKey, nil, http.StatusForbidden)
+	arrCall(t, "GET", radarr+"/system/status", memberKey, nil, http.StatusUnauthorized)
 	st := obj(arrCall(t, "GET", radarr+"/system/status?apikey="+key, "", nil, http.StatusOK))
 	if st["appName"] != "Radarr" || st["urlBase"] != "/radarr" || !strings.HasPrefix(st["version"].(string), "5.") {
 		t.Fatalf("radarr status: %v", st)

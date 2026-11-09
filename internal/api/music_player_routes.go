@@ -2,7 +2,7 @@ package api
 
 // musicPlayerRoutes adds the routes of the music player's own features:
 // playlists, lyrics, ReplayGain, the player settings and ListenBrainz
-// scrobbling. All of them answer 404 while the music module is off (the route
+// scrobbling (administrators only). All of them answer 404 while the music module is off (the route
 // table's gate covers every /api/music/ path).
 func (s *Server) musicPlayerRoutes(member, play, admin routeGroup) {
 	// Playlists belong to the account; the handlers only show others' lists
@@ -22,10 +22,10 @@ func (s *Server) musicPlayerRoutes(member, play, admin routeGroup) {
 	member.HandleFunc("GET /api/music/player-settings", s.handleGetPlayerSettings)
 	admin.HandleFunc("PUT /api/music/player-settings", s.handlePutPlayerSettings)
 
-	// The caller's own ListenBrainz connection.
-	member.HandleFunc("GET /api/music/listenbrainz", s.handleScrobbleStatus)
-	member.HandleFunc("PUT /api/music/listenbrainz", s.handleScrobbleSave)
-	member.HandleFunc("DELETE /api/music/listenbrainz", s.handleScrobbleForget)
-	play.HandleFunc("POST /api/music/listenbrainz/playing", s.handleScrobblePlaying)
-	play.HandleFunc("POST /api/music/listenbrainz/listen", s.handleScrobbleListen)
+	// The caller's own ListenBrainz connection (Linked services, administrators only).
+	admin.HandleFunc("GET /api/music/listenbrainz", s.handleScrobbleStatus)
+	admin.HandleFunc("PUT /api/music/listenbrainz", s.handleScrobbleSave)
+	admin.HandleFunc("DELETE /api/music/listenbrainz", s.handleScrobbleForget)
+	admin.HandleFunc("POST /api/music/listenbrainz/playing", s.handleScrobblePlaying)
+	admin.HandleFunc("POST /api/music/listenbrainz/listen", s.handleScrobbleListen)
 }

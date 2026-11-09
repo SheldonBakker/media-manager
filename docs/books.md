@@ -173,7 +173,7 @@ Once connected, a new book shows up there right after it's downloaded, and the b
 
 ## Reading on an e-reader
 
-Your ebooks can also go to an e-reader. There are two ways, and both are off until you turn them on from your own profile page (**Profile > Read on an e-reader**). Each account has its own, and each only lets the e-reader read books: it can't add, change or delete anything.
+Your ebooks can also go to an e-reader. This is for administrators only. There are two ways, and both are off until you turn them on under **Settings > Account & Access > Linked services > Read on an e-reader**. Each administrator account has its own, and each only lets the e-reader read books: it can't add, change or delete anything.
 
 Both need **Ebooks** switched on under **Settings > Media types**, and an account that is allowed to read books (the **Play** permission under **Settings > Account & Access**; administrators always are). Books reach an e-reader whichever way they got into the library: downloaded by Mediarium, imported from a folder, or put there by another tool such as Shelfmark.
 
@@ -181,7 +181,7 @@ Both need **Ebooks** switched on under **Settings > Media types**, and an accoun
 
 OPDS is the catalogue format most reading apps understand. Mediarium serves OPDS 1.2 at `/opds/` and OPDS 2.0 at `/opds/v2/`.
 
-1. Open **Profile > Read on an e-reader** and press **Make an e-reader password**. Copy it straight away: it is shown once. It is not your sign-in password, and it can't be used to sign in to Mediarium.
+1. Open **Settings > Account & Access > Linked services > Read on an e-reader** and press **Make an e-reader password**. Copy it straight away: it is shown once. It is not your sign-in password, and it can't be used to sign in to Mediarium.
 2. In your app, add a catalogue. Use the address from the profile page (for example `https://books.example.com/opds/`), your user name and the e-reader password.
 
 It works with KOReader, Moon+ Reader, Librera, Marvin, Foliate and other OPDS apps. What the apps show:
@@ -211,7 +211,7 @@ A Kobo can fetch your ebooks from Mediarium over Wi-Fi, with covers, and your re
 
 **Steps**
 
-1. In Mediarium open **Profile > Read on an e-reader**, and under **Kobo sync** press **Make my Kobo address**. Mediarium shows the line to use, which looks like `api_endpoint=https://books.example.com/kobo/…`. Press **Copy**.
+1. In Mediarium open **Settings > Account & Access > Linked services > Read on an e-reader**, and under **Kobo sync** press **Make my Kobo address**. Mediarium shows the line to use, which looks like `api_endpoint=https://books.example.com/kobo/…`. Press **Copy**.
 2. Connect the Kobo to your computer with its USB cable and open it as a drive.
 3. Open the hidden folder `.kobo`, then `Kobo`, and open the file `Kobo eReader.conf` in a plain text editor (Notepad is fine; don't use Word).
 4. Find the section `[OneStoreServices]`. If it already has a line starting with `api_endpoint=` (usually `api_endpoint=https://storeapi.kobo.com`), replace that whole line with the line from Mediarium. If it has none, add the line under the section name. There must be only one `api_endpoint` line. Save the file.

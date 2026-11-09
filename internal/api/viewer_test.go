@@ -206,19 +206,20 @@ func TestReadOnlyKeyOnTheArrEndpoints(t *testing.T) {
 	}
 }
 
-// A key made before its owner became a viewer follows the new role.
+// A key made before its owner became a viewer follows the new role: keys are
+// for administrators only, so it stops working.
 func TestOldKeyOfAnAccountThatBecameAViewer(t *testing.T) {
 	e := newSignInEnv(t, nil)
-	id := e.addAccount("sam", "member")
+	id := e.addAccount("sam", "admin")
 	sam, _, _ := e.login("sam", "long-enough-password")
 	key := e.must(sam, "POST", "/api/auth/api-keys", map[string]any{"name": "script"}, http.StatusCreated)["key"].(string)
 	anon := e.client()
-	if got, _ := e.call(anon, "POST", "/api/exclusions", map[string]any{}, "X-API-Key", key); got == http.StatusForbidden {
-		t.Fatal("a member's key was refused before the change")
+	if got, _ := e.call(anon, "POST", "/api/exclusions", map[string]any{}, "X-API-Key", key); got == http.StatusForbidden || got == http.StatusUnauthorized {
+		t.Fatalf("an administrator's key was refused before the change: %d", got)
 	}
 	e.must(e.admin, "PUT", "/api/users/"+itoa(id), map[string]any{"role": "viewer"}, http.StatusOK)
-	if got, _ := e.call(anon, "POST", "/api/exclusions", map[string]any{}, "X-API-Key", key); got != http.StatusForbidden {
-		t.Errorf("a viewer's old key can still change things: %d", got)
+	if got, _ := e.call(anon, "POST", "/api/exclusions", map[string]any{}, "X-API-Key", key); got != http.StatusUnauthorized {
+		t.Errorf("a viewer's old key still signs in: %d", got)
 	}
 	if got, _ := e.call(sam, "POST", "/api/exclusions", map[string]any{}); got != http.StatusForbidden {
 		t.Errorf("the open session of a viewer can still change things: %d", got)
@@ -245,7 +246,7 @@ func TestRoleChanges(t *testing.T) {
 
 func TestDisablingAnAccount(t *testing.T) {
 	e := newSignInEnv(t, nil)
-	id := e.addAccount("sam", "member")
+	id := e.addAccount("sam", "admin") // an administrator, so it can have an API key
 	sam, status, _ := e.login("sam", "long-enough-password")
 	if status != http.StatusOK {
 		t.Fatal("sign-in")

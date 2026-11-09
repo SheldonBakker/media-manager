@@ -22,16 +22,16 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 
 | Method | Path | Access | What it does |
 |---|---|---|---|
-| GET | `/api/auth/api-keys` | any account | lists the account's API keys without the keys themselves (only a hash is stored; see internal/auth.CreateAPIKey), just enough to recognise and revoke one later. |
-| POST | `/api/auth/api-keys` | any account | makes a new API key and returns the key itself this one time. |
-| DELETE | `/api/auth/api-keys/{id}` | any account |  |
+| GET | `/api/auth/api-keys` | admin | lists the account's API keys without the keys themselves (only a hash is stored; see internal/auth.CreateAPIKey), just enough to recognise and revoke one later. |
+| POST | `/api/auth/api-keys` | admin | makes a new API key and returns the key itself this one time. |
+| DELETE | `/api/auth/api-keys/{id}` | admin |  |
 | POST | `/api/auth/change-password` | any account |  |
-| GET | `/api/auth/ereader` | any account | GET /api/auth/ereader |
-| DELETE | `/api/auth/ereader/kobo` | any account | DELETE /api/auth/ereader/kobo |
-| POST | `/api/auth/ereader/kobo` | any account | POST /api/auth/ereader/kobo: makes a new Kobo address; the old one stops working and the next sync sends everything again. |
-| POST | `/api/auth/ereader/kobo/resync` | any account | POST /api/auth/ereader/kobo/resync: forgets what was sent to the Kobo, so the next sync sends every book again. |
-| DELETE | `/api/auth/ereader/opds` | any account | DELETE /api/auth/ereader/opds |
-| POST | `/api/auth/ereader/opds` | any account | POST /api/auth/ereader/opds: makes a new e-reader password. |
+| GET | `/api/auth/ereader` | admin | GET /api/auth/ereader |
+| DELETE | `/api/auth/ereader/kobo` | admin | DELETE /api/auth/ereader/kobo |
+| POST | `/api/auth/ereader/kobo` | admin | POST /api/auth/ereader/kobo: makes a new Kobo address; the old one stops working and the next sync sends everything again. |
+| POST | `/api/auth/ereader/kobo/resync` | admin | POST /api/auth/ereader/kobo/resync: forgets what was sent to the Kobo, so the next sync sends every book again. |
+| DELETE | `/api/auth/ereader/opds` | admin | DELETE /api/auth/ereader/opds |
+| POST | `/api/auth/ereader/opds` | admin | POST /api/auth/ereader/opds: makes a new e-reader password. |
 | GET | `/api/auth/idle-signout` | admin |  |
 | PUT | `/api/auth/idle-signout` | admin |  |
 | GET | `/api/auth/ldap` | admin | GET /api/auth/ldap |
@@ -501,11 +501,11 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | POST | `/api/music/import/scan` | admin | starts reading the music folder and registering what MusicBrainz recognises (administrators). |
 | DELETE | `/api/music/import/scan/{id}` | admin | stops a running scan (administrators). |
 | GET | `/api/music/import/scan/{id}` | admin | returns a scan job: its phase, progress, the summary and one result per album folder found (administrators). |
-| DELETE | `/api/music/listenbrainz` | any account | DELETE /api/music/listenbrainz: forget the token and any unsent plays. |
-| GET | `/api/music/listenbrainz` | any account | GET /api/music/listenbrainz |
-| PUT | `/api/music/listenbrainz` | any account | PUT /api/music/listenbrainz {token?, enabled?} |
-| POST | `/api/music/listenbrainz/listen` | signed in | POST /api/music/listenbrainz/listen {trackId, listenedAt}: a play that has counted. |
-| POST | `/api/music/listenbrainz/playing` | signed in | POST /api/music/listenbrainz/playing {trackId} |
+| DELETE | `/api/music/listenbrainz` | admin | DELETE /api/music/listenbrainz: forget the token and any unsent plays. |
+| GET | `/api/music/listenbrainz` | admin | GET /api/music/listenbrainz |
+| PUT | `/api/music/listenbrainz` | admin | PUT /api/music/listenbrainz {token?, enabled?} |
+| POST | `/api/music/listenbrainz/listen` | admin | POST /api/music/listenbrainz/listen {trackId, listenedAt}: a play that has counted. |
+| POST | `/api/music/listenbrainz/playing` | admin | POST /api/music/listenbrainz/playing {trackId} |
 | GET | `/api/music/player-settings` | any account | GET /api/music/player-settings |
 | PUT | `/api/music/player-settings` | admin | PUT /api/music/player-settings {lyricsOnline} |
 | GET | `/api/music/playlists` | any account | GET /api/music/playlists |
@@ -560,19 +560,20 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 
 | Method | Path | Access | What it does |
 |---|---|---|---|
-| DELETE | `/api/plex-watchlist` | any account | DELETE /api/plex-watchlist: forget the Plex account and what was seen. |
-| GET | `/api/plex-watchlist` | any account | GET /api/plex-watchlist |
-| PUT | `/api/plex-watchlist` | any account | PUT /api/plex-watchlist {"autoAdd": bool} |
-| POST | `/api/plex-watchlist/check` | any account | POST /api/plex-watchlist/check: look at the caller's watchlist now. |
-| GET | `/api/plex-watchlist/items` | any account | GET /api/plex-watchlist/items: what's on the caller's watchlist, with the details Discover shows, so anything can be added by hand. |
-| POST | `/api/plex-watchlist/pin` | any account | POST /api/plex-watchlist/pin: start connecting the caller's Plex account. |
-| GET | `/api/plex-watchlist/pin/{pinId}` | any account | GET /api/plex-watchlist/pin/{pinId}: has the person approved it yet? |
+| DELETE | `/api/plex-watchlist` | admin | DELETE /api/plex-watchlist: forget the Plex account and what was seen. |
+| GET | `/api/plex-watchlist` | admin | GET /api/plex-watchlist |
+| PUT | `/api/plex-watchlist` | admin | PUT /api/plex-watchlist {"autoAdd": bool} |
+| POST | `/api/plex-watchlist/check` | admin | POST /api/plex-watchlist/check: look at the caller's watchlist now. |
+| GET | `/api/plex-watchlist/items` | admin | GET /api/plex-watchlist/items: what's on the caller's watchlist, with the details Discover shows, so anything can be added by hand. |
+| POST | `/api/plex-watchlist/pin` | admin | POST /api/plex-watchlist/pin: start connecting the caller's Plex account. |
+| GET | `/api/plex-watchlist/pin/{pinId}` | admin | GET /api/plex-watchlist/pin/{pinId}: has the person approved it yet? |
 
 ## provisioning
 
 | Method | Path | Access | What it does |
 |---|---|---|---|
 | POST | `/api/provisioning/directory-accounts` | provisioning token | makes the account of a directory person before their first sign-in, or answers with the one already linked to them. |
+| PUT | `/api/provisioning/directory-accounts/{subject}/access` | provisioning token | locks the account of a directory person, so that it needs a subscription, or unlocks it again. |
 
 ## proxy
 
@@ -731,6 +732,16 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | GET | `/api/stats/indexers` | admin | gives each indexer's searches, failures, releases found and grabs over the last 30 days. |
 | GET | `/api/stats/library` | any account |  |
 | POST | `/api/stats/reset` | admin | answers POST /api/stats/reset: the download totals on the Statistics page and the dashboard start again from zero. |
+
+## subscription
+
+| Method | Path | Access | What it does |
+|---|---|---|---|
+| GET | `/api/subscription` | any account |  |
+| POST | `/api/subscription/cancel` | any account |  |
+| POST | `/api/subscription/checkout` | any account |  |
+| POST | `/api/subscription/confirm` | any account | passes on the payment reference the person came back from the payment page with, and nothing else of what they sent. |
+| POST | `/api/subscription/manage-link` | any account |  |
 
 ## subtitles
 
@@ -897,4 +908,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-552 routes.
+558 routes.

@@ -304,7 +304,7 @@ func (s *Server) handleWatchlistItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !ok {
-		writeError(w, http.StatusNotFound, "Connect your Plex account first (Settings > Accounts > Linked services).")
+		writeError(w, http.StatusNotFound, "Connect your Plex account first (Settings > Account & Access > Linked services).")
 		return
 	}
 	p, err := s.watchlistPlexTV()
@@ -395,8 +395,8 @@ func (s *Server) syncWatchlist(ctx context.Context, row plexWatchlistRow) (added
 	if user.Disabled {
 		return 0, 0, errors.New("the account that connected this watchlist is turned off, so nothing is added from it")
 	}
-	if user.Viewer {
-		return 0, 0, errors.New("the account that connected this watchlist is read-only, so nothing is added from it")
+	if !user.IsAdmin {
+		return 0, 0, errors.New("the account that connected this watchlist isn't an administrator, so nothing is added from it")
 	}
 	p, err := s.watchlistPlexTV()
 	if err != nil {
