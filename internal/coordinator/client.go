@@ -21,8 +21,12 @@ import (
 )
 
 const (
-	requestTimeout = 15 * time.Second
-	maxBodyBytes   = 1 << 20
+	// A GET only reads. A POST can wait on the payment service, Emby and
+	// Mediarium in turn on the Coordinator's side (confirming a payment), so
+	// it gets longer.
+	readTimeout  = 15 * time.Second
+	writeTimeout = 30 * time.Second
+	maxBodyBytes = 1 << 20
 )
 
 var (
@@ -38,6 +42,8 @@ type Client struct {
 	baseURL string
 	token   string
 	http    *http.Client
+	// How long a GET, and any other call, may take.
+	readTimeout, writeTimeout time.Duration
 }
 
 // New returns a client for the Coordinator at baseURL (no trailing slash
@@ -49,7 +55,7 @@ func New(baseURL, token string) *Client {
 	if baseURL == "" || token == "" {
 		return nil
 	}
-	return &Client{baseURL: baseURL, token: token, http: netguard.Client(requestTimeout)}
+	return &Client{baseURL: baseURL, token: token, http: netguard.Client(0), readTimeout: readTimeout, writeTimeout: writeTimeout}
 }
 
 // Forward makes one call for the member the directory knows as subject and
@@ -57,6 +63,12 @@ func New(baseURL, token string) *Client {
 // the member's subscription address: "" or "/checkout", for example. A
 // Coordinator that cannot be reached gives an error that is safe to log.
 func (c *Client) Forward(ctx context.Context, method, subject, path string, body []byte) (int, []byte, error) {
+	timeout := c.writeTimeout
+	if method == http.MethodGet {
+		timeout = c.readTimeout
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	target := c.baseURL + "/api/v1/members/" + url.PathEscape(subject) + "/subscription" + path
 	req, err := http.NewRequestWithContext(ctx, method, target, bytes.NewReader(body))
 	if err != nil {
@@ -74,9 +86,13 @@ func (c *Client) Forward(ctx context.Context, method, subject, path string, body
 		return 0, nil, ErrUnavailable
 	}
 	defer resp.Body.Close()
-	payload, err := io.ReadAll(io.LimitReader(resp.Body, maxBodyBytes))
+	// One byte past the cap tells a whole answer from one that was cut short.
+	payload, err := io.ReadAll(io.LimitReader(resp.Body, maxBodyBytes+1))
 	if err != nil {
 		return 0, nil, fmt.Errorf("%w: the answer could not be read", ErrUnavailable)
+	}
+	if len(payload) > maxBodyBytes {
+		return 0, nil, fmt.Errorf("%w: the answer is larger than %d bytes", ErrUnavailable, maxBodyBytes)
 	}
 	return resp.StatusCode, payload, nil
 }
