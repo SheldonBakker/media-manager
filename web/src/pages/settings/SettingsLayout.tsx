@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { isAdmin } from '../../api'
+import { isAdmin, subscriptionNav } from '../../api'
 import { useAuth } from '../../AuthContext'
 import { useFindOnPage } from '../../findOnPage'
 import { pageBlurb, pageParts } from '../../settingsNav'
@@ -13,8 +13,9 @@ export default function SettingsLayout() {
   useFindOnPage()
   const { user } = useAuth()
   const admin = isAdmin(user)
-  const parts = pageParts(pathname, admin)
-  const blurb = pageBlurb(pathname, admin)
+  const subscription = subscriptionNav(user)
+  const parts = pageParts(pathname, admin, subscription)
+  const blurb = pageBlurb(pathname, admin, subscription)
   return (
     <div className="settings-content">
       <h2 className="settings-phone-title">

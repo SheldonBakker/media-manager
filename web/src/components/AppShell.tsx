@@ -4,7 +4,7 @@ import { MiniPlayer, MusicPlayerProvider } from './MusicPlayer'
 import { Fragment, useCallback, useEffect, useRef, useState, Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import { scrollToTop } from '../scrollTop'
-import { api, isAdmin, type AppLink, type WatchLink } from '../api'
+import { api, isAdmin, subscriptionNav, type AppLink, type WatchLink } from '../api'
 import { useAuth } from '../AuthContext'
 import { demoEnabled } from '../demo'
 import { titleFor, useSpecificTitle } from '../documentTitle'
@@ -131,7 +131,7 @@ function Shell() {
   const { user } = useAuth()
   const admin = isAdmin(user)
   // Members only have their own profile and About under Settings.
-  const settingsGroups = settingsGroupsFor(admin, user?.role === 'viewer')
+  const settingsGroups = settingsGroupsFor(admin, user?.role === 'viewer', subscriptionNav(user))
   const nav = NAV.map((n) => (n.sec === 'settings' ? { ...n, to: settingsGroups[0].pages[0].to } : n))
   const { on: moduleOn } = useModules()
   const ebooksOn = moduleOn('ebooks')
@@ -213,8 +213,9 @@ function Shell() {
 
   // The page name in the top bar, in the browser tab and (when the page has no
   // heading of its own) as the page's one <h1>.
-  const heading = pageTitle(location.pathname, admin)
-  const parts = pageParts(location.pathname, admin)
+  const subscription = subscriptionNav(user)
+  const heading = pageTitle(location.pathname, admin, subscription)
+  const parts = pageParts(location.pathname, admin, subscription)
   const headingText = parts.group ? `${parts.group} · ${parts.page}` : heading
   const headingNode = (
     <span className="top-text">

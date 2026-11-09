@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { api, DEFAULT_PERMISSIONS, displayName, isAdmin, type Account, type AccountChanges, type APIKey, type Permissions, type Role } from '../api'
+import { api, DEFAULT_PERMISSIONS, displayName, isAdmin, isLocked, type Account, type AccountChanges, type APIKey, type Permissions, type Role } from '../api'
 import PermissionsChoice from '../components/PermissionsChoice'
 import ProxySignIn from '../components/ProxySignIn'
 import SignInMethods from '../components/SignInMethods'
@@ -660,7 +660,7 @@ export default function Profile() {
         </span>
       </div>
       {local && <PasswordForm />}
-      {!viewer && <RequestNoticesCard />}
+      {!viewer && !isLocked(user) && <RequestNoticesCard />}
     </div>
   )
 }

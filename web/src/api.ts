@@ -108,7 +108,7 @@ async function send<T>(path: string, init?: ReadOptions): Promise<T> {
   }
   noteEndReason(res.status, text)
   if (sessionEnded(path, res.status, text)) noteSessionEnded()
-  let data: { error?: string; busy?: boolean; blocking?: BlockingDownload; code?: string } | null = null
+  let data: { error?: string; detail?: string; busy?: boolean; blocking?: BlockingDownload; code?: string } | null = null
   try {
     data = text ? JSON.parse(text) : null
   } catch {
@@ -121,7 +121,7 @@ async function send<T>(path: string, init?: ReadOptions): Promise<T> {
     throw new ApiError(503, st(data.error) || SLOW_MESSAGE, true)
   }
   if (!res.ok) {
-    throw new ApiError(res.status, st(data?.error) || t('Something went wrong on the server (error {status}).', { status: String(res.status) }), false, data?.blocking, typeof data?.code === 'string' ? data.code : undefined)
+    throw new ApiError(res.status, st(data?.error) || data?.detail || t('Something went wrong on the server (error {status}).', { status: String(res.status) }), false, data?.blocking, typeof data?.code === 'string' ? data.code : undefined)
   }
   noteFine()
   // Covers Mediarium serves itself come as "/api/...": under a URL base they
@@ -343,6 +343,8 @@ export interface User {
   name?: string
   email?: string
   permissions?: Permissions
+  subscriptionLocked?: boolean // needs a subscription before anything but Account & Access opens
+  subscriptionAvailable?: boolean // the Subscription page can be used
 }
 
 // can reports whether the signed-in account may do something. Administrators
@@ -364,6 +366,29 @@ export function isAdmin(u: User | null | undefined): boolean {
 // True for a viewer: an account that can look but never change anything.
 export function isViewer(u: User | null | undefined): boolean {
   return !!u && u.role === 'viewer'
+}
+
+// True for a member whose access waits on a subscription: they can only
+// reach Account & Access until they subscribe.
+export function isLocked(u: User | null | undefined): boolean {
+  return !!u && !isAdmin(u) && u.subscriptionLocked === true
+}
+
+// The Subscription page and the locked layout, as the navigation lists them.
+export function subscriptionNav(u: User | null | undefined): { available: boolean; locked: boolean } {
+  return { available: !!u?.subscriptionAvailable, locked: isLocked(u) }
+}
+
+export type SubscriptionStatus = 'none' | 'active' | 'cancelling' | 'payment_failed' | 'ended'
+
+// A member's subscription, kept by the Coordinator. `plan` is null for a
+// complimentary member, whose access is free.
+export interface Subscription {
+  status: SubscriptionStatus
+  hasAccess: boolean
+  complimentary: boolean
+  paidThrough: string | null
+  plan: { name: string; amount: number; currency: string; interval: string } | null
 }
 
 // An account as the administrator's account list shows it.
@@ -3430,6 +3455,11 @@ export const api = {
   sessions: () => get<SessionInfo[]>('/auth/sessions'),
   endOtherSessions: () => del<{ ended: number }>('/auth/sessions'),
   me: () => get<User>('/auth/me'),
+  getSubscription: () => get<Subscription>('/subscription'),
+  startCheckout: () => post<{ paymentUrl: string }>('/subscription/checkout'),
+  confirmCheckout: (reference: string) => post<Subscription>('/subscription/confirm', { reference }),
+  manageLink: () => post<{ url: string }>('/subscription/manage-link'),
+  cancelSubscription: () => post<Subscription>('/subscription/cancel'),
   changePassword: (currentPassword: string, newPassword: string) =>
     post<null>('/auth/change-password', { currentPassword, newPassword }),
   listAPIKeys: () => get<APIKey[]>('/auth/api-keys'),

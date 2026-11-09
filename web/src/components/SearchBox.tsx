@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { api, isAdmin, isViewer, type BookFound, type MusicArtistResult, type TitleResult } from '../api'
+import { api, isAdmin, isViewer, subscriptionNav, type BookFound, type MusicArtistResult, type TitleResult } from '../api'
 import { useAuth } from '../AuthContext'
 import { useModules } from '../ModulesContext'
 import AddMusicDialog from './AddMusicDialog'
@@ -171,7 +171,7 @@ export default function SearchBox() {
   const viewer = isViewer(user)
   const modKey = (['movies', 'tv', 'music', 'ebooks', 'audiobooks'] as const).map((m) => (on(m) ? 1 : 0)).join('')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const settingsIndex = useMemo(() => buildSettingsIndex(admin, viewer, (m) => on(m)), [admin, viewer, modKey])
+  const settingsIndex = useMemo(() => buildSettingsIndex(admin, viewer, (m) => on(m), subscriptionNav(user)), [admin, viewer, user, modKey])
   const hits = useMemo(() => (q.trim().length >= 2 ? searchSettings(q, settingsIndex) : []), [q, settingsIndex])
 
   const openItem = (r: TitleResult) => {

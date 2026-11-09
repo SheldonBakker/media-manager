@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react'
 import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom'
-import { isAdmin } from './api'
+import { isAdmin, isLocked } from './api'
 import { BASE_PATH } from './base'
 import { t } from './i18n'
 import { AuthProvider, useAuth } from './AuthContext'
 import { ModulesProvider } from './ModulesContext'
 import AppShell from './components/AppShell'
+import LockedShell from './components/LockedShell'
 import ErrorBoundary from './components/ErrorBoundary'
 import Dashboard from './pages/Dashboard'
 import Splash from './components/Splash'
@@ -96,6 +97,7 @@ const NotificationSettings = lazy(() => import('./pages/settings/NotificationSet
 const QualitySettings = lazy(() => import('./pages/settings/QualitySettings'))
 const SubtitleSettings = lazy(() => import('./pages/settings/SubtitleSettings'))
 const VPNSettings = lazy(() => import('./pages/settings/VPNSettings'))
+const SubscriptionSettings = lazy(() => import('./pages/settings/SubscriptionSettings'))
 const ConnectApp = lazy(() => import('./pages/ConnectApp'))
 
 // Pages only an administrator can use. A member who opens one (for example
@@ -141,6 +143,10 @@ function Gate() {
       </Suspense>
     )
   }
+
+  // A member whose access waits on a subscription gets a small layout of its
+  // own, so the rest of the app never loads and never asks for what is closed.
+  if (isLocked(user)) return <LockedRoutes />
 
   return (
     <>
@@ -217,6 +223,7 @@ function Gate() {
           <Route path="sign-in" element={<AdminOnly><SignInSettings /></AdminOnly>} />
           <Route path="general" element={<GeneralSettings />} />
           <Route path="security" element={<SecuritySettings />} />
+          <Route path="subscription" element={<SubscriptionSettings />} />
           <Route path="services" element={<AdminOnly><ServicesSettings /></AdminOnly>} />
           <Route path="logs" element={<AdminOnly><LogsSettings /></AdminOnly>} />
           <Route path="statistics" element={<Statistics />} />
@@ -229,6 +236,24 @@ function Gate() {
       </Route>
     </Routes>
     </>
+  )
+}
+
+// The only routes a locked member has: three Account & Access pages, and
+// everything else leads back to the Subscription page.
+function LockedRoutes() {
+  return (
+    <Routes>
+      <Route element={<LockedShell />}>
+        <Route path="/settings" element={<SettingsLayout />}>
+          <Route index element={<Navigate to="subscription" replace />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="security" element={<SecuritySettings />} />
+          <Route path="subscription" element={<SubscriptionSettings />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/settings/subscription" replace />} />
+      </Route>
+    </Routes>
   )
 }
 

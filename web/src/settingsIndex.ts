@@ -1,5 +1,5 @@
 import { t } from './i18n.ts'
-import { settingsGroupsFor, settingsNavFor } from './settingsNav.ts'
+import { settingsGroupsFor, settingsNavFor, type SubscriptionNav } from './settingsNav.ts'
 import { rank, type Searchable } from './settingsSearch.ts'
 
 // Everything the search bar can take you to inside Settings: every page, the
@@ -30,6 +30,7 @@ interface Spec {
 
 // Words people use for each page, besides its name.
 const PAGE_WORDS: Record<string, string> = {
+  subscription: 'plan pay payment card cancel renew billing subscribe',
   general: 'preferences language theme dark light time zone address update',
   modules: 'movies tv shows music books ebooks audiobooks enable disable turn on off',
   media: 'paths directories library root storage movies tv music books downloads hardlinks',
@@ -192,9 +193,9 @@ function cardSpecs(): Spec[] {
 
 // The index for one kind of account. `modulesOn` says whether a media type is
 // switched on, so folders for a type that is off are not offered.
-export function buildSettingsIndex(admin: boolean, viewer: boolean, modulesOn: (m: Module) => boolean = () => true): SettingsEntry[] {
-  const pages = settingsNavFor(admin, viewer)
-  const groups = settingsGroupsFor(admin, viewer)
+export function buildSettingsIndex(admin: boolean, viewer: boolean, modulesOn: (m: Module) => boolean = () => true, subscription?: SubscriptionNav): SettingsEntry[] {
+  const pages = settingsNavFor(admin, viewer, subscription)
+  const groups = settingsGroupsFor(admin, viewer, subscription)
   const groupOf = (to: string) => groups.find((g) => g.pages.some((p) => p.to === to))
   const trailOf = (to: string, pageLabel: string) => {
     const g = groupOf(to)

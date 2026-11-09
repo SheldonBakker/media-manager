@@ -41,7 +41,7 @@ test('every entry points at a settings route that exists', () => {
 })
 
 test('every settings page can be found, and nothing is listed twice', () => {
-  const admin = buildSettingsIndex(true, false)
+  const admin = buildSettingsIndex(true, false, undefined, { available: true, locked: false })
   const pages = admin.filter((e) => e.page).map((e) => e.to)
   assert.deepEqual(pages, SETTINGS_NAV.map((p) => p.to))
   const seen = new Set<string>()
