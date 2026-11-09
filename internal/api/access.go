@@ -50,6 +50,36 @@ var viewerWritable = map[string]bool{
 	"PUT /api/books/{id}/progress":            true,
 }
 
+// lockedMessage is the 403 body for an account that needs a subscription
+// calling anything outside lockedAllowed.
+const lockedMessage = "This account needs a subscription. Open Settings > Account & Access > Subscription."
+
+// lockedAllowed are the only signed-in routes an account that needs a
+// subscription may call: what Account & Access shows (the person's own
+// profile, password, sessions, second step, passkeys and single sign-on
+// link), never the library, the downloads or the settings. It is checked for
+// every route in one place, so a route added later stays closed to a locked
+// account until someone adds it here.
+var lockedAllowed = map[string]bool{
+	"GET /api/auth/me":                        true,
+	"PUT /api/auth/profile":                   true,
+	"POST /api/auth/change-password":          true,
+	"GET /api/auth/sessions":                  true,
+	"DELETE /api/auth/sessions":               true,
+	"GET /api/auth/two-step":                  true,
+	"POST /api/auth/two-step/setup":           true,
+	"POST /api/auth/two-step/enable":          true,
+	"POST /api/auth/two-step/disable":         true,
+	"POST /api/auth/two-step/recovery":        true,
+	"GET /api/auth/passkeys":                  true,
+	"POST /api/auth/passkeys/register/begin":  true,
+	"POST /api/auth/passkeys/register/finish": true,
+	"PUT /api/auth/passkeys/{id}":             true,
+	"DELETE /api/auth/passkeys/{id}":          true,
+	"POST /api/auth/oidc/link":                true,
+	"DELETE /api/auth/oidc/link":              true,
+}
+
 // viewerHidden are routes a viewer may not even read: they show things that
 // belong to someone who manages the account (API keys, connections to other
 // services, the secret calendar address).
@@ -157,6 +187,10 @@ func (t *routeTable) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		case level == accessAdmin && !user.IsAdmin:
 			writeError(w, http.StatusForbidden, forbiddenMessage)
+			return
+		}
+		if user.Locked() && !lockedAllowed[pattern] {
+			writeError(w, http.StatusForbidden, lockedMessage)
 			return
 		}
 		if user.ReadOnly() {

@@ -421,6 +421,7 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out := userPayload(user)
+	out["subscriptionLocked"] = user.Locked() // the app shows only Account & Access
 	if p, err := s.Auth.PermissionsOf(user.ID); err == nil {
 		out["permissions"] = p // the app hides what the account may not do
 	}
