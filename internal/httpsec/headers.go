@@ -57,7 +57,7 @@ func (p *Proxies) HeadersWithFrames(next http.Handler, frames func() []string) h
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
-		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()")
+		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()")
 		h.Set("Cross-Origin-Opener-Policy", "same-origin")
 		// A media manager has no business in a search engine's index.
 		h.Set("X-Robots-Tag", "noindex, nofollow, noarchive")

@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -161,5 +162,16 @@ func TestHeaders(t *testing.T) {
 	h.ServeHTTP(secure, req("GET", "127.0.0.1:1", map[string]string{"X-Forwarded-Proto": "https"}))
 	if secure.Header().Get("Strict-Transport-Security") == "" {
 		t.Error("no HSTS behind an HTTPS proxy")
+	}
+}
+
+// interest-cohort switched off FLoC, which Chrome dropped: Chrome now logs an
+// error on every page whose Permissions-Policy still names it.
+func TestPermissionsPolicyNamesNoRetiredFeature(t *testing.T) {
+	h := mustProxies(t, "private").Headers(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req("GET", "203.0.113.9:1", nil))
+	if p := w.Header().Get("Permissions-Policy"); strings.Contains(p, "interest-cohort") {
+		t.Errorf("Permissions-Policy %q names interest-cohort", p)
 	}
 }

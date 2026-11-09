@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"sort"
@@ -32,6 +33,14 @@ type libraryStats struct {
 
 const libraryStatsTTL = 60 * time.Second
 
+// firstStatsWait is how long a caller waits for the very first walk. A small
+// library is counted well within it; a big one on a network drive can take
+// longer than a page may (readDeadline), so the page goes on without it.
+var firstStatsWait = 2 * time.Second
+
+// errStatsPending is the answer while the first walk is still running.
+var errStatsPending = errors.New("the library is still being counted")
+
 type statsCache struct {
 	mu         sync.Mutex
 	stats      libraryStats
@@ -47,10 +56,11 @@ type statsWalk struct {
 }
 
 // libraryStats returns the library totals. They come from a walk over every
-// downloaded file, which on a big library (or a slow disk) takes a while, so
-// the answer is kept for libraryStatsTTL and, once it is older, still handed
-// out at once while a fresh one is made in the background. Only the very
-// first call waits for the walk.
+// downloaded file, which on a big library (or a slow or network drive) takes a
+// while, so the answer is kept for libraryStatsTTL and, once it is older, still
+// handed out at once while a fresh one is made in the background. Only the
+// first callers after a start wait for the walk, and for no longer than
+// firstStatsWait: after that they get errStatsPending while it carries on.
 func (s *Server) libraryStats() (libraryStats, error) {
 	s.statsCache.mu.Lock()
 	cached := s.statsCache.stats
@@ -78,31 +88,42 @@ func (s *Server) libraryStats() (libraryStats, error) {
 	// Nothing is kept yet. Callers that arrive while the first walk runs (a
 	// few browser tabs after a restart, a monitoring scrape) wait for that one
 	// instead of each starting a walk of their own.
-	return s.statsCache.firstWalk(s.walkLibraryStats)
+	return s.statsCache.firstWalk(s.walkLibraryStats, firstStatsWait)
 }
 
-// firstWalk runs walk, or waits for the walk another caller already started,
-// and keeps its result. The caller holds c.mu; firstWalk releases it.
-func (c *statsCache) firstWalk(walk func() (libraryStats, error)) (libraryStats, error) {
-	if w := c.first; w != nil {
-		c.mu.Unlock()
-		<-w.done
-		return w.stats, w.err
+// firstWalk starts walk, or joins the walk another caller already started,
+// and waits for it at most wait. The walk carries on when the wait is up and
+// its result is kept. The caller holds c.mu; firstWalk releases it.
+func (c *statsCache) firstWalk(walk func() (libraryStats, error), wait time.Duration) (libraryStats, error) {
+	w := c.first
+	if w == nil {
+		w = &statsWalk{done: make(chan struct{}), err: errors.New("the statistics could not be worked out")}
+		c.first = w
+		go func() {
+			defer func() { // also when walk panics, so nobody waits for ever
+				if p := recover(); p != nil {
+					slog.Error("library statistics: the walk failed", "panic", p)
+				}
+				c.mu.Lock()
+				if w.err == nil {
+					c.stats = w.stats
+				}
+				c.first = nil
+				c.mu.Unlock()
+				close(w.done)
+			}()
+			w.stats, w.err = walk()
+		}()
 	}
-	w := &statsWalk{done: make(chan struct{}), err: errors.New("the statistics could not be worked out")}
-	c.first = w
 	c.mu.Unlock()
-	defer func() { // also when walk panics, so nobody waits for ever
-		c.mu.Lock()
-		if w.err == nil {
-			c.stats = w.stats
-		}
-		c.first = nil
-		c.mu.Unlock()
-		close(w.done)
-	}()
-	w.stats, w.err = walk()
-	return w.stats, w.err
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+	select {
+	case <-w.done:
+		return w.stats, w.err
+	case <-timer.C:
+		return libraryStats{}, errStatsPending
+	}
 }
 
 // walkLibraryStats adds up the size and quality of every downloaded file.
@@ -327,8 +348,10 @@ func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	out.Library.Ebooks = dashBookCounts{Books: ebooks.Books, Downloaded: ebooks.Downloaded, Missing: ebooks.Missing}
 	out.Library.Audiobooks = dashBookCounts{Books: audiobooks.Books, Downloaded: audiobooks.Downloaded, Missing: audiobooks.Missing}
 
+	// Still being counted just after a start: the page goes without the sizes
+	// and the quality breakdown, which a later refresh brings.
 	stats, err := s.libraryStats()
-	if err != nil {
+	if err != nil && !errors.Is(err, errStatsPending) {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

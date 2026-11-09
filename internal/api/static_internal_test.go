@@ -25,8 +25,8 @@ func TestInterfaceIsNotServedStaleAfterAnUpdate(t *testing.T) {
 	}
 	for _, path := range []string{"/", "/settings/system", "/library"} {
 		w := get(path)
-		if w.Code != http.StatusOK || w.Header().Get("Cache-Control") != "no-cache" {
-			t.Errorf("GET %s: %d, Cache-Control %q; want 200 and no-cache", path, w.Code, w.Header().Get("Cache-Control"))
+		if w.Code != http.StatusOK || w.Header().Get("Cache-Control") != pageCacheControl {
+			t.Errorf("GET %s: %d, Cache-Control %q; want 200 and %q", path, w.Code, w.Header().Get("Cache-Control"), pageCacheControl)
 		}
 	}
 
@@ -45,6 +45,21 @@ func TestInterfaceIsNotServedStaleAfterAnUpdate(t *testing.T) {
 		}
 		if !hashedName(a.Name()) {
 			t.Errorf("asset %s has no content hash in its name, so an old copy could be kept after an update", a.Name())
+		}
+	}
+}
+
+// A proxy in front may add its own script to the page (Cloudflare's Web
+// Analytics does, unless told not to), which the page's
+// Content-Security-Policy then blocks with an error in the browser console.
+// no-transform asks every proxy to pass the page on as it is.
+func TestPagesAskProxiesToLeaveThemAsTheyAre(t *testing.T) {
+	h := frontendHandler()
+	for _, path := range []string{"/", "/library", "/bookshelf", "/bookshelf/read/4"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if cc := w.Header().Get("Cache-Control"); cc != "no-cache, no-transform" {
+			t.Errorf("GET %s: Cache-Control %q, want no-cache, no-transform", path, cc)
 		}
 	}
 }

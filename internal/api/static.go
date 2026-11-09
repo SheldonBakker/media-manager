@@ -17,6 +17,13 @@ import (
 	"github.com/rdborg/mediarium/web"
 )
 
+// pageCacheControl is the Cache-Control of the app's page. no-cache: it is
+// re-checked every time, so an update is picked up at once. no-transform: a
+// proxy in front must pass it on as it is. Cloudflare's Web Analytics, for
+// one, adds its own script to a page unless told not to, and the page's
+// Content-Security-Policy then blocks it with an error in the browser console.
+const pageCacheControl = "no-cache, no-transform"
+
 // frontendHandler serves the embedded React build, falling back to
 // index.html for any path that isn't a real static asset — required for
 // client-side routing (search/library/settings/onboarding are all
@@ -44,7 +51,7 @@ func frontendHandlerBase(base string) http.Handler {
 				// Mediarium Books installs as an app of its own: the same
 				// page, with its own name and web app manifest.
 				if pages.books != nil {
-					w.Header().Set("Cache-Control", "no-cache")
+					w.Header().Set("Cache-Control", pageCacheControl)
 					pages.books.serve(w, r)
 					return
 				}
@@ -53,7 +60,7 @@ func frontendHandlerBase(base string) http.Handler {
 			r.URL.Path = "/"
 		}
 		if f := pages.forPath(r.URL.Path); f != nil && (r.Method == http.MethodGet || r.Method == http.MethodHead) {
-			w.Header().Set("Cache-Control", "no-cache")
+			w.Header().Set("Cache-Control", pageCacheControl)
 			f.serve(w, r)
 			return
 		}
