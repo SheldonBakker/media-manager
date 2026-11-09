@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { Subscription, SubscriptionStatus } from './api.ts'
-import { planLine, returnReference, subscriptionActions } from './subscriptionView.ts'
+import { accessState, planLine, returnReference, subscriptionActions } from './subscriptionView.ts'
 
 const sub = (status: SubscriptionStatus, complimentary = false): Subscription => ({
   status,
@@ -36,4 +36,12 @@ test('the plan reads as price and interval', () => {
   assert.equal(planLine({ name: 'Monthly', amount: 99, currency: 'ZAR', interval: 'monthly' }), 'R 99.00 / month')
   assert.equal(planLine({ name: 'Yearly', amount: 1200.5, currency: 'USD', interval: 'annually' }), 'USD 1200.50 / year')
   assert.equal(planLine(null), '')
+})
+
+test('paid but still locked means access is being switched on', () => {
+  assert.equal(accessState(sub('active'), true), 'switching')
+  assert.equal(accessState(sub('cancelling'), true), 'switching')
+  assert.equal(accessState(sub('active'), false), 'unlocked')
+  assert.equal(accessState(sub('payment_failed'), true), 'none')
+  assert.equal(accessState(sub('none'), false), 'none')
 })

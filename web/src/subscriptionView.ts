@@ -56,3 +56,12 @@ export function planLine(plan: Subscription['plan']): string {
   const money = plan.currency === 'ZAR' ? 'R' : plan.currency
   return `${money} ${plan.amount.toFixed(2)} / ${every(plan.interval)}`
 }
+
+export type AccessState = 'none' | 'switching' | 'unlocked'
+
+// Where a member stands once the subscription is known: no access yet, paid
+// but the account still reads as locked (access is being switched on), or open.
+export function accessState(s: Subscription, locked: boolean): AccessState {
+  if (!s.hasAccess) return 'none'
+  return locked ? 'switching' : 'unlocked'
+}

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { api, ApiError, type Subscription } from '../../api'
+import { api, ApiError, isLocked, type Subscription } from '../../api'
+import { useAuth } from '../../AuthContext'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { locale, t } from '../../i18n'
-import { planLine, returnReference, subscriptionActions } from '../../subscriptionView'
+import { accessState, planLine, returnReference, subscriptionActions } from '../../subscriptionView'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
 const dateText = (iso: string) => new Date(iso).toLocaleDateString(locale())
@@ -35,6 +36,7 @@ export default function SubscriptionSettings() {
   const location = useLocation()
   const navigate = useNavigate()
   const toast = useToast()
+  const { user, setUser } = useAuth()
   const [sub, setSub] = useState<Subscription | null>(null)
   const [problem, setProblem] = useState('')
   const [busy, setBusy] = useState(false)
@@ -43,13 +45,28 @@ export default function SubscriptionSettings() {
   // in development (and a re-render before the address is cleaned) sends it once.
   const confirmed = useRef<string | null>(null)
 
-  const load = useCallback(async () => {
+  // Reads the account again. Once it is no longer locked the app swaps to its
+  // full layout by itself; until then the page says access is being switched on.
+  const syncUser = useCallback(async () => {
     try {
-      setSub(await api.getSubscription())
+      setUser(await api.me())
     } catch (e) {
       setProblem(errorText(e))
     }
-  }, [])
+  }, [setUser])
+
+  const load = useCallback(
+    async (syncAccess = false) => {
+      try {
+        const s = await api.getSubscription()
+        setSub(s)
+        if (syncAccess && s.hasAccess) await syncUser()
+      } catch (e) {
+        setProblem(errorText(e))
+      }
+    },
+    [syncUser],
+  )
 
   useEffect(() => {
     const reference = returnReference(location.search)
@@ -63,20 +80,20 @@ export default function SubscriptionSettings() {
     setBusy(true)
     api
       .confirmCheckout(reference)
-      .then((s) => {
+      .then(async (s) => {
         setSub(s)
         setProblem('')
+        navigate(location.pathname, { replace: true })
+        if (s.hasAccess) await syncUser()
       })
       .catch((e) => {
         setProblem(errorText(e))
-        // The payment may have gone through even so (a second tab, a late notice): show what the server now says.
-        if (e instanceof ApiError && e.status === 409) void load()
-      })
-      .finally(() => {
-        setBusy(false)
         navigate(location.pathname, { replace: true })
+        // The payment may have gone through even so (a second tab, a late notice): show what the server now says.
+        if (e instanceof ApiError && e.status === 409) return load(true)
       })
-  }, [location.search, location.pathname, navigate, load])
+      .finally(() => setBusy(false))
+  }, [location.search, location.pathname, navigate, load, syncUser])
 
   async function run(job: () => Promise<void>) {
     setBusy(true)
@@ -85,7 +102,7 @@ export default function SubscriptionSettings() {
     } catch (e) {
       setProblem(errorText(e))
       // An earlier payment went through: the subscription is already active.
-      if (e instanceof ApiError && e.code === 'StartCheckout.AlreadyPaid') void load()
+      if (e instanceof ApiError && e.code === 'StartCheckout.AlreadyPaid') void load(true)
     } finally {
       setBusy(false)
     }
@@ -126,6 +143,7 @@ export default function SubscriptionSettings() {
 
   const actions = sub ? subscriptionActions(sub) : []
   const plan = sub ? planLine(sub.plan) : ''
+  const switching = sub ? accessState(sub, isLocked(user)) === 'switching' : false
   const until = sub?.paidThrough ? dateText(sub.paidThrough) : ''
 
   return (
@@ -146,10 +164,23 @@ export default function SubscriptionSettings() {
             {sub.status === 'cancelling' && until && <p style={{ color: 'var(--text-dim)' }}>{t('You can subscribe again after {date}.', { date: until })}</p>}
           </>
         )}
+        {switching && (
+          <>
+            <p>{t('Your subscription is active. Your access is being switched on, which can take a minute.')}</p>
+            <button onClick={() => void run(syncUser)} disabled={busy}>
+              {t('Check again')}
+            </button>
+          </>
+        )}
         {problem && (
           <p role="alert" style={{ color: 'var(--danger)' }}>
             {problem}
           </p>
+        )}
+        {!sub && problem && (
+          <button onClick={() => void run(() => load())} disabled={busy}>
+            {t('Try again')}
+          </button>
         )}
         {actions.length > 0 && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
