@@ -355,12 +355,12 @@ It asks for the new password twice (at least 8 characters) and signs that accoun
 
 This fork can ask for a paid subscription. Payment, plans and cards live in a separate service, the Coordinator. Mediarium never stores card details, payment keys or payment links. It only passes calls on to the Coordinator and remembers one thing per account: whether it needs a subscription.
 
-**Switching it on.** Set `MEDIARIUM_COORDINATOR_URL` (the Coordinator's address) and `MEDIARIUM_COORDINATOR_TOKEN` (the secret the Coordinator expects, or `MEDIARIUM_COORDINATOR_TOKEN_FILE` to keep it out of the compose file, see [Secrets from files](./INSTALL.md#secrets-from-files-docker-secrets)) on the container. With either one empty, subscriptions are off. Only accounts that sign in through the directory can have a subscription, because the Coordinator knows a person by their directory id.
+**Switching it on.** Set `MEDIARIUM_COORDINATOR_URL` (the Coordinator's address) and `MEDIARIUM_COORDINATOR_TOKEN` (the secret the Coordinator expects, or `MEDIARIUM_COORDINATOR_TOKEN_FILE` to keep it out of the compose file, see [Secrets from files](./INSTALL.md#secrets-from-files-docker-secrets)) on the container. With either one empty, subscriptions are off; an address that is not http or https leaves them off too, with a warning in the log. Only accounts that sign in through the directory can have a subscription, because the Coordinator knows a person by their directory id.
 
 **The lock.** An account that needs a subscription is "locked". The Coordinator sets it with the provisioning token (see [Making directory accounts from another service](#making-directory-accounts-from-another-service)):
 
 - `POST /api/provisioning/directory-accounts` takes `"locked": true` to make a new account that starts locked. It is ignored for a person who already has an account.
-- `PUT /api/provisioning/directory-accounts/{subject}/access` with `{"locked": true}` or `{"locked": false}` locks or unlocks the account of that directory person. It answers `204`, or `404` when no account is linked to that id. Nothing else about the account changes and its sessions stay. Both changes are in the Activity feed, "by provisioning".
+- `PUT /api/provisioning/directory-accounts/{subject}/access` with `{"locked": true}` or `{"locked": false}` locks or unlocks the account of that directory person. It answers `204`, `400` when `locked` is missing, or `404` when no account is linked to that id. Nothing else about the account changes and its sessions stay. Each change is in the Activity feed, "by provisioning"; sending what the account already is changes nothing and adds no line.
 
 Admins are never locked.
 
@@ -376,11 +376,11 @@ Admins are never locked.
 | Payment failed | The last payment did not go through | **Pay now**, **Update card** |
 | Complimentary | Your access is free | None |
 
-**Subscribe** and **Pay now** send you to the payment page; when you come back, Mediarium confirms the payment once. **Update card** opens the card page in a new tab. Switching access on can take a minute after paying, so the page says "Your access is being switched on" with a **Check again** button, and the app opens up by itself once the account is unlocked. There is no way to resume a cancelled subscription: subscribe again after the access date.
+**Subscribe** and **Pay now** send you to the payment page; when you come back, Mediarium confirms the payment once. **Update card** opens the card page in a new tab. Switching access on can take a minute after paying, so the page says "Your access is being switched on" with a **Check again** button. Once the account is unlocked the app opens up the next time the page reads the account: after **Check again**, when you come back to the tab, or on a reload. There is no way to resume a cancelled subscription: subscribe again after the access date.
 
 **The account list** shows a **Needs subscription** badge on a locked account.
 
-**For developers.** The member routes are `GET /api/subscription`, `POST /api/subscription/checkout`, `POST /api/subscription/confirm` (with `{"reference": "..."}`), `POST /api/subscription/manage-link` and `POST /api/subscription/cancel`. They forward to the Coordinator with the person's directory id, and answer its status and body as they come. An account without a directory sign-in, or a Mediarium without the Coordinator settings, answers `404` "This account has no subscription."; a Coordinator that does not answer gives `502`. Viewers may call the changing ones too. `GET /api/auth/me` reports `subscriptionLocked` and `subscriptionAvailable`.
+**For developers.** The member routes are `GET /api/subscription`, `POST /api/subscription/checkout`, `POST /api/subscription/confirm` (with `{"reference": "..."}`), `POST /api/subscription/manage-link` and `POST /api/subscription/cancel`. They forward to the Coordinator with the person's directory id, and answer its status and body as they come, except that a `5xx` body is replaced by the plain server error for anyone but an admin, a `401` or `403` (the Coordinator refusing `MEDIARIUM_COORDINATOR_TOKEN`) becomes `502`, and a `404` on `GET /api/subscription` becomes "This account has no subscription.". An account without a directory sign-in, or a Mediarium without the Coordinator settings, answers `404` "This account has no subscription."; a Coordinator that does not answer gives `502`. Viewers may call the changing ones too. `GET /api/auth/me` reports `subscriptionLocked` and `subscriptionAvailable`.
 
 ## For developers
 
