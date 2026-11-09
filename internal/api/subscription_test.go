@@ -83,7 +83,7 @@ func rawCall(e *signInEnv, c *http.Client, method, path, body string) (int, stri
 }
 
 func TestSubscriptionForwardsWithTheSubjectAndToken(t *testing.T) {
-	const answer = `{"status":"Active","hasAccess":true,"complimentary":false,"paidThrough":"2026-12-01T00:00:00Z","plan":null}`
+	const answer = `{"status":"active","hasAccess":true,"complimentary":false,"paidThrough":"2026-12-01T00:00:00Z","plan":null}`
 	url, calls := fakeCoordinator(t, http.StatusOK, answer)
 	e := newSignInEnv(t, withCoordinator(url))
 	sam := e.directoryMember("sam", "member", "uid=sam/odd subject")
