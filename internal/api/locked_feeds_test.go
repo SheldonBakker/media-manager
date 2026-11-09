@@ -98,3 +98,25 @@ func TestLockedAccountIsRefusedOnTheCalendarFeed(t *testing.T) {
 		t.Errorf("an administrator's feed with the flag set answered %d", got)
 	}
 }
+
+// The lock check reads the account. When that read fails the feed says it is
+// unavailable, as for any other server trouble, rather than that it is gone.
+func TestCalendarFeedIsUnavailableWhenTheAccountCannotBeRead(t *testing.T) {
+	server, base, _, member, _ := familyServer(t)
+	type feed struct {
+		Path string `json:"path"`
+	}
+	mine := postJSON[feed](t, member, base+"/api/calendar/feed", nil, http.StatusOK)
+	// The feed's own lookup still works; reading the account no longer does.
+	if err := server.TestExec(`ALTER TABLE users DROP COLUMN subscription_locked`); err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.Get(base + mine.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Errorf("status = %d, want 500", resp.StatusCode)
+	}
+}

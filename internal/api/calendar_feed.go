@@ -90,7 +90,12 @@ func (s *Server) handleCalendarFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	// The feed is signed in by its token, outside the signed-in routes, so the
 	// lock is checked here. It looks as if the feed were not there.
-	if u, err := s.Auth.GetUser(userID); err != nil || u.Locked() {
+	u, err := s.Auth.GetUser(userID)
+	if err != nil {
+		http.Error(w, "calendar unavailable", http.StatusInternalServerError)
+		return
+	}
+	if u.Locked() {
 		http.NotFound(w, r)
 		return
 	}
