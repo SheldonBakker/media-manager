@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { api, displayName, isAdmin } from '../api'
 import { useAuth } from '../AuthContext'
 import { demoEnabled, setDemo } from '../demo'
-import { WEBSITE_URL } from '../docs'
 import { LANGUAGES, chooseLanguage, currentLanguage, t } from '../i18n'
 import { QUEUE_STORAGE_KEY } from '../musicQueue'
 import { SKIP_ONCE_KEY } from '../autoSignIn'
@@ -96,9 +95,6 @@ export default function ProfileMenu() {
               <Icon name="sliders" size={16} /> {t('Settings')}
             </Link>
           )}
-          <a href={WEBSITE_URL} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setOpen(false)}>
-            <Icon name="globe" size={16} /> {t('Website')}
-          </a>
           {admin && (
             <button role="menuitem" onClick={() => setDemo(!demo)} title={t('Made-up titles for screenshots and trying the app out. Only in this browser; nothing is saved to your library.')}>
               <Icon name="flask" size={16} /> {demo ? t('Turn off demo data') : t('Show demo data')}
