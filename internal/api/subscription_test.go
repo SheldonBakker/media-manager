@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -244,5 +245,65 @@ func TestMeSaysWhetherSubscriptionsAreAvailable(t *testing.T) {
 	sam = off.directoryMember("sam", "member", "sam")
 	if got := off.must(sam, "GET", "/api/auth/me", nil, http.StatusOK)["subscriptionAvailable"]; got != false {
 		t.Errorf("without Coordinator settings: %v", got)
+	}
+}
+
+// captureLog sends the log to a buffer for the rest of the test.
+func captureLog(t *testing.T) *bytes.Buffer {
+	t.Helper()
+	var logged bytes.Buffer
+	log.SetOutput(&logged)
+	t.Cleanup(func() { log.SetOutput(io.Discard) })
+	return &logged
+}
+
+// A Coordinator that refuses Mediarium's own token is a setup problem for an
+// administrator: the member gets the plain server error, the log the status.
+func TestCoordinatorRefusingTheTokenIsAServerError(t *testing.T) {
+	for _, refused := range []int{http.StatusUnauthorized, http.StatusForbidden} {
+		const problem = `{"title":"Unauthorized","detail":"The service token is wrong."}`
+		url, _ := fakeCoordinator(t, refused, problem)
+		logged := captureLog(t)
+		e := newSignInEnv(t, withCoordinator(url))
+		sam := e.directoryMember("sam", "member", "sam")
+		status, body := rawCall(e, sam, "POST", "/api/subscription/checkout", "")
+		if status != http.StatusBadGateway || !strings.Contains(body, "Something went wrong on the server. An administrator can find the details in the log.") {
+			t.Errorf("Coordinator %d: %d %s, want 502 with the generic server error", refused, status, body)
+		}
+		line := ""
+		for l := range strings.Lines(logged.String()) {
+			if strings.Contains(l, "WARN subscription:") {
+				line = l
+			}
+		}
+		if !strings.Contains(line, "status="+strconv.Itoa(refused)) || strings.Contains(line, "service token is wrong") {
+			t.Errorf("Coordinator %d: the warning is %q, want the status and not the body", refused, line)
+		}
+	}
+}
+
+// The Coordinator not knowing the person is no subscription, in Mediarium's
+// own words, never the Coordinator's.
+func TestCoordinatorNotKnowingTheMemberIsNoSubscription(t *testing.T) {
+	url, _ := fakeCoordinator(t, http.StatusNotFound, `{"title":"Not Found","code":"Subscription.MemberNotFound","detail":"No member with that subject."}`)
+	e := newSignInEnv(t, withCoordinator(url))
+	sam := e.directoryMember("sam", "member", "sam")
+	status, body := rawCall(e, sam, "GET", "/api/subscription", "")
+	if status != http.StatusNotFound || body != `{"error":"This account has no subscription."}`+"\n" {
+		t.Errorf("got %d %q, want 404 with Mediarium's no-subscription message", status, body)
+	}
+}
+
+// An answer the Coordinator is not known to give is passed on, and noted.
+func TestCoordinatorUnexpectedStatusIsLogged(t *testing.T) {
+	url, _ := fakeCoordinator(t, http.StatusTeapot, `{"secret":"never logged"}`)
+	logged := captureLog(t)
+	e := newSignInEnv(t, withCoordinator(url))
+	sam := e.directoryMember("sam", "member", "sam")
+	if status, _ := rawCall(e, sam, "GET", "/api/subscription", ""); status != http.StatusTeapot {
+		t.Errorf("status = %d, want the Coordinator's 418 passed on", status)
+	}
+	if !strings.Contains(logged.String(), "status=418") || strings.Contains(logged.String(), "never logged") {
+		t.Errorf("the log lacks the status, or holds the body:\n%s", logged.String())
 	}
 }
