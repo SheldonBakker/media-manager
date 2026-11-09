@@ -26,7 +26,9 @@ var viewerMayWrite = map[string]bool{
 	"POST /api/auth/passkeys/register/begin": true, "POST /api/auth/passkeys/register/finish": true,
 	"PUT /api/auth/passkeys/{id}": true, "DELETE /api/auth/passkeys/{id}": true,
 	"POST /api/auth/oidc/link": true, "DELETE /api/auth/oidc/link": true,
-	"PUT /api/books/{id}/progress": true,
+	"PUT /api/books/{id}/progress":    true,
+	"POST /api/subscription/checkout": true, "POST /api/subscription/confirm": true,
+	"POST /api/subscription/manage-link": true, "POST /api/subscription/cancel": true,
 }
 
 // Things a viewer may not even read: they belong to whoever manages the account.

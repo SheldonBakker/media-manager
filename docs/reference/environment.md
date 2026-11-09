@@ -13,6 +13,8 @@ Container-level settings only. Everything else (indexers, Usenet servers, naming
 | `DOWNLOADS_DIR` | `/downloads` |
 | `EBOOKS_DIR` | `/ebooks` |
 | `MEDIARIUM_ACCOUNT_SERVICE_URL` | `` |
+| `MEDIARIUM_COORDINATOR_TOKEN` | `` |
+| `MEDIARIUM_COORDINATOR_URL` | `` |
 | `MEDIARIUM_DISABLE_SSO` | `` |
 | `MEDIARIUM_PAUSE_AUTOMATION` | `` |
 | `MEDIARIUM_PROVISIONING_TOKEN` | `` |

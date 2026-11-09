@@ -274,3 +274,122 @@ func TestProvisionedAccountIsTheOneTheDirectorySignInFinds(t *testing.T) {
 		t.Errorf("accounts = %s, want 2", n)
 	}
 }
+
+// accessPath is the address that locks or unlocks the account of a subject.
+func accessPath(subject string) string { return provisionPath + "/" + subject + "/access" }
+
+func TestProvisioningCanMakeALockedAccount(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam", "locked": true}, http.StatusCreated, bearer(provisioningToken)...)
+	u, err := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !u.SubscriptionLocked || !u.Locked() {
+		t.Errorf("the account is not locked: %+v", u)
+	}
+}
+
+// Asking again for a person who has an account never locks or unlocks it.
+func TestProvisioningAgainNeverChangesTheLock(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam", "locked": true}, http.StatusCreated, bearer(provisioningToken)...)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam", "locked": false}, http.StatusOK, bearer(provisioningToken)...)
+	u, err := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !u.SubscriptionLocked {
+		t.Error("a second call unlocked the account")
+	}
+}
+
+func TestProvisioningAccessLocksAndUnlocksBySubject(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam"}, http.StatusCreated, bearer(provisioningToken)...)
+	for _, locked := range []bool{true, false} {
+		if status, out := e.call(e.client(), "PUT", accessPath("uuid-sam"), map[string]bool{"locked": locked}, bearer(provisioningToken)...); status != http.StatusNoContent {
+			t.Fatalf("locked=%v: %d %v, want 204", locked, status, out["_raw"])
+		}
+		u, err := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if u.SubscriptionLocked != locked {
+			t.Errorf("locked = %v, want %v", u.SubscriptionLocked, locked)
+		}
+	}
+}
+
+func TestProvisioningAccessForAnUnknownSubjectIs404(t *testing.T) {
+	e := newProvisioningEnv(t)
+	if status, out := e.call(e.client(), "PUT", accessPath("nobody"), map[string]bool{"locked": true}, bearer(provisioningToken)...); status != http.StatusNotFound {
+		t.Errorf("%d %v, want 404", status, out["_raw"])
+	}
+}
+
+func TestProvisioningAccessNeedsTheToken(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam"}, http.StatusCreated, bearer(provisioningToken)...)
+	body := map[string]bool{"locked": true}
+	for name, try := range map[string]struct {
+		c       *http.Client
+		headers []string
+	}{
+		"no token":                   {e.client(), nil},
+		"a wrong token":              {e.client(), bearer(provisioningToken + "x")},
+		"an administrator's session": {e.admin, nil},
+	} {
+		if status, out := e.call(try.c, "PUT", accessPath("uuid-sam"), body, try.headers...); status != http.StatusUnauthorized {
+			t.Errorf("%s: %d %v, want 401", name, status, out["_raw"])
+		}
+	}
+	if u, _ := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam"); u == nil || u.SubscriptionLocked {
+		t.Error("a refused call locked the account")
+	}
+
+	off := newSignInEnv(t, nil)
+	if status, out := off.call(off.client(), "PUT", accessPath("uuid-sam"), body, bearer(provisioningToken)...); status != http.StatusNotFound {
+		t.Errorf("without a token set: %d %v, want 404", status, out["_raw"])
+	}
+}
+
+func TestProvisioningAccessIsLogged(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam"}, http.StatusCreated, bearer(provisioningToken)...)
+	e.call(e.client(), "PUT", accessPath("uuid-sam"), map[string]bool{"locked": true}, bearer(provisioningToken)...)
+	lines := activityLines(t, e.admin, e.base)
+	if !strings.Contains(lines, `Account "sam" needs a subscription (by provisioning`) {
+		t.Errorf("the Activity feed lacks the lock:\n%s", lines)
+	}
+}
+
+// A body without "locked" (empty, or with the name misspelt) must never
+// unlock anyone, so it is refused.
+func TestProvisioningAccessNeedsLocked(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam", "locked": true}, http.StatusCreated, bearer(provisioningToken)...)
+	for _, body := range []map[string]any{{}, {"lockd": false}, {"locked": nil}} {
+		if status, out := e.call(e.client(), "PUT", accessPath("uuid-sam"), body, bearer(provisioningToken)...); status != http.StatusBadRequest {
+			t.Errorf("%v: %d %v, want 400", body, status, out["_raw"])
+		}
+	}
+	if u, _ := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam"); u == nil || !u.SubscriptionLocked {
+		t.Error("a body without locked unlocked the account")
+	}
+}
+
+// Locking an account that is already locked changes nothing, so it adds no
+// second line to the Activity feed.
+func TestProvisioningAccessLogsOnlyAChange(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam"}, http.StatusCreated, bearer(provisioningToken)...)
+	for range 2 {
+		if status, out := e.call(e.client(), "PUT", accessPath("uuid-sam"), map[string]bool{"locked": true}, bearer(provisioningToken)...); status != http.StatusNoContent {
+			t.Fatalf("%d %v, want 204", status, out["_raw"])
+		}
+	}
+	if n := strings.Count(activityLines(t, e.admin, e.base), `Account "sam" needs a subscription`); n != 1 {
+		t.Errorf("the lock is in the Activity feed %d times, want once", n)
+	}
+}

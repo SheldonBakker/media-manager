@@ -30,6 +30,7 @@ const subjectMax = 255
 // session, decides who may call them.
 func (s *Server) provisioningRoutes(provisioning *http.ServeMux) {
 	provisioning.HandleFunc("POST /api/provisioning/directory-accounts", s.handleProvisionDirectoryAccount)
+	provisioning.HandleFunc("PUT /api/provisioning/directory-accounts/{subject}/access", s.handleProvisionAccess)
 }
 
 // provisioningAllowed checks the caller's bearer token. On failure it has
@@ -56,6 +57,9 @@ type provisionAccountRequest struct {
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
+	// Locked makes a new account need a subscription. It is ignored for a
+	// person who already has an account.
+	Locked bool `json:"locked"`
 }
 
 // provisionedAccount is what the other service learns about the account.
@@ -107,7 +111,7 @@ func (s *Server) handleProvisionDirectoryAccount(w http.ResponseWriter, r *http.
 	}
 	created, err := s.Auth.CreateExternalUser(auth.ExternalProfile{
 		Provider: auth.SourceLDAP, Subject: req.Subject, Username: req.Username, Name: req.Name, Email: req.Email,
-		Role: auth.RoleMember, AllowSuffix: false,
+		Role: auth.RoleMember, AllowSuffix: false, Locked: req.Locked,
 	})
 	if errors.Is(err, auth.ErrIdentityTaken) || errors.Is(err, auth.ErrUsernameTaken) {
 		// Another call for the same person may have made the account a moment ago.
@@ -126,4 +130,58 @@ func (s *Server) handleProvisionDirectoryAccount(w http.ResponseWriter, r *http.
 	}
 	s.auditAccountBy(r, provisioningActor, fmt.Sprintf("Account %q was created as %s for a directory sign-in", created.Username, roleWords(created.Role())))
 	writeJSON(w, http.StatusCreated, toProvisionedAccount(created))
+}
+
+// accessBodyMax is the biggest body the access call needs: one true or false.
+const accessBodyMax = 1 << 10
+
+type provisionAccessRequest struct {
+	// Locked is a pointer so that a body without it (or with the name
+	// misspelt) is refused instead of read as false, which would unlock.
+	Locked *bool `json:"locked"`
+}
+
+// handleProvisionAccess locks the account of a directory person, so that it
+// needs a subscription, or unlocks it again. Nothing else about the account
+// changes, and its sessions stay.
+func (s *Server) handleProvisionAccess(w http.ResponseWriter, r *http.Request) {
+	if !s.provisioningAllowed(w, r) {
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, accessBodyMax)
+	var req provisionAccessRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "That request couldn't be read.")
+		return
+	}
+	if req.Locked == nil {
+		writeError(w, http.StatusBadRequest, `Send "locked" as true or false.`)
+		return
+	}
+	subject := strings.TrimSpace(r.PathValue("subject"))
+	if rejectBad(w,
+		checkRequired(subject, "Send the person's id in the directory as subject."),
+		checkMaxLen(subject, "Subject", subjectMax),
+	) {
+		return
+	}
+	u, changed, err := s.Auth.SetSubscriptionLocked(auth.SourceLDAP, subject, *req.Locked)
+	if errors.Is(err, auth.ErrNoIdentity) {
+		writeError(w, http.StatusNotFound, "No account is linked to that directory id.")
+		return
+	}
+	if err != nil {
+		writeAccountError(w, err)
+		return
+	}
+	// The Coordinator may send the same answer again; only a change goes in
+	// the Activity feed.
+	if changed {
+		line := fmt.Sprintf("Account %q has a subscription", u.Username)
+		if *req.Locked {
+			line = fmt.Sprintf("Account %q needs a subscription", u.Username)
+		}
+		s.auditAccountBy(r, provisioningActor, line)
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

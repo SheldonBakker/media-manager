@@ -10,6 +10,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # Settings come from .env next to this file. Paid subscriptions (see docs/accounts.md)
+    # are off until both of these are set:
+    #   MEDIARIUM_COORDINATOR_URL=https://coordinator.example.com
+    #   MEDIARIUM_COORDINATOR_TOKEN=<the secret the Coordinator expects>
     env_file:
       - .env
     ports:

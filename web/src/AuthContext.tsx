@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
-import { api, ApiError, isAdmin, startModulesEarly, type User } from './api'
+import { api, ApiError, isAdmin, isLocked, startModulesEarly, type User } from './api'
 import { clearEndReason, onSessionEnded } from './sessionEnd'
 
 interface AuthState {
@@ -52,19 +52,22 @@ function withTimeout<T>(p: Promise<T>): Promise<T> {
 }
 
 const LAST_ROLE_KEY = 'mediarium-last-admin'
+// What LAST_ROLE_KEY holds for an account that needs a subscription ('1' is an
+// administrator, '0' anyone else).
+const LAST_LOCKED = 'locked'
 
-// Whether the account last signed in on this browser was an administrator. Unknown counts as yes.
-function lastWasAdmin(): boolean {
+// What the account last signed in on this browser was, or null when unknown.
+function lastRole(): string | null {
   try {
-    return localStorage.getItem(LAST_ROLE_KEY) !== '0'
+    return localStorage.getItem(LAST_ROLE_KEY)
   } catch {
-    return true
+    return null
   }
 }
 
-function rememberAdmin(admin: boolean) {
+function rememberRole(u: User) {
   try {
-    localStorage.setItem(LAST_ROLE_KEY, admin ? '1' : '0')
+    localStorage.setItem(LAST_ROLE_KEY, isAdmin(u) ? '1' : isLocked(u) ? LAST_LOCKED : '0')
   } catch {
     // private windows may refuse; settings are then asked for early again
   }
@@ -99,13 +102,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // page cannot start before all of them. What is not needed (the account of a
       // server that is still to be set up) is simply ignored.
       // Settings are for administrators only, so they are only asked for early when
-      // this browser's last account was one; otherwise only after the account says so.
+      // this browser's last account was one (or is unknown); otherwise only after the
+      // account says so. An account that needs a subscription may read neither the
+      // settings nor the modules, so after one nothing is asked for early.
       const statusCall = withTimeout(api.onboardingStatus())
       const meCall = withTimeout(api.me())
-      let settingsCall = lastWasAdmin() ? withTimeout(api.getSettings()) : null
+      const last = lastRole()
+      let settingsCall = last !== '0' && last !== LAST_LOCKED ? withTimeout(api.getSettings()) : null
       meCall.catch(() => undefined)
       settingsCall?.catch(() => undefined)
-      startModulesEarly()
+      if (last !== LAST_LOCKED) startModulesEarly()
       const status = await statusCall
       setFirstRunNeeded(status.firstRunNeeded)
       if (!status.firstRunNeeded) {
@@ -113,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const me = await meCall
           setUser(me)
           const admin = isAdmin(me)
-          rememberAdmin(admin)
+          rememberRole(me)
           if (admin && !settingsCall) settingsCall = withTimeout(api.getSettings())
           try {
             setNeedsWizard(admin && settingsCall ? !(await settingsCall).onboardingDone : false)

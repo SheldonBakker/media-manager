@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/rdborg/mediarium/internal/accountservice"
+	"github.com/rdborg/mediarium/internal/coordinator"
 	"log/slog"
 	"net/http"
 	"path/filepath"
@@ -59,6 +60,9 @@ type Server struct {
 	// accountService signs people up from the sign-in page (signup.go); nil
 	// while MEDIARIUM_ACCOUNT_SERVICE_URL is not set.
 	accountService *accountservice.Client
+	// coordinator carries the subscription calls (handlers_subscription.go);
+	// nil while MEDIARIUM_COORDINATOR_URL or _TOKEN is not set.
+	coordinator    *coordinator.Client
 	signUps        *auth.LoginLimiter // sign-ups per address (signup.go)
 	signUpCodes    *auth.LoginLimiter // confirmation codes asked for per address (signup.go)
 	passwordResets *auth.LoginLimiter // password reset codes and resets per address (password_reset.go)
@@ -274,6 +278,7 @@ func New(db *sql.DB, cfg config.Config, box *crypto.Box, defaultTMDBAPIKey, vers
 	if cfg.AccountServiceURL != "" {
 		s.accountService = accountservice.New(cfg.AccountServiceURL)
 	}
+	s.coordinator = coordinator.New(cfg.CoordinatorURL, cfg.CoordinatorToken)
 	s.QueueRepo.SetBox(box) // download addresses carry indexer keys: kept encrypted
 	s.startProblems()
 	s.applyDebugLogging()
@@ -506,6 +511,11 @@ func (s *Server) protectedRoutes() *routeTable {
 	member.HandleFunc("DELETE /api/auth/passkeys/{id}", s.handleDeletePasskey)
 	member.HandleFunc("POST /api/auth/oidc/link", s.handleOIDCLinkStart)
 	member.HandleFunc("DELETE /api/auth/oidc/link", s.handleOIDCUnlink)
+	member.HandleFunc("GET /api/subscription", s.forwardTo(""))
+	member.HandleFunc("POST /api/subscription/checkout", s.forwardTo("/checkout"))
+	member.HandleFunc("POST /api/subscription/confirm", s.handleSubscriptionConfirm)
+	member.HandleFunc("POST /api/subscription/manage-link", s.forwardTo("/manage-link"))
+	member.HandleFunc("POST /api/subscription/cancel", s.forwardTo("/cancel"))
 
 	// The page where an administrator lets an AI assistant connect (mcp_oauth.go).
 	member.HandleFunc("GET /api/oauth/requests/{id}", s.handleOAuthRequestInfo)

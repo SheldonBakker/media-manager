@@ -108,6 +108,8 @@ func (s *Server) ereaderUserAllowed(userID int64) (bool, string) {
 	if err != nil || u.Disabled {
 		return false, "This account is turned off."
 	}
+	// This also keeps out an account that needs a subscription: the lock never
+	// applies to an administrator.
 	if !u.IsAdmin {
 		return false, "E-readers are for administrators only."
 	}

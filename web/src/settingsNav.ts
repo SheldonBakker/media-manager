@@ -28,6 +28,7 @@ export const SETTINGS_NAV: { to: string; label: string; icon: IconName; color: s
   { to: '/settings/addons', label: t('Add-ons'), icon: 'grid', color: '#9fd4a8', blurb: t('Other programs you run next to Mediarium, with a link to each.') },
   { to: '/settings/profile', label: t('Your profile'), icon: 'user', color: '#8fb8f5', blurb: t('Your name, email and password, and the messages you get about your requests.'), member: true },
   { to: '/settings/security', label: t('Security'), icon: 'shield', color: '#8fb8f5', blurb: t('Passkeys, two-step sign-in and a linked single sign-on account.'), member: true },
+  { to: '/settings/subscription', label: t('Subscription'), icon: 'star', color: '#8fb8f5', blurb: t('Your plan, your card, and cancelling or renewing.'), member: true },
   { to: '/settings/services', label: t('Linked services'), icon: 'external', color: '#8fb8f5', blurb: t('Your Plex watchlist, ListenBrainz and your e-reader.') },
   { to: '/settings/accounts', label: t('All accounts'), icon: 'user', color: '#8fb8f5', blurb: t('Add people and choose what each of them may do.') },
   { to: '/settings/requests', label: t('Requests and reports'), icon: 'chat', color: '#8fb8f5', blurb: t('What people may ask for, how many requests they get, and problem reports.') },
@@ -49,8 +50,20 @@ export const SETTINGS_REDIRECTS: [from: string, to: string][] = [
 
 // The settings pages an account may open: everything for an administrator,
 // only the member pages for everyone else.
-export function settingsNavFor(admin: boolean, viewer = false) {
-  const pages = admin ? SETTINGS_NAV : SETTINGS_NAV.filter((s) => s.member)
+// The Subscription page is listed only where subscriptions work (`available`).
+// A member whose access waits on a subscription (`locked`) gets just the
+// pages that let them sort it out.
+export interface SubscriptionNav {
+  available: boolean
+  locked: boolean
+}
+const NO_SUBSCRIPTION: SubscriptionNav = { available: false, locked: false }
+const SUBSCRIPTION_PAGE = '/settings/subscription'
+const LOCKED_PAGES = ['/settings/profile', '/settings/security', SUBSCRIPTION_PAGE]
+
+export function settingsNavFor(admin: boolean, viewer = false, subscription: SubscriptionNav = NO_SUBSCRIPTION) {
+  if (!admin && subscription.locked) return SETTINGS_NAV.filter((s) => LOCKED_PAGES.includes(s.to))
+  const pages = (admin ? SETTINGS_NAV : SETTINGS_NAV.filter((s) => s.member)).filter((s) => s.to !== SUBSCRIPTION_PAGE || subscription.available)
   return viewer ? pages.filter((s) => !s.notViewer) : pages
 }
 
@@ -75,7 +88,7 @@ const GROUPS: { key: string; label: string; icon: IconName; color: string; pages
   { key: 'downloads', label: tc('section', 'Downloading'), icon: 'download', color: '#86dca4', pages: ['/settings/usenet', '/settings/torrents', '/settings/vpn', '/settings/download-rules'] },
   { key: 'metadata', label: t('Info, lists and subtitles'), icon: 'globe', color: '#c1acf7', pages: ['/settings/metadata', '/settings/lists', '/settings/subtitles'] },
   { key: 'connections', label: t('Connections'), icon: 'monitor', color: '#f2c14e', pages: ['/settings/media-servers', '/settings/notifications', '/settings/other-apps', '/settings/addons'] },
-  { key: 'profile', label: t('Account & Access'), icon: 'user', color: '#8fb8f5', pages: ['/settings/profile', '/settings/security', '/settings/services', '/settings/accounts', '/settings/requests', '/settings/sign-in'] },
+  { key: 'profile', label: t('Account & Access'), icon: 'user', color: '#8fb8f5', pages: ['/settings/profile', '/settings/security', '/settings/subscription', '/settings/services', '/settings/accounts', '/settings/requests', '/settings/sign-in'] },
   { key: 'system', label: t('System'), icon: 'hard', color: '#b4bfcc', pages: ['/settings/system', '/settings/backup', '/settings/statistics', '/settings/logs', '/settings/migrate'] },
 ]
 
@@ -83,38 +96,38 @@ export const inPage = (pathname: string, to: string) => pathname === to || pathn
 
 // The groups an account sees, each with only the pages it may open. A group
 // left with one page takes that page's name.
-export function settingsGroupsFor(admin: boolean, viewer = false): SettingsGroup[] {
-  const pages = settingsNavFor(admin, viewer)
+export function settingsGroupsFor(admin: boolean, viewer = false, subscription: SubscriptionNav = NO_SUBSCRIPTION): SettingsGroup[] {
+  const pages = settingsNavFor(admin, viewer, subscription)
   return GROUPS.map((g) => {
     const visible = g.pages.map((to) => pages.find((p) => p.to === to)).filter((p): p is NavPage => !!p)
     return { ...g, label: visible.length === 1 && g.pages.length > 1 ? visible[0].label : visible.length === 1 && !admin ? visible[0].label : g.label, pages: visible }
   }).filter((g) => g.pages.length > 0)
 }
 
-export function groupFor(pathname: string, admin: boolean): SettingsGroup | undefined {
-  return settingsGroupsFor(admin).find((g) => g.pages.some((p) => inPage(pathname, p.to)))
+export function groupFor(pathname: string, admin: boolean, subscription: SubscriptionNav = NO_SUBSCRIPTION): SettingsGroup | undefined {
+  return settingsGroupsFor(admin, false, subscription).find((g) => g.pages.some((p) => inPage(pathname, p.to)))
 }
 
 // The page name shown at the left of the header. Pages in a group with several
 // pages read "Group · Page" (for example "Library · Quality"); the group part is
 // shown smaller and left out on a phone, where the page name alone is clearer.
-export function pageParts(pathname: string, admin = true): { group?: string; page: string } {
-  const group = groupFor(pathname, admin)
+export function pageParts(pathname: string, admin = true, subscription: SubscriptionNav = NO_SUBSCRIPTION): { group?: string; page: string } {
+  const group = groupFor(pathname, admin, subscription)
   if (group) {
     const page = group.pages.find((p) => inPage(pathname, p.to))
     return page && group.pages.length > 1 ? { group: group.label, page: page.label } : { page: group.label }
   }
-  return { page: pageTitle(pathname, admin) }
+  return { page: pageTitle(pathname, admin, subscription) }
 }
 
 // What the page is for, one line, shown under the name of a settings page.
-export function pageBlurb(pathname: string, admin = true): string {
-  return settingsNavFor(admin).find((p) => inPage(pathname, p.to))?.blurb ?? ''
+export function pageBlurb(pathname: string, admin = true, subscription: SubscriptionNav = NO_SUBSCRIPTION): string {
+  return settingsNavFor(admin, false, subscription).find((p) => inPage(pathname, p.to))?.blurb ?? ''
 }
 
-export function pageTitle(pathname: string, admin = true): string {
+export function pageTitle(pathname: string, admin = true, subscription: SubscriptionNav = NO_SUBSCRIPTION): string {
   if (pathname === '/') return t('Dashboard')
-  const group = groupFor(pathname, admin)
+  const group = groupFor(pathname, admin, subscription)
   if (group) {
     const page = group.pages.find((p) => inPage(pathname, p.to))
     return page && group.pages.length > 1 ? `${group.label} · ${page.label}` : group.label

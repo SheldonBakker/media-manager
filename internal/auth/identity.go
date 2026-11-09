@@ -111,6 +111,8 @@ type ExternalProfile struct {
 	// AllowSuffix lets a taken user name get a number added. Without it a
 	// taken name is an error (ErrUsernameTaken).
 	AllowSuffix bool
+	// Locked makes the account need a subscription from the start.
+	Locked bool
 }
 
 // CreateExternalUser makes the account for a person's first sign-in through a
@@ -151,8 +153,8 @@ func (s *Service) CreateExternalUser(p ExternalProfile) (*User, error) {
 		}
 	}
 	isAdmin, viewer := p.Role == RoleAdmin, p.Role == RoleViewer
-	res, err := tx.Exec(`INSERT INTO users (username, password_hash, is_admin, is_viewer, first_name, last_name, email, auth_source)
-		VALUES (?, '', ?, ?, ?, '', ?, ?)`, name, isAdmin, viewer, strings.TrimSpace(p.Name), strings.TrimSpace(p.Email), p.Provider)
+	res, err := tx.Exec(`INSERT INTO users (username, password_hash, is_admin, is_viewer, first_name, last_name, email, auth_source, subscription_locked)
+		VALUES (?, '', ?, ?, ?, '', ?, ?, ?)`, name, isAdmin, viewer, strings.TrimSpace(p.Name), strings.TrimSpace(p.Email), p.Provider, p.Locked)
 	if err != nil {
 		if isUniqueConstraintErr(err) {
 			return nil, ErrUsernameTaken
@@ -173,6 +175,26 @@ func (s *Service) CreateExternalUser(p ExternalProfile) (*User, error) {
 		return nil, fmt.Errorf("commit create external user: %w", err)
 	}
 	return s.GetUser(id)
+}
+
+// SetSubscriptionLocked locks or unlocks the account linked to a provider's
+// subject. changed is false when the account already was that way. It returns
+// ErrNoIdentity when nobody has that identity. Sessions are left as they are.
+func (s *Service) SetSubscriptionLocked(provider, subject string, locked bool) (u *User, changed bool, err error) {
+	u, err = s.UserByIdentity(provider, subject)
+	if err != nil {
+		return nil, false, err
+	}
+	res, err := s.db.Exec(`UPDATE users SET subscription_locked = ? WHERE id = ? AND subscription_locked != ?`, locked, u.ID, locked)
+	if err != nil {
+		return nil, false, fmt.Errorf("set subscription lock: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return nil, false, fmt.Errorf("set subscription lock: %w", err)
+	}
+	u.SubscriptionLocked = locked
+	return u, n > 0, nil
 }
 
 // SyncExternalRole sets the role of an account made through a provider to

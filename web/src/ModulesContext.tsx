@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { api, takeEarlyModules, type ModuleKey, type Modules } from './api'
+import { api, isLocked, takeEarlyModules, type ModuleKey, type Modules } from './api'
 import { useAuth } from './AuthContext'
 import { useLive } from './useLive'
 import { t } from './i18n'
@@ -37,11 +37,12 @@ interface ModulesState {
 const ModulesContext = createContext<ModulesState | null>(null)
 
 // Which kinds of media are switched on, for the whole app. Loaded once after
-// sign-in (every account can read it) and refreshed whenever the switchboard
+// sign-in (every account can read it, except one that needs a subscription,
+// whose small layout shows no media) and refreshed whenever the switchboard
 // changes something, or the browser tab comes back into view.
 export function ModulesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  const signedIn = !!user
+  const canRead = !!user && !isLocked(user)
   const [modules, setModules] = useState<Modules>(FALLBACK)
   const [subtitlesOn, setSubtitlesOn] = useState(false)
   const [trailerOn, setTrailerOn] = useState(false)
@@ -50,7 +51,7 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false)
 
   const refresh = useCallback(async () => {
-    if (!signedIn) return
+    if (!canRead) return
     try {
       const early = takeEarlyModules()
       const { subtitlesEnabled, trailerBackground, trailerSound, torrentsOn: torrents, ...kinds } = await (early ? early.catch(() => api.modules()) : api.modules())
@@ -64,10 +65,10 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoaded(true)
     }
-  }, [signedIn])
+  }, [canRead])
 
   useEffect(() => {
-    if (!signedIn) {
+    if (!canRead) {
       setModules(FALLBACK)
       setSubtitlesOn(false)
       setTrailerOn(false)
@@ -77,8 +78,8 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       return
     }
     void refresh()
-  }, [signedIn, refresh])
-  useLive(refresh, 60000)
+  }, [canRead, refresh])
+  useLive(refresh, 60000, canRead)
 
   const value = useMemo<ModulesState>(
     () => ({

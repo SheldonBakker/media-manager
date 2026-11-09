@@ -82,6 +82,13 @@ type Config struct {
 	// "Create an account": the service makes the person's directory account
 	// and their basic account here. Empty means sign-up is off.
 	AccountServiceURL string
+
+	// CoordinatorURL and CoordinatorToken let signed-in people manage a paid
+	// subscription through the Coordinator (MEDIARIUM_COORDINATOR_URL and
+	// MEDIARIUM_COORDINATOR_TOKEN, which may come from a _FILE). Either one
+	// empty means subscriptions are off.
+	CoordinatorURL   string
+	CoordinatorToken string
 }
 
 // provisioningTokenMin is the shortest provisioning token accepted, in
@@ -114,7 +121,10 @@ func Load() Config {
 
 		ProvisioningToken: provisioningToken(envStr("MEDIARIUM_PROVISIONING_TOKEN", "")),
 
-		AccountServiceURL: accountServiceURL(envStr("MEDIARIUM_ACCOUNT_SERVICE_URL", "")),
+		AccountServiceURL: serviceURL("MEDIARIUM_ACCOUNT_SERVICE_URL", envStr("MEDIARIUM_ACCOUNT_SERVICE_URL", ""), "signing up stays off"),
+
+		CoordinatorURL:   serviceURL("MEDIARIUM_COORDINATOR_URL", envStr("MEDIARIUM_COORDINATOR_URL", ""), "subscriptions stay off"),
+		CoordinatorToken: envStr("MEDIARIUM_COORDINATOR_TOKEN", ""),
 	}
 	cfg.URLBase, cfg.urlBaseErr = NormalizeURLBase(envStr("URL_BASE", ""))
 	cfg.DownloadsIncomplete = filepath.Join(cfg.DownloadsDir, "incomplete")
@@ -218,16 +228,17 @@ func provisioningToken(v string) string {
 	return v
 }
 
-// accountServiceURL is the address without spaces or a trailing slash, or ""
-// when it is not an http or https address (noted; see Problems).
-func accountServiceURL(v string) string {
+// serviceURL is the address of another service (v, from the variable key)
+// without spaces or a trailing slash, or "" when it is not an http or https
+// address (noted with what stays off; see Problems).
+func serviceURL(key, v, off string) string {
 	v = strings.TrimRight(strings.TrimSpace(v), "/")
 	if v == "" {
 		return ""
 	}
 	u, err := url.Parse(v)
 	if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
-		noteProblem("MEDIARIUM_ACCOUNT_SERVICE_URL is not an http or https address, so signing up stays off.")
+		noteProblem("%s is not an http or https address, so %s.", key, off)
 		return ""
 	}
 	return v

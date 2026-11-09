@@ -573,6 +573,7 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | Method | Path | Access | What it does |
 |---|---|---|---|
 | POST | `/api/provisioning/directory-accounts` | provisioning token | makes the account of a directory person before their first sign-in, or answers with the one already linked to them. |
+| PUT | `/api/provisioning/directory-accounts/{subject}/access` | provisioning token | locks the account of a directory person, so that it needs a subscription, or unlocks it again. |
 
 ## proxy
 
@@ -731,6 +732,16 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | GET | `/api/stats/indexers` | admin | gives each indexer's searches, failures, releases found and grabs over the last 30 days. |
 | GET | `/api/stats/library` | any account |  |
 | POST | `/api/stats/reset` | admin | answers POST /api/stats/reset: the download totals on the Statistics page and the dashboard start again from zero. |
+
+## subscription
+
+| Method | Path | Access | What it does |
+|---|---|---|---|
+| GET | `/api/subscription` | any account |  |
+| POST | `/api/subscription/cancel` | any account |  |
+| POST | `/api/subscription/checkout` | any account |  |
+| POST | `/api/subscription/confirm` | any account | passes on the payment reference the person came back from the payment page with, and nothing else of what they sent. |
+| POST | `/api/subscription/manage-link` | any account |  |
 
 ## subtitles
 
@@ -897,4 +908,4 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | PUT | `/api/watched/settings` | admin | PUT /api/watched/settings {"sync": true, "cleanup": {...}} |
 | POST | `/api/watched/sync` | admin | POST /api/watched/sync: read what's been watched now. |
 
-552 routes.
+558 routes.

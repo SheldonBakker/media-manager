@@ -29,12 +29,15 @@ type accountPayload struct {
 	// What a basic account may do (everything, for an administrator).
 	Permissions auth.Permissions `json:"permissions"`
 	TwoStep     bool             `json:"twoStep"` // two-step sign-in is on
+	// SubscriptionLocked: needs a subscription before anything but Account & Access.
+	SubscriptionLocked bool `json:"subscriptionLocked"`
 }
 
 func toAccountPayload(a *auth.Account) accountPayload {
 	return accountPayload{
 		ID: a.ID, Username: a.Username, Name: a.Name(), Email: a.Email,
 		Role: a.Role(), IsAdmin: a.IsAdmin, Disabled: a.Disabled, Source: sourceOf(a.Source), CreatedAt: a.CreatedAt, LastLoginAt: a.LastLoginAt, Permissions: a.Permissions,
+		SubscriptionLocked: a.SubscriptionLocked,
 	}
 }
 

@@ -79,12 +79,24 @@ func (s *Server) handleRemoveCalendarFeed(w http.ResponseWriter, r *http.Request
 // the address is what lets it in.
 func (s *Server) handleCalendarFeed(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSuffix(r.PathValue("file"), ".ics")
-	if _, err := s.Auth.UserForCalendarFeed(token); err != nil {
+	userID, err := s.Auth.UserForCalendarFeed(token)
+	if err != nil {
 		if errors.Is(err, auth.ErrSessionNotFound) {
 			http.NotFound(w, r)
 			return
 		}
 		http.Error(w, "calendar unavailable", http.StatusInternalServerError)
+		return
+	}
+	// The feed is signed in by its token, outside the signed-in routes, so the
+	// lock is checked here. It looks as if the feed were not there.
+	u, err := s.Auth.GetUser(userID)
+	if err != nil {
+		http.Error(w, "calendar unavailable", http.StatusInternalServerError)
+		return
+	}
+	if u.Locked() {
+		http.NotFound(w, r)
 		return
 	}
 	entries, err := s.calendarEntries()

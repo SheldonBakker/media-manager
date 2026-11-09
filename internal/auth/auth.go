@@ -69,6 +69,9 @@ type User struct {
 	Viewer bool
 	// Disabled accounts cannot sign in and their sessions and keys stop working.
 	Disabled bool
+	// SubscriptionLocked is set by the Coordinator for an account that needs a
+	// paid subscription. It only has effect through Locked.
+	SubscriptionLocked bool
 	// Source is where the password lives: SourceLocal, SourceOIDC or SourceLDAP.
 	Source string
 	// ReadOnlyKey is set for the length of a request made with a read-only
@@ -276,15 +279,19 @@ func (s *Service) Authenticate(username, password string) (*User, error) {
 
 // userCols are the columns every lookup of an account reads, in the order
 // User.scanDest expects.
-const userCols = `id, username, is_admin, first_name, last_name, email, is_viewer, disabled, auth_source`
+const userCols = `id, username, is_admin, first_name, last_name, email, is_viewer, disabled, auth_source, subscription_locked`
 
 // userColsOf is userCols for a table alias (a join).
 func userColsOf(alias string) string {
-	return alias + `.id, ` + alias + `.username, ` + alias + `.is_admin, ` + alias + `.first_name, ` + alias + `.last_name, ` + alias + `.email, ` + alias + `.is_viewer, ` + alias + `.disabled, ` + alias + `.auth_source`
+	return alias + `.id, ` + alias + `.username, ` + alias + `.is_admin, ` + alias + `.first_name, ` + alias + `.last_name, ` + alias + `.email, ` + alias + `.is_viewer, ` + alias + `.disabled, ` + alias + `.auth_source, ` + alias + `.subscription_locked`
 }
 
+// Locked reports whether the account may only reach Account & Access until it
+// has a subscription. An administrator is never locked.
+func (u *User) Locked() bool { return u.SubscriptionLocked && !u.IsAdmin }
+
 func (u *User) scanDest() []any {
-	return []any{&u.ID, &u.Username, &u.IsAdmin, &u.FirstName, &u.LastName, &u.Email, &u.Viewer, &u.Disabled, &u.Source}
+	return []any{&u.ID, &u.Username, &u.IsAdmin, &u.FirstName, &u.LastName, &u.Email, &u.Viewer, &u.Disabled, &u.Source, &u.SubscriptionLocked}
 }
 
 // upgradeHash replaces a password hash made with a lower work factor by one
