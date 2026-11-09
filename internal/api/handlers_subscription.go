@@ -18,11 +18,16 @@ const maxConfirmBody = 1 << 10
 // directory gave the person. ok is false when subscriptions are off or the
 // account has no directory sign-in.
 func (s *Server) directorySubject(user *auth.User) (subject string, ok bool) {
-	if s.coordinator == nil {
-		return "", false
-	}
 	ids, err := s.Auth.IdentitiesOf(user.ID)
 	if err != nil {
+		return "", false
+	}
+	return s.subjectIn(ids)
+}
+
+// subjectIn is directorySubject for identities already read.
+func (s *Server) subjectIn(ids []auth.Identity) (subject string, ok bool) {
+	if s.coordinator == nil {
 		return "", false
 	}
 	for _, id := range ids {
