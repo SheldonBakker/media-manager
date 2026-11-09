@@ -426,11 +426,11 @@ func TestScrobblingToListenBrainz(t *testing.T) {
 	mine := f.url("/api/music/listenbrainz")
 	const fakeToken = "11111111-2222-3333-4444-555555555555"
 
-	if st := getJSON[map[string]any](t, f.member, mine); st["connected"] != false {
+	if st := getJSON[map[string]any](t, f.admin, mine); st["connected"] != false {
 		t.Fatalf("before connecting: %+v", st)
 	}
 	// Nothing is sent until an account connects.
-	if got := postJSON[map[string]any](t, f.member, mine+"/playing", map[string]any{"trackId": f.trackIDs[0]}, http.StatusOK); got["sent"] != false {
+	if got := postJSON[map[string]any](t, f.admin, mine+"/playing", map[string]any{"trackId": f.trackIDs[0]}, http.StatusOK); got["sent"] != false {
 		t.Fatalf("not connected: %+v", got)
 	}
 
@@ -438,30 +438,30 @@ func TestScrobblingToListenBrainz(t *testing.T) {
 	lb.mu.Lock()
 	lb.valid = false
 	lb.mu.Unlock()
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"token": fakeToken}, http.StatusBadRequest)
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"token": "  "}, http.StatusBadRequest)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"token": fakeToken}, http.StatusBadRequest)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"token": "  "}, http.StatusBadRequest)
 	lb.mu.Lock()
 	lb.valid = true
 	lb.mu.Unlock()
-	st := postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"token": " " + fakeToken + " "}, http.StatusOK)
+	st := postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"token": " " + fakeToken + " "}, http.StatusOK)
 	if st["connected"] != true || st["user"] != "ryan_lb" || st["enabled"] != true {
 		t.Fatalf("connected: %+v", st)
 	}
-	raw, _ := json.Marshal(getJSON[map[string]any](t, f.member, mine))
+	raw, _ := json.Marshal(getJSON[map[string]any](t, f.admin, mine))
 	if strings.Contains(string(raw), fakeToken) || strings.Contains(string(raw), "token") {
 		t.Fatalf("the token must never be sent back: %s", raw)
 	}
-	// The administrator's own connection is separate.
-	if st := getJSON[map[string]any](t, f.admin, mine); st["connected"] != false {
-		t.Fatalf("one account's token leaked to another: %+v", st)
+	// ListenBrainz is for administrators only: a basic account has none.
+	if status, _ := doStatus(t, f.member, http.MethodGet, mine); status != http.StatusForbidden {
+		t.Fatalf("a basic account reached ListenBrainz: %d", status)
 	}
 
 	// Playing now, then a counted listen.
-	if got := postJSON[map[string]any](t, f.member, mine+"/playing", map[string]any{"trackId": f.trackIDs[1]}, http.StatusOK); got["sent"] != true {
+	if got := postJSON[map[string]any](t, f.admin, mine+"/playing", map[string]any{"trackId": f.trackIDs[1]}, http.StatusOK); got["sent"] != true {
 		t.Fatalf("playing now: %+v", got)
 	}
 	now := unixNow()
-	if got := postJSON[map[string]any](t, f.member, mine+"/listen", map[string]any{"trackId": f.trackIDs[1], "listenedAt": now - 120}, http.StatusOK); got["sent"] != true || got["pending"] != float64(0) {
+	if got := postJSON[map[string]any](t, f.admin, mine+"/listen", map[string]any{"trackId": f.trackIDs[1], "listenedAt": now - 120}, http.StatusOK); got["sent"] != true || got["pending"] != float64(0) {
 		t.Fatalf("listen: %+v", got)
 	}
 	lb.mu.Lock()
@@ -482,17 +482,17 @@ func TestScrobblingToListenBrainz(t *testing.T) {
 	// ListenBrainz down: plays are kept, then sent together, oldest first, when it is back.
 	lb.setDown(true)
 	for i, id := range []int64{f.trackIDs[2], f.trackIDs[0]} {
-		got := postJSON[map[string]any](t, f.member, mine+"/listen", map[string]any{"trackId": id, "listenedAt": now - 90 + int64(i)}, http.StatusOK)
+		got := postJSON[map[string]any](t, f.admin, mine+"/listen", map[string]any{"trackId": id, "listenedAt": now - 90 + int64(i)}, http.StatusOK)
 		if got["sent"] != false || got["pending"] != float64(i+1) {
 			t.Fatalf("while down: %+v", got)
 		}
 	}
-	if st := getJSON[map[string]any](t, f.member, mine); st["pending"] != float64(2) || st["lastError"] == nil {
+	if st := getJSON[map[string]any](t, f.admin, mine); st["pending"] != float64(2) || st["lastError"] == nil {
 		t.Fatalf("status while down: %+v", st)
 	}
 	lb.setDown(false)
 	before := len(lb.types())
-	postJSON[map[string]any](t, f.member, mine+"/listen", map[string]any{"trackId": f.trackIDs[1], "listenedAt": now - 30}, http.StatusOK)
+	postJSON[map[string]any](t, f.admin, mine+"/listen", map[string]any{"trackId": f.trackIDs[1], "listenedAt": now - 30}, http.StatusOK)
 	lb.mu.Lock()
 	batch := lb.requests[before]["payload"].([]any)
 	lb.mu.Unlock()
@@ -500,7 +500,7 @@ func TestScrobblingToListenBrainz(t *testing.T) {
 		batch[2].(map[string]any)["track_metadata"].(map[string]any)["track_name"] != "Middle Song" {
 		t.Fatalf("kept plays: %+v", batch)
 	}
-	if st := getJSON[map[string]any](t, f.member, mine); st["pending"] != float64(0) || st["submitted"] != float64(4) || st["lastError"] != nil {
+	if st := getJSON[map[string]any](t, f.admin, mine); st["pending"] != float64(0) || st["submitted"] != float64(4) || st["lastError"] != nil {
 		t.Fatalf("after catching up: %+v", st)
 	}
 
@@ -511,29 +511,29 @@ func TestScrobblingToListenBrainz(t *testing.T) {
 		"no time": {"trackId": f.trackIDs[0]},
 		"no id":   {"listenedAt": now - 5},
 	} {
-		if status, _ := playerPost(t, f.member, mine+"/listen", body); status != http.StatusBadRequest {
+		if status, _ := playerPost(t, f.admin, mine+"/listen", body); status != http.StatusBadRequest {
 			t.Errorf("%s: %d", name, status)
 		}
 	}
-	if status, _ := playerPost(t, f.member, mine+"/listen", map[string]any{"trackId": 424242, "listenedAt": now - 5}); status != http.StatusNotFound {
+	if status, _ := playerPost(t, f.admin, mine+"/listen", map[string]any{"trackId": 424242, "listenedAt": now - 5}); status != http.StatusNotFound {
 		t.Errorf("unknown track: %d", status)
 	}
 
 	// The switch stops sending; forgetting removes the token.
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"enabled": false}, http.StatusOK)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"enabled": false}, http.StatusOK)
 	n := len(lb.types())
-	if got := postJSON[map[string]any](t, f.member, mine+"/listen", map[string]any{"trackId": f.trackIDs[0], "listenedAt": now - 5}, http.StatusOK); got["sent"] != false || len(lb.types()) != n {
+	if got := postJSON[map[string]any](t, f.admin, mine+"/listen", map[string]any{"trackId": f.trackIDs[0], "listenedAt": now - 5}, http.StatusOK); got["sent"] != false || len(lb.types()) != n {
 		t.Fatalf("switched off: %+v", got)
 	}
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"enabled": true}, http.StatusOK)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"enabled": true}, http.StatusOK)
 	req, _ := http.NewRequest(http.MethodDelete, mine, nil)
-	if resp, err := f.member.Do(req); err != nil || resp.StatusCode != http.StatusNoContent {
+	if resp, err := f.admin.Do(req); err != nil || resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("forget: %v %v", resp, err)
 	}
-	if st := getJSON[map[string]any](t, f.member, mine); st["connected"] != false {
+	if st := getJSON[map[string]any](t, f.admin, mine); st["connected"] != false {
 		t.Fatalf("after forgetting: %+v", st)
 	}
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"enabled": true}, http.StatusNotFound)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"enabled": true}, http.StatusNotFound)
 }
 
 func TestScrobblingStopsWhenTheTokenIsRefused(t *testing.T) {
@@ -549,9 +549,9 @@ func TestScrobblingStopsWhenTheTokenIsRefused(t *testing.T) {
 	t.Cleanup(lb.Close)
 	f.server.TestSetScrobbleServer(lb.URL)
 	mine := f.url("/api/music/listenbrainz")
-	postJSONMethod[map[string]any](t, f.member, http.MethodPut, mine, map[string]any{"token": "tok"}, http.StatusOK)
-	postJSON[map[string]any](t, f.member, mine+"/playing", map[string]any{"trackId": f.trackIDs[0]}, http.StatusOK)
-	st := getJSON[map[string]any](t, f.member, mine)
+	postJSONMethod[map[string]any](t, f.admin, http.MethodPut, mine, map[string]any{"token": "tok"}, http.StatusOK)
+	postJSON[map[string]any](t, f.admin, mine+"/playing", map[string]any{"trackId": f.trackIDs[0]}, http.StatusOK)
+	st := getJSON[map[string]any](t, f.admin, mine)
 	if st["enabled"] != false || !strings.Contains(fmt.Sprint(st["lastError"]), "no longer accepts") {
 		t.Fatalf("a refused token must switch sending off and say why: %+v", st)
 	}

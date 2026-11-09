@@ -70,7 +70,11 @@ test('members and view-only accounts are only offered what they can open', () =>
   assert.ok(member.every((e) => SETTINGS_NAV.find((p) => p.to === e.to)?.member), 'a member got an administrator page')
   assert.ok(!member.some((e) => e.anchor === 'Address of Mediarium'), 'an administrator card was offered to a member')
   const viewer = buildSettingsIndex(false, true)
-  assert.ok(!viewer.some((e) => e.to === '/settings/services'), 'a view-only account got Linked services')
+  // API keys and Linked services are for administrators only.
+  for (const [who, entries] of [['a member', member], ['a view-only account', viewer]] as const) {
+    assert.ok(!entries.some((e) => e.to === '/settings/services'), `${who} got Linked services`)
+    assert.ok(!entries.some((e) => /api key/i.test(`${e.label} ${e.words}`)), `${who} was offered API keys`)
+  }
   // a media type that is off takes its folder with it
   const noMusic = buildSettingsIndex(true, false, (m) => m !== 'music')
   assert.ok(!noMusic.some((e) => e.anchor === 'Music folder'))
@@ -92,7 +96,7 @@ test('typing what people look for lands on the right place', () => {
     ['vpn', '/settings/vpn'],
     ['Notifications', '/settings/notifications'],
     ['backups', '/settings/backup'],
-    ['api keys', '/settings/profile > API keys'],
+    ['api keys', '/settings/security > API keys'],
     ['timezone', '/settings/general > Time zone'],
     ['dark mode', '/settings/general > Light or dark'],
     ['passkey', '/settings/security > Passkeys'],

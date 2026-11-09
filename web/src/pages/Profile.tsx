@@ -660,11 +660,10 @@ export default function Profile() {
   )
 }
 
-// Settings > Account & Access > Security: how you sign in and the keys that act as you.
+// Settings > Account & Access > Security: how you sign in and, for administrators, the keys that act as you.
 export function SecuritySettings() {
   const { user } = useAuth()
   const local = !user?.source || user.source === 'local'
-  const viewer = user?.role === 'viewer'
   return (
     <div className="settings-stack">
       <PasskeysCard />
@@ -672,15 +671,13 @@ export function SecuritySettings() {
       {local && <TwoStepCard />}
       <SessionsCard />
       {isAdmin(user) && <IdleSignOutCard />}
-      {!viewer && <APIKeys />}
+      {isAdmin(user) && <APIKeys />}
     </div>
   )
 }
 
-// Settings > Account & Access > Linked services: the accounts and devices you connect to yours.
+// Settings > Account & Access > Linked services: the accounts and devices you connect to yours (administrators).
 export function ServicesSettings() {
-  const { user } = useAuth()
-  if (user?.role === 'viewer') return <p className="hint">{t('View-only accounts have nothing to link here.')}</p>
   return (
     <div className="settings-stack">
       <PlexWatchlistCard />

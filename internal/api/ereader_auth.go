@@ -97,14 +97,19 @@ func (s *Server) ereaderRateLimited(w http.ResponseWriter, r *http.Request) bool
 }
 
 // ereaderUserAllowed reports whether the account may read books through an
-// e-reader: ebooks are on and the account may read in Mediarium Books.
+// e-reader: ebooks are on, the account is an administrator's (e-readers are
+// for administrators only) and it may read in Mediarium Books.
 func (s *Server) ereaderUserAllowed(userID int64) (bool, string) {
 	if !s.ebooksEnabled() {
 		return false, "Ebooks are switched off in Mediarium."
 	}
 	// An account an administrator turned off loses its e-reader access too.
-	if u, err := s.Auth.GetUser(userID); err != nil || u.Disabled {
+	u, err := s.Auth.GetUser(userID)
+	if err != nil || u.Disabled {
 		return false, "This account is turned off."
+	}
+	if !u.IsAdmin {
+		return false, "E-readers are for administrators only."
 	}
 	perms, err := s.Auth.PermissionsOf(userID)
 	if err != nil {

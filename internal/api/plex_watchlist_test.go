@@ -85,8 +85,17 @@ func connectWatchlist(t *testing.T, client *http.Client, base string) map[string
 	return done["status"].(map[string]any)
 }
 
+// secondAdmin adds another administrator account, "ada", and signs it in.
+func secondAdmin(t *testing.T, admin *http.Client, base string) (ada *http.Client, id float64) {
+	t.Helper()
+	created := postJSON[map[string]any](t, admin, base+"/api/users", map[string]any{
+		"username": "ada", "password": "ada-long-password", "name": "Ada", "role": "admin",
+	}, http.StatusCreated)
+	return erLoginAs(t, base, "ada", "ada-long-password"), created["id"].(float64)
+}
+
 func TestPlexWatchlistAddsWhatComesNext(t *testing.T) {
-	server, base, admin, member, memberID := familyServer(t)
+	server, base, admin, _, _ := familyServer(t)
 	server.TestSetTMDBBaseURL("fixture-key", arrTMDB(t).URL)
 	plex := newFakePlexWatchlist(t)
 	server.TestSetPlexTVURL(plex.URL)
@@ -123,32 +132,42 @@ func TestPlexWatchlistAddsWhatComesNext(t *testing.T) {
 		t.Fatalf("added twice: %v", check)
 	}
 
-	// A member who has to ask: their watchlist files a request instead.
-	perms := map[string]any{"addDirect": false, "movies": true, "tv": true, "music": true, "books": true, "releases": false, "manage": true, "retry": true, "subtitles": true, "play": true}
-	postJSONMethod[map[string]any](t, admin, http.MethodPut, fmt.Sprintf("%s/api/users/%v", base, memberID), map[string]any{"permissions": perms}, http.StatusOK)
-	plexMember := newFakePlexWatchlist(t)
-	server.TestSetPlexTVURL(plexMember.URL)
-	server.TestSetPlexDiscoverURL(plexMember.URL)
-	connectWatchlist(t, member, base)
-	plexMember.put("m1", "movie", "Night Harbour", 2021, "tmdb://701")
-	check = postJSON[map[string]any](t, member, base+"/api/plex-watchlist/check", map[string]any{}, http.StatusOK)
-	if check["requested"].(float64) != 1 || check["added"].(float64) != 0 {
-		t.Fatalf("member check = %v", check)
-	}
-	reqs := getJSON[map[string]any](t, admin, base+"/api/requests")["requests"].([]any)
-	if len(reqs) != 1 || reqs[0].(map[string]any)["title"] != "Night Harbour" {
-		t.Fatalf("requests = %v", reqs)
-	}
-
 	// Switching it off and disconnecting.
-	off := putJSONStatus(t, member, base+"/api/plex-watchlist", map[string]any{"autoAdd": false}, http.StatusOK)
+	off := putJSONStatus(t, admin, base+"/api/plex-watchlist", map[string]any{"autoAdd": false}, http.StatusOK)
 	if off["autoAdd"] != false {
 		t.Fatalf("off = %v", off)
 	}
-	if code := deleteReq(t, member, base+"/api/plex-watchlist"); code != http.StatusNoContent {
+	if code := deleteReq(t, admin, base+"/api/plex-watchlist"); code != http.StatusNoContent {
 		t.Fatalf("disconnect: %d", code)
 	}
-	if st := getJSON[map[string]any](t, member, base+"/api/plex-watchlist"); st["connected"] != false {
+	if st := getJSON[map[string]any](t, admin, base+"/api/plex-watchlist"); st["connected"] != false {
 		t.Fatalf("after disconnect: %v", st)
+	}
+}
+
+// Linked services are for administrators only: the watchlist of an
+// administrator who is made a basic account adds nothing any more.
+func TestPlexWatchlistOfABasicAccountAddsNothing(t *testing.T) {
+	server, base, admin, _, _ := familyServer(t)
+	server.TestSetTMDBBaseURL("fixture-key", arrTMDB(t).URL)
+	plex := newFakePlexWatchlist(t)
+	server.TestSetPlexTVURL(plex.URL)
+	server.TestSetPlexDiscoverURL(plex.URL)
+
+	ada, adaID := secondAdmin(t, admin, base)
+	connectWatchlist(t, ada, base)
+	postJSONMethod[map[string]any](t, admin, http.MethodPut, fmt.Sprintf("%s/api/users/%v", base, adaID), map[string]any{"role": "member"}, http.StatusOK)
+
+	plex.put("new1", "movie", "Night Harbour", 2021, "tmdb://701")
+	resp, err := admin.Post(fmt.Sprintf("%s/api/import-lists/plex/%v/run", base, adaID), "application/json", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		t.Fatal("the watchlist of a basic account was checked")
+	}
+	if movies := getJSON[[]map[string]any](t, admin, base+"/api/movies"); len(movies) != 0 {
+		t.Fatalf("a basic account's watchlist added %v", movies)
 	}
 }

@@ -183,7 +183,7 @@ All three are off by default, and none of them takes the password away unless an
 
 ## Who can do what
 
-**A basic user** can search, add titles, follow downloads, watch files in the browser and manage their own profile and API keys. They cannot read settings, credentials, folder paths (mostly), logs or other accounts, cannot start updates or backups, and see a generic message when something goes wrong on the server. They cannot make Mediarium fetch an address of their choosing: a grab only works on a release a search showed them.
+**A basic user** can search, add titles, follow downloads, watch files in the browser and manage their own profile. API keys, the Plex watchlist, ListenBrainz and e-readers are for administrators only. They cannot read settings, credentials, folder paths (mostly), logs or other accounts, cannot start updates or backups, and see a generic message when something goes wrong on the server. They cannot make Mediarium fetch an address of their choosing: a grab only works on a release a search showed them.
 
 **A viewer** can look and play, and change nothing: not the library, not downloads, not their own API keys (they can't have any), and they can't see settings, other accounts or the secret calendar address. A **read-only API key** is the same for scripts: `GET` only.
 

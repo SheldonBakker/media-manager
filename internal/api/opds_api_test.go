@@ -300,7 +300,6 @@ func TestOPDSPagesAndGuards(t *testing.T) {
 
 func TestOPDSRefusesWhatItShould(t *testing.T) {
 	server, base, admin, _, _ := familyServer(t)
-	_ = server
 	// Ebooks are off: the catalogue is not there, whoever asks.
 	pw := postJSON[ereaderAccess](t, admin, base+"/api/auth/ereader/opds", nil, http.StatusOK).Password
 	client := erClient()
@@ -312,17 +311,20 @@ func TestOPDSRefusesWhatItShould(t *testing.T) {
 		t.Fatalf("ebooks on: %d", resp.StatusCode)
 	}
 
-	// An account that may not read books gets nothing, even with its password.
+	// A basic account gets nothing, even with the e-reader password it made
+	// before e-readers were for administrators only.
 	created := postJSON[map[string]any](t, admin, base+"/api/users", map[string]any{
 		"username": "kid", "password": "kids-password", "role": "member", "permissions": map[string]any{"play": false},
 	}, http.StatusCreated)
-	_ = created
 	kid := erClient()
-	// The kid signs in on the web to make an e-reader password.
 	web := erLoginAs(t, base, "kid", "kids-password")
-	kidPW := postJSON[ereaderAccess](t, web, base+"/api/auth/ereader/opds", nil, http.StatusOK).Password
+	postJSON[map[string]any](t, web, base+"/api/auth/ereader/opds", nil, http.StatusForbidden)
+	kidPW, err := server.EReader.NewOPDSPassword(int64(created["id"].(float64)))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if resp, _ := erOPDSGet(t, kid, base+"/opds/", "kid", kidPW); resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("no play permission: %d", resp.StatusCode)
+		t.Fatalf("a basic account: %d", resp.StatusCode)
 	}
 	// And someone else's password isn't theirs.
 	if resp, _ := erOPDSGet(t, kid, base+"/opds/", "kid", pw); resp.StatusCode != http.StatusUnauthorized {
@@ -359,5 +361,31 @@ func TestOPDSWrongPasswordsAreLimited(t *testing.T) {
 	web := erLoginAs(t, f.base, "ryan", "correct-horse-battery-staple")
 	if me := getJSON[map[string]any](t, web, f.base+"/api/auth/me"); me["username"] != "ryan" {
 		t.Fatalf("web sign-in after catalogue guesses: %v", me)
+	}
+}
+
+// E-readers are for administrators only: the e-reader password and Kobo
+// address a basic account made before that no longer open anything.
+func TestEReaderRefusesABasicAccount(t *testing.T) {
+	server, base, admin, _, memberID := familyServer(t)
+	postJSONMethod[map[string]any](t, admin, http.MethodPut, base+"/api/modules", map[string]any{"ebooks": true}, http.StatusOK)
+	pw, err := server.EReader.NewOPDSPassword(int64(memberID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp, _ := erOPDSGet(t, erClient(), base+"/opds/", "sam", pw); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("a basic account's e-reader password: %d, want 403", resp.StatusCode)
+	}
+	token, err := server.EReader.NewKoboToken(int64(memberID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := erClient().Get(base + "/kobo/" + token + "/v1/initialization")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("a basic account's Kobo address: %d, want 403", resp.StatusCode)
 	}
 }

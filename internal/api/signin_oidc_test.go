@@ -737,7 +737,7 @@ func TestLinkingAnAccountToSingleSignOn(t *testing.T) {
 		t.Errorf("linking someone else's provider account ended at %q", loc)
 	}
 	// Linking is not possible with an API key, and the link can be removed.
-	key := e.must(sam, "POST", "/api/auth/api-keys", map[string]any{"name": "k"}, http.StatusCreated)["key"].(string)
+	key := e.must(e.admin, "POST", "/api/auth/api-keys", map[string]any{"name": "k"}, http.StatusCreated)["key"].(string)
 	if got, _ := e.call(e.client(), "POST", "/api/auth/oidc/link", nil, "X-API-Key", key); got != http.StatusForbidden {
 		t.Errorf("API key: %d", got)
 	}

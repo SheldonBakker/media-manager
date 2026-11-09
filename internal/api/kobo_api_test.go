@@ -747,24 +747,6 @@ func TestKoboGuessingIsLimited(t *testing.T) {
 	}
 }
 
-func TestKoboNeedsPermission(t *testing.T) {
-	server, base, admin, _, _ := familyServer(t)
-	postJSONMethod[map[string]any](t, admin, http.MethodPut, base+"/api/modules", map[string]any{"ebooks": true}, http.StatusOK)
-	postJSON[map[string]any](t, admin, base+"/api/users", map[string]any{
-		"username": "kid", "password": "kids-password", "role": "member", "permissions": map[string]any{"play": false},
-	}, http.StatusCreated)
-	web := erLoginAs(t, base, "kid", "kids-password")
-	access := postJSON[ereaderAccess](t, web, base+"/api/auth/ereader/kobo", nil, http.StatusOK)
-	_ = server
-	if resp, _ := erGet(t, base+access.Kobo.Path+"/v1/library/sync"); resp.StatusCode != http.StatusForbidden {
-		t.Errorf("no permission: %d", resp.StatusCode)
-	}
-	// The page says why it won't work.
-	if me := getJSON[map[string]any](t, web, base+"/api/auth/ereader"); me["allowed"] != false {
-		t.Errorf("allowed: %v", me["allowed"])
-	}
-}
-
 func TestKoboSendsKindleBooksAsKepub(t *testing.T) {
 	f, dev, _ := newKoboFixture(t)
 	f.server.TestSetKoboStore("http://127.0.0.1:1")

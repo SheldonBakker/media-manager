@@ -112,13 +112,14 @@ func TestSignInFailsClosedWhenTwoStepStateIsUnreadable(t *testing.T) {
 
 // A turned-off account's Plex watchlist adds nothing any more.
 func TestWatchlistJobSkipsTurnedOffAccounts(t *testing.T) {
-	server, base, admin, member, memberID := familyServer(t)
+	server, base, admin, _, _ := familyServer(t)
 	server.TestSetTMDBBaseURL("fixture-key", arrTMDB(t).URL)
 	plex := newFakePlexWatchlist(t)
 	server.TestSetPlexTVURL(plex.URL)
 	server.TestSetPlexDiscoverURL(plex.URL)
 	plex.put("old1", "movie", "Night Harbour", 2021, "tmdb://701")
-	connectWatchlist(t, member, base)
+	ada, adaID := secondAdmin(t, admin, base)
+	connectWatchlist(t, ada, base)
 
 	count := func() int {
 		n := len(getJSON[[]map[string]any](t, admin, base+"/api/series"))
@@ -130,7 +131,7 @@ func TestWatchlistJobSkipsTurnedOffAccounts(t *testing.T) {
 		t.Fatalf("the job should act for a working account, got %d", count())
 	}
 
-	postJSONMethod[map[string]any](t, admin, http.MethodPut, fmt.Sprintf("%s/api/users/%v", base, memberID), map[string]any{"disabled": true}, http.StatusOK)
+	postJSONMethod[map[string]any](t, admin, http.MethodPut, fmt.Sprintf("%s/api/users/%v", base, adaID), map[string]any{"disabled": true}, http.StatusOK)
 	plex.put("new2", "movie", "Second Light", 2020, "tmdb://702")
 	server.TestRunWatchlistJob()
 	if count() != 1 {

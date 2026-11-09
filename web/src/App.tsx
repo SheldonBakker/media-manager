@@ -217,7 +217,7 @@ function Gate() {
           <Route path="sign-in" element={<AdminOnly><SignInSettings /></AdminOnly>} />
           <Route path="general" element={<GeneralSettings />} />
           <Route path="security" element={<SecuritySettings />} />
-          <Route path="services" element={<ServicesSettings />} />
+          <Route path="services" element={<AdminOnly><ServicesSettings /></AdminOnly>} />
           <Route path="logs" element={<AdminOnly><LogsSettings /></AdminOnly>} />
           <Route path="statistics" element={<Statistics />} />
           {SETTINGS_REDIRECTS.map(([from, to]) => (

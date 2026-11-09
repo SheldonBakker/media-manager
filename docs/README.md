@@ -61,7 +61,7 @@ Settings has one entry in the sidebar. It always lists its groups, and one group
 | Downloading | Usenet, Torrents, VPN and proxy, Download rules | Your Usenet provider; the torrent client, debrid and your own client; the VPN; where to download from, speed, hours and checks. |
 | Info, lists and subtitles | Movie and show info, Import lists, Subtitles | TMDB and the info language, trailers; lists, the Trakt key and the Simkl account; subtitles. |
 | Connections | Media servers, Notifications, Other apps | Plex, Jellyfin and Emby; messages; Overseerr and phone apps. |
-| Accounts | Your profile, Security, Linked services, All accounts, Requests and reports, Ways to sign in | Your own details, passkeys, two-step sign-in and API keys, Plex watchlist, ListenBrainz and e-reader; for administrators the accounts, requests and every way to sign in. |
+| Accounts | Your profile, Security, Linked services, All accounts, Requests and reports, Ways to sign in | Your own details, passkeys and two-step sign-in; for administrators also API keys, the Plex watchlist, ListenBrainz and an e-reader, the accounts, requests and every way to sign in. |
 | System | Server, Backup and restore, Statistics, Logs and errors, Move from other apps | The server and its clean-up, backups, numbers, errors and the report for support. |
 
 The app language is only about the app itself. The audio language you want is under Settings > Library > Quality, and the subtitle languages are under Settings > Info, lists and subtitles > Subtitles.

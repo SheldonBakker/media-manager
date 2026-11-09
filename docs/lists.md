@@ -69,7 +69,7 @@ Letterboxd does not let programs read its pages (it shows them a check meant for
 
 ### Plex watchlists
 
-The Plex watchlists accounts have connected (**Settings > Account & Access > Linked services > Plex watchlist**) show in the same view, each with **Check now**. They work as before: every 20 minutes, new titles are added, or asked for when the account has to ask. They are managed by the account that connected them.
+The Plex watchlists administrators have connected (**Settings > Account & Access > Linked services > Plex watchlist**) show in the same view, each with **Check now**. They work as before: every 20 minutes, new titles are added. They are managed by the account that connected them. Linked services are for administrators only, so the watchlist of an account that is no longer an administrator adds nothing.
 
 ## When a list fails
 
