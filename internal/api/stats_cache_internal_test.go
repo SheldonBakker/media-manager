@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -26,7 +27,7 @@ func TestFirstStatsWalkIsSharedBetweenCallers(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			c.mu.Lock()
-			st, _ := c.firstWalk(walk)
+			st, _ := c.firstWalk(walk, time.Minute)
 			results[i] = st.movieBytes
 		}()
 	}
@@ -44,5 +45,51 @@ func TestFirstStatsWalkIsSharedBetweenCallers(t *testing.T) {
 	}
 	if c.stats.movieBytes != 42 {
 		t.Error("the result was not kept")
+	}
+}
+
+// A caller stops waiting for the first walk once the wait is up (a big library
+// on a network drive can take longer than a page may), and the walk carries
+// on without it: its result is kept for the next caller.
+func TestFirstStatsWalkCarriesOnAfterTheCallerStopsWaiting(t *testing.T) {
+	var c statsCache
+	release := make(chan struct{})
+	walk := func() (libraryStats, error) {
+		<-release
+		return libraryStats{movieBytes: 42, qualities: map[string]int{}}, nil
+	}
+
+	gaveUp := make(chan error, 1)
+	go func() {
+		c.mu.Lock()
+		_, err := c.firstWalk(walk, 20*time.Millisecond)
+		gaveUp <- err
+	}()
+	select {
+	case err := <-gaveUp:
+		if !errors.Is(err, errStatsPending) {
+			t.Fatalf("err = %v, want errStatsPending", err)
+		}
+	case <-time.After(2 * time.Second):
+		close(release)
+		t.Fatal("the caller kept waiting for the walk")
+	}
+
+	close(release)
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		c.mu.Lock()
+		kept, running := c.stats.movieBytes, c.first != nil
+		c.mu.Unlock()
+		if !running {
+			if kept != 42 {
+				t.Fatalf("kept %d, want the walk's 42", kept)
+			}
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the walk never finished")
+		}
+		time.Sleep(5 * time.Millisecond)
 	}
 }

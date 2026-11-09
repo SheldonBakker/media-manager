@@ -300,3 +300,24 @@ func TestDashboardSummarisesLibraryFoldersAndRecentActivity(t *testing.T) {
 		t.Fatal("the dashboard must carry the health warnings")
 	}
 }
+
+// The first dashboard after a restart must not wait for the walk that adds up
+// the size of every file: on a big library on a network drive that walk takes
+// longer than a page may, and the page got "busy" instead. It comes without
+// the sizes for now; a later refresh brings them.
+func TestDashboardDoesNotWaitForTheFirstLibraryWalk(t *testing.T) {
+	defer api.SetReadDeadlineForTest(time.Second)()
+	defer api.SetFirstStatsWaitForTest(50 * time.Millisecond)()
+	server, base, client := loginNewServer(t)
+	release := server.TestHoldFirstLibraryWalk()
+	defer release()
+
+	d := getJSON[map[string]any](t, client, base+"/api/dashboard")
+	lib := d["library"].(map[string]any)
+	if lib["sizeBytes"] != float64(0) {
+		t.Fatalf("library size = %v, want 0 while the walk runs", lib["sizeBytes"])
+	}
+	if q := lib["qualities"].([]any); len(q) != 0 {
+		t.Fatalf("qualities = %+v, want none while the walk runs", q)
+	}
+}
