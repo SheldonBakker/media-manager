@@ -177,11 +177,11 @@ func (s *Server) handleProvisionAccess(w http.ResponseWriter, r *http.Request) {
 	// The Coordinator may send the same answer again; only a change goes in
 	// the Activity feed.
 	if changed {
-		what := "has a subscription"
+		line := fmt.Sprintf("Account %q has a subscription", u.Username)
 		if *req.Locked {
-			what = "needs a subscription"
+			line = fmt.Sprintf("Account %q needs a subscription", u.Username)
 		}
-		s.auditAccountBy(r, provisioningActor, fmt.Sprintf("Account %q %s", u.Username, what))
+		s.auditAccountBy(r, provisioningActor, line)
 	}
 	w.WriteHeader(http.StatusNoContent)
 }

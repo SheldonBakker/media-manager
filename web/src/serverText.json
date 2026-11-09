@@ -797,6 +797,7 @@
  "See what failed",
  "Seeding goal reached for {0}: stopped seeding and removed its download data ({1})",
  "Send \"ebook\" or \"audiobook\".",
+ "Send \"locked\" as true or false.",
  "Send a file or an address, with the movie or episode it is for.",
  "Send a name for the playlist.",
  "Send a new name, or whether to share the playlist.",
