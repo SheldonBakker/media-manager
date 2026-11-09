@@ -278,9 +278,7 @@ func New(db *sql.DB, cfg config.Config, box *crypto.Box, defaultTMDBAPIKey, vers
 	if cfg.AccountServiceURL != "" {
 		s.accountService = accountservice.New(cfg.AccountServiceURL)
 	}
-	if s.coordinator, err = coordinator.New(cfg.CoordinatorURL, cfg.CoordinatorToken); err != nil {
-		return nil, err
-	}
+	s.coordinator = coordinator.New(cfg.CoordinatorURL, cfg.CoordinatorToken)
 	s.QueueRepo.SetBox(box) // download addresses carry indexer keys: kept encrypted
 	s.startProblems()
 	s.applyDebugLogging()

@@ -41,18 +41,15 @@ type Client struct {
 }
 
 // New returns a client for the Coordinator at baseURL (no trailing slash
-// needed) that signs in with token. It returns nil and no error when either is
-// empty, which means subscriptions are off.
-func New(baseURL, token string) (*Client, error) {
-	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
+// needed; config checks that it is an http or https address) that signs in
+// with token. It returns nil when either is empty, which means subscriptions
+// are off.
+func New(baseURL, token string) *Client {
+	baseURL = strings.TrimRight(baseURL, "/")
 	if baseURL == "" || token == "" {
-		return nil, nil
+		return nil
 	}
-	u, err := url.Parse(baseURL)
-	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-		return nil, errors.New("coordinator: MEDIARIUM_COORDINATOR_URL must be an http or https address")
-	}
-	return &Client{baseURL: baseURL, token: token, http: netguard.Client(requestTimeout)}, nil
+	return &Client{baseURL: baseURL, token: token, http: netguard.Client(requestTimeout)}
 }
 
 // Forward makes one call for the member the directory knows as subject and
