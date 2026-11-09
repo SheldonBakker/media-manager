@@ -1,5 +1,5 @@
 import type { Subscription } from './api.ts'
-import { t } from './i18n.ts'
+import { locale, t } from './i18n.ts'
 
 export type SubscriptionAction = 'subscribe' | 'payNow' | 'updateCard' | 'cancel'
 
@@ -49,12 +49,13 @@ function every(interval: string): string {
   }
 }
 
-// "R 99.00 / month": the price and how often it is charged, empty for a member
-// with no plan.
-export function planLine(plan: Subscription['plan']): string {
+// "R 60.00 / month": the price in the reader's own way of writing money and how
+// often it is charged, empty for a member with no plan. The narrow symbol
+// writes rand as R, where the plain one would spell out ZAR.
+export function planLine(plan: Subscription['plan'], loc: string | undefined = locale()): string {
   if (!plan) return ''
-  const money = plan.currency === 'ZAR' ? 'R' : plan.currency
-  return `${money} ${plan.amount.toFixed(2)} / ${every(plan.interval)}`
+  const money = new Intl.NumberFormat(loc, { style: 'currency', currency: plan.currency, currencyDisplay: 'narrowSymbol' }).format(plan.amount)
+  return `${money} / ${every(plan.interval)}`
 }
 
 export type AccessState = 'none' | 'switching' | 'unlocked'

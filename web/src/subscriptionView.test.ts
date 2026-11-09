@@ -8,7 +8,7 @@ const sub = (status: SubscriptionStatus, complimentary = false): Subscription =>
   hasAccess: status === 'active' || status === 'cancelling',
   complimentary,
   paidThrough: null,
-  plan: complimentary ? null : { name: 'Monthly', amount: 99, currency: 'ZAR', interval: 'monthly' },
+  plan: complimentary ? null : { name: 'Monthly', amount: 60, currency: 'ZAR', interval: 'monthly' },
 })
 
 test('each status offers its own buttons', () => {
@@ -32,9 +32,11 @@ test('the return reference is read from reference, then trxref', () => {
   assert.equal(returnReference('?reference='), null)
 })
 
-test('the plan reads as price and interval', () => {
-  assert.equal(planLine({ name: 'Monthly', amount: 99, currency: 'ZAR', interval: 'monthly' }), 'R 99.00 / month')
-  assert.equal(planLine({ name: 'Yearly', amount: 1200.5, currency: 'USD', interval: 'annually' }), 'USD 1200.50 / year')
+test('the plan reads as price and interval, in the reader\'s locale', () => {
+  // Intl keeps a letter symbol off the digits with a no-break space.
+  assert.equal(planLine({ name: 'Monthly', amount: 60, currency: 'ZAR', interval: 'monthly' }, 'en'), 'R\u00a060.00 / month')
+  assert.equal(planLine({ name: 'Yearly', amount: 1200.5, currency: 'USD', interval: 'annually' }, 'en'), '$1,200.50 / year')
+  assert.equal(planLine({ name: 'Monthly', amount: 60, currency: 'ZAR', interval: 'monthly' }, 'en-ZA'), 'R\u00a060,00 / month')
   assert.equal(planLine(null), '')
 })
 
