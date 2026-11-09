@@ -82,6 +82,13 @@ type Config struct {
 	// "Create an account": the service makes the person's directory account
 	// and their basic account here. Empty means sign-up is off.
 	AccountServiceURL string
+
+	// CoordinatorURL and CoordinatorToken let signed-in people manage a paid
+	// subscription through the Coordinator (MEDIARIUM_COORDINATOR_URL and
+	// MEDIARIUM_COORDINATOR_TOKEN, which may come from a _FILE). Either one
+	// empty means subscriptions are off.
+	CoordinatorURL   string
+	CoordinatorToken string
 }
 
 // provisioningTokenMin is the shortest provisioning token accepted, in
@@ -115,6 +122,9 @@ func Load() Config {
 		ProvisioningToken: provisioningToken(envStr("MEDIARIUM_PROVISIONING_TOKEN", "")),
 
 		AccountServiceURL: accountServiceURL(envStr("MEDIARIUM_ACCOUNT_SERVICE_URL", "")),
+
+		CoordinatorURL:   envStr("MEDIARIUM_COORDINATOR_URL", ""),
+		CoordinatorToken: envStr("MEDIARIUM_COORDINATOR_TOKEN", ""),
 	}
 	cfg.URLBase, cfg.urlBaseErr = NormalizeURLBase(envStr("URL_BASE", ""))
 	cfg.DownloadsIncomplete = filepath.Join(cfg.DownloadsDir, "incomplete")

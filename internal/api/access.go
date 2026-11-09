@@ -31,7 +31,7 @@ const readOnlyKeyMessage = "This API key is read-only. It can only be used for G
 
 // viewerWritable are the routes a viewer account may call with a method that
 // changes something: only what concerns the person themselves (their own
-// profile, password, second step, passkeys and reading place), never the
+// profile, password, second step, passkeys, reading place and subscription), never the
 // library, the downloads or the settings.
 var viewerWritable = map[string]bool{
 	"PUT /api/auth/profile":                   true,
@@ -48,6 +48,10 @@ var viewerWritable = map[string]bool{
 	"POST /api/auth/oidc/link":                true,
 	"DELETE /api/auth/oidc/link":              true,
 	"PUT /api/books/{id}/progress":            true,
+	"POST /api/subscription/checkout":         true,
+	"POST /api/subscription/confirm":          true,
+	"POST /api/subscription/manage-link":      true,
+	"POST /api/subscription/cancel":           true,
 }
 
 // lockedMessage is the 403 body for an account that needs a subscription
@@ -81,6 +85,11 @@ var lockedAllowed = map[string]bool{
 	"DELETE /api/auth/passkeys/{id}":          true,
 	"POST /api/auth/oidc/link":                true,
 	"DELETE /api/auth/oidc/link":              true,
+	"GET /api/subscription":                   true,
+	"POST /api/subscription/checkout":         true,
+	"POST /api/subscription/confirm":          true,
+	"POST /api/subscription/manage-link":      true,
+	"POST /api/subscription/cancel":           true,
 }
 
 // viewerHidden are routes a viewer may not even read: they show things that

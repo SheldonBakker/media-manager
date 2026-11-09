@@ -425,6 +425,7 @@ func (s *Server) handleMe(w http.ResponseWriter, r *http.Request) {
 	if p, err := s.Auth.PermissionsOf(user.ID); err == nil {
 		out["permissions"] = p // the app hides what the account may not do
 	}
+	_, out["subscriptionAvailable"] = s.directorySubject(user) // the Subscription page needs the Coordinator and a directory sign-in
 	if ids, err := s.Auth.IdentitiesOf(user.ID); err == nil {
 		out["oidcLinked"] = hasProvider(ids, oidcProvider) // tied to a single sign-on account
 	}
