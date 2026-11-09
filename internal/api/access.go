@@ -31,8 +31,8 @@ const readOnlyKeyMessage = "This API key is read-only. It can only be used for G
 
 // viewerWritable are the routes a viewer account may call with a method that
 // changes something: only what concerns the person themselves (their own
-// profile, password, second step, passkeys, reading place and subscription), never the
-// library, the downloads or the settings.
+// profile, password, second step, passkeys, reading place and subscription),
+// never the library, the downloads or the settings.
 var viewerWritable = map[string]bool{
 	"PUT /api/auth/profile":                   true,
 	"POST /api/auth/change-password":          true,
@@ -63,11 +63,23 @@ const lockedMessage = "This account needs a subscription. Open Settings > Accoun
 // profile, password, sessions, second step, passkeys and single sign-on
 // link), never the library, the downloads or the settings. It is checked for
 // every route in one place, so a route added later stays closed to a locked
-// account until someone adds it here. Three ways in sign the person in outside
-// this table: the OPDS catalogue and the Kobo address (ereaderUserAllowed,
-// which lets in administrators only, and the lock never applies to one) and
-// the calendar feed (handleCalendarFeed, which checks Locked() itself). Any new
-// way in must check Locked() too.
+// account until someone adds it here.
+//
+// These ways in sign a person in outside this table, and each keeps a locked
+// account out by itself:
+//   - The OPDS catalogue (/opds/) and the Kobo address (/kobo/):
+//     ereaderUserAllowed lets in administrators only, and the lock never
+//     applies to one.
+//   - The calendar feed (/api/calendar/feed/{file}): handleCalendarFeed checks
+//     Locked() itself.
+//   - MCP (/mcp and /api/mcp): handleMCP lets in administrators only.
+//   - The Radarr, Sonarr and Lidarr endpoints (/radarr/, /sonarr/, /lidarr/):
+//     arrHandler lets in administrators only.
+//   - /oauth/ signs nobody in by itself: the app is approved on /connect-app
+//     through this table, where a locked account is refused (and only an
+//     administrator may approve), and the token it then gets opens only MCP.
+//
+// Any new way in must check Locked() too, or let in administrators only.
 var lockedAllowed = map[string]bool{
 	"GET /api/auth/me":                        true,
 	"PUT /api/auth/profile":                   true,
