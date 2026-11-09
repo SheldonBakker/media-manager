@@ -363,3 +363,33 @@ func TestProvisioningAccessIsLogged(t *testing.T) {
 		t.Errorf("the Activity feed lacks the lock:\n%s", lines)
 	}
 }
+
+// A body without "locked" (empty, or with the name misspelt) must never
+// unlock anyone, so it is refused.
+func TestProvisioningAccessNeedsLocked(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam", "locked": true}, http.StatusCreated, bearer(provisioningToken)...)
+	for _, body := range []map[string]any{{}, {"lockd": false}, {"locked": nil}} {
+		if status, out := e.call(e.client(), "PUT", accessPath("uuid-sam"), body, bearer(provisioningToken)...); status != http.StatusBadRequest {
+			t.Errorf("%v: %d %v, want 400", body, status, out["_raw"])
+		}
+	}
+	if u, _ := e.server.Auth.UserByIdentity(auth.SourceLDAP, "uuid-sam"); u == nil || !u.SubscriptionLocked {
+		t.Error("a body without locked unlocked the account")
+	}
+}
+
+// Locking an account that is already locked changes nothing, so it adds no
+// second line to the Activity feed.
+func TestProvisioningAccessLogsOnlyAChange(t *testing.T) {
+	e := newProvisioningEnv(t)
+	e.must(e.client(), "POST", provisionPath, map[string]any{"subject": "uuid-sam", "username": "sam"}, http.StatusCreated, bearer(provisioningToken)...)
+	for range 2 {
+		if status, out := e.call(e.client(), "PUT", accessPath("uuid-sam"), map[string]bool{"locked": true}, bearer(provisioningToken)...); status != http.StatusNoContent {
+			t.Fatalf("%d %v, want 204", status, out["_raw"])
+		}
+	}
+	if n := strings.Count(activityLines(t, e.admin, e.base), `Account "sam" needs a subscription`); n != 1 {
+		t.Errorf("the lock is in the Activity feed %d times, want once", n)
+	}
+}

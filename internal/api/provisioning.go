@@ -136,7 +136,9 @@ func (s *Server) handleProvisionDirectoryAccount(w http.ResponseWriter, r *http.
 const accessBodyMax = 1 << 10
 
 type provisionAccessRequest struct {
-	Locked bool `json:"locked"`
+	// Locked is a pointer so that a body without it (or with the name
+	// misspelt) is refused instead of read as false, which would unlock.
+	Locked *bool `json:"locked"`
 }
 
 // handleProvisionAccess locks the account of a directory person, so that it
@@ -152,6 +154,10 @@ func (s *Server) handleProvisionAccess(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "That request couldn't be read.")
 		return
 	}
+	if req.Locked == nil {
+		writeError(w, http.StatusBadRequest, `Send "locked" as true or false.`)
+		return
+	}
 	subject := strings.TrimSpace(r.PathValue("subject"))
 	if rejectBad(w,
 		checkRequired(subject, "Send the person's id in the directory as subject."),
@@ -159,7 +165,7 @@ func (s *Server) handleProvisionAccess(w http.ResponseWriter, r *http.Request) {
 	) {
 		return
 	}
-	u, err := s.Auth.SetSubscriptionLocked(auth.SourceLDAP, subject, req.Locked)
+	u, changed, err := s.Auth.SetSubscriptionLocked(auth.SourceLDAP, subject, *req.Locked)
 	if errors.Is(err, auth.ErrNoIdentity) {
 		writeError(w, http.StatusNotFound, "No account is linked to that directory id.")
 		return
@@ -168,10 +174,14 @@ func (s *Server) handleProvisionAccess(w http.ResponseWriter, r *http.Request) {
 		writeAccountError(w, err)
 		return
 	}
-	if req.Locked {
-		s.auditAccountBy(r, provisioningActor, fmt.Sprintf("Account %q needs a subscription", u.Username))
-	} else {
-		s.auditAccountBy(r, provisioningActor, fmt.Sprintf("Account %q has a subscription", u.Username))
+	// The Coordinator may send the same answer again; only a change goes in
+	// the Activity feed.
+	if changed {
+		what := "has a subscription"
+		if *req.Locked {
+			what = "needs a subscription"
+		}
+		s.auditAccountBy(r, provisioningActor, fmt.Sprintf("Account %q %s", u.Username, what))
 	}
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -178,18 +178,23 @@ func (s *Service) CreateExternalUser(p ExternalProfile) (*User, error) {
 }
 
 // SetSubscriptionLocked locks or unlocks the account linked to a provider's
-// subject. It returns ErrNoIdentity when nobody has that identity. Sessions are
-// left as they are.
-func (s *Service) SetSubscriptionLocked(provider, subject string, locked bool) (*User, error) {
-	u, err := s.UserByIdentity(provider, subject)
+// subject. changed is false when the account already was that way. It returns
+// ErrNoIdentity when nobody has that identity. Sessions are left as they are.
+func (s *Service) SetSubscriptionLocked(provider, subject string, locked bool) (u *User, changed bool, err error) {
+	u, err = s.UserByIdentity(provider, subject)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	if _, err := s.db.Exec(`UPDATE users SET subscription_locked = ? WHERE id = ?`, locked, u.ID); err != nil {
-		return nil, fmt.Errorf("set subscription lock: %w", err)
+	res, err := s.db.Exec(`UPDATE users SET subscription_locked = ? WHERE id = ? AND subscription_locked != ?`, locked, u.ID, locked)
+	if err != nil {
+		return nil, false, fmt.Errorf("set subscription lock: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return nil, false, fmt.Errorf("set subscription lock: %w", err)
 	}
 	u.SubscriptionLocked = locked
-	return u, nil
+	return u, n > 0, nil
 }
 
 // SyncExternalRole sets the role of an account made through a provider to
