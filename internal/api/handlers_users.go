@@ -16,16 +16,18 @@ import (
 // accountPayload is one row of the account list an administrator manages.
 // name is the name as stored (may be empty; the app then shows the username).
 type accountPayload struct {
-	ID          int64      `json:"id"`
-	Username    string     `json:"username"`
-	Name        string     `json:"name"`
-	Email       string     `json:"email"`
-	Role        string     `json:"role"` // "admin", "member" or "viewer"
-	IsAdmin     bool       `json:"isAdmin"`
-	Disabled    bool       `json:"disabled"` // turned off: cannot sign in
-	Source      string     `json:"source"`   // "local" (a password here), "oidc" or "ldap"
-	CreatedAt   time.Time  `json:"createdAt"`
-	LastLoginAt *time.Time `json:"lastLoginAt"` // null until the first sign-in
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Role     string `json:"role"` // "admin", "member" or "viewer"
+	IsAdmin  bool   `json:"isAdmin"`
+	Disabled bool   `json:"disabled"` // turned off: cannot sign in
+	// SubscriptionLocked: needs a subscription before anything but Account & Access.
+	SubscriptionLocked bool       `json:"subscriptionLocked"`
+	Source             string     `json:"source"` // "local" (a password here), "oidc" or "ldap"
+	CreatedAt          time.Time  `json:"createdAt"`
+	LastLoginAt        *time.Time `json:"lastLoginAt"` // null until the first sign-in
 	// What a basic account may do (everything, for an administrator).
 	Permissions auth.Permissions `json:"permissions"`
 	TwoStep     bool             `json:"twoStep"` // two-step sign-in is on
@@ -34,7 +36,7 @@ type accountPayload struct {
 func toAccountPayload(a *auth.Account) accountPayload {
 	return accountPayload{
 		ID: a.ID, Username: a.Username, Name: a.Name(), Email: a.Email,
-		Role: a.Role(), IsAdmin: a.IsAdmin, Disabled: a.Disabled, Source: sourceOf(a.Source), CreatedAt: a.CreatedAt, LastLoginAt: a.LastLoginAt, Permissions: a.Permissions,
+		Role: a.Role(), IsAdmin: a.IsAdmin, Disabled: a.Disabled, SubscriptionLocked: a.SubscriptionLocked, Source: sourceOf(a.Source), CreatedAt: a.CreatedAt, LastLoginAt: a.LastLoginAt, Permissions: a.Permissions,
 	}
 }
 

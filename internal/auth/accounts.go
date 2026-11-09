@@ -36,7 +36,7 @@ type AccountUpdate struct {
 	Password  *string // a new password; the account's sessions are signed out
 }
 
-const accountColumns = `id, username, is_admin, first_name, last_name, email, created_at, last_login_at, permissions, is_viewer, disabled, auth_source`
+const accountColumns = `id, username, is_admin, first_name, last_name, email, created_at, last_login_at, permissions, is_viewer, disabled, auth_source, subscription_locked`
 
 func scanAccount(scan func(dest ...any) error) (Account, error) {
 	var (
@@ -45,7 +45,7 @@ func scanAccount(scan func(dest ...any) error) (Account, error) {
 		last    sql.NullString
 		perms   string
 	)
-	if err := scan(&a.ID, &a.Username, &a.IsAdmin, &a.FirstName, &a.LastName, &a.Email, &created, &last, &perms, &a.Viewer, &a.Disabled, &a.Source); err != nil {
+	if err := scan(&a.ID, &a.Username, &a.IsAdmin, &a.FirstName, &a.LastName, &a.Email, &created, &last, &perms, &a.Viewer, &a.Disabled, &a.Source, &a.SubscriptionLocked); err != nil {
 		return Account{}, err
 	}
 	a.Permissions = parsePermissions(perms)

@@ -297,6 +297,11 @@ function AccountCard({ a, self, onEdit, onRemove, onTwoStepOff }: { a: Account; 
               {t('Off')}
             </span>
           )}
+          {a.subscriptionLocked && !a.isAdmin && (
+            <span className="badge missing" title={t('Can only use Account & Access until it has a subscription')}>
+              {t('Needs subscription')}
+            </span>
+          )}
           {isExternal(a) && (
             <span className="badge" title={t('Signs in through {where}, with no password here', { where: sourceName(a.source) })}>
               {sourceName(a.source)}

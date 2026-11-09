@@ -379,6 +379,7 @@ export interface Account {
   permissions?: Permissions
   twoStep?: boolean // two-step sign-in is on
   disabled?: boolean // turned off: cannot sign in
+  subscriptionLocked?: boolean // needs a subscription before anything but Account & Access
   source?: AccountSource
 }
 
