@@ -740,7 +740,7 @@ Every route the server exposes. Routes marked **public** need no sign-in; all ot
 | GET | `/api/subscription` | any account |  |
 | POST | `/api/subscription/cancel` | any account |  |
 | POST | `/api/subscription/checkout` | any account |  |
-| POST | `/api/subscription/confirm` | any account | passes on the payment reference the person came back from the payment page with, and nothing else of what they sent. |
+| POST | `/api/subscription/confirm` | any account |  |
 | POST | `/api/subscription/manage-link` | any account |  |
 
 ## subtitles

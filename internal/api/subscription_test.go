@@ -89,15 +89,15 @@ func TestSubscriptionForwardsWithTheSubjectAndToken(t *testing.T) {
 	e := newSignInEnv(t, withCoordinator(url))
 	sam := e.directoryMember("sam", "member", "uid=sam/odd subject")
 
-	tests := []struct{ method, path, wantPath, wantBody string }{
-		{"GET", "/api/subscription", "", ""},
-		{"POST", "/api/subscription/checkout", "/checkout", ""},
-		{"POST", "/api/subscription/confirm", "/checkout/confirm", `{"reference":"ref_123"}`},
-		{"POST", "/api/subscription/manage-link", "/manage-link", ""},
-		{"POST", "/api/subscription/cancel", "/cancel", ""},
+	tests := []struct{ method, path, wantPath, sendBody, wantBody string }{
+		{"GET", "/api/subscription", "", "", ""},
+		{"POST", "/api/subscription/checkout", "/checkout", "", ""},
+		{"POST", "/api/subscription/confirm", "/checkout/confirm", `{"reference":"ref_123"}`, ""},
+		{"POST", "/api/subscription/manage-link", "/manage-link", "", ""},
+		{"POST", "/api/subscription/cancel", "/cancel", "", ""},
 	}
 	for _, tc := range tests {
-		status, body := rawCall(e, sam, tc.method, tc.path, tc.wantBody)
+		status, body := rawCall(e, sam, tc.method, tc.path, tc.sendBody)
 		if status != http.StatusOK || body != answer {
 			t.Errorf("%s %s: %d %q, want the Coordinator's answer unchanged", tc.method, tc.path, status, body)
 		}
@@ -219,13 +219,14 @@ func TestLockedMemberCanCallAllSubscriptionRoutes(t *testing.T) {
 	}
 }
 
-func TestSubscriptionConfirmRefusesALongBody(t *testing.T) {
+func TestSubscriptionConfirmPassesNoBody(t *testing.T) {
 	url, calls := fakeCoordinator(t, http.StatusOK, `{}`)
 	e := newSignInEnv(t, withCoordinator(url))
 	sam := e.directoryMember("sam", "member", "sam")
 	status, _ := rawCall(e, sam, "POST", "/api/subscription/confirm", `{"reference":"`+strings.Repeat("x", 2000)+`"}`)
-	if status != http.StatusBadRequest || len(calls()) != 0 {
-		t.Errorf("a 2 KB reference: %d, %d calls", status, len(calls()))
+	got := calls()
+	if status != http.StatusOK || len(got) != 1 || got[0].body != "" {
+		t.Errorf("a 2 KB body: %d, calls %+v, want 200 and one call with no body", status, got)
 	}
 }
 

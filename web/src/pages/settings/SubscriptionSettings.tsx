@@ -6,7 +6,7 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { useToast } from '../../components/Toast'
 import { locale, t } from '../../i18n'
-import { accessState, planLine, refusal, returnReference, subscriptionActions, type RefusalTone } from '../../subscriptionView'
+import { accessState, isCheckoutReturn, planLine, refusal, subscriptionActions, type RefusalTone } from '../../subscriptionView'
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e))
 const refusalOf = (e: unknown, reading: boolean) => (e instanceof ApiError ? refusal(e.status, e.code, reading) : refusal(0, undefined, reading))
@@ -32,7 +32,7 @@ function statusLine(s: Subscription): string {
 
 // Settings > Account & Access > Subscription: the plan, the card, and
 // subscribing, paying a failed payment or cancelling. Payment itself happens
-// on Paystack's pages; this page only sends people there and back.
+// on the payment provider's pages; this page only sends people there and back.
 export default function SubscriptionSettings() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -43,9 +43,10 @@ export default function SubscriptionSettings() {
   const [notice, setNotice] = useState<{ text: string; tone: RefusalTone } | null>(null)
   const [busy, setBusy] = useState(false)
   const [asking, setAsking] = useState(false)
-  // The payment reference this load already sent, so React's double effect run
-  // in development (and a re-render before the address is cleaned) sends it once.
-  const confirmed = useRef<string | null>(null)
+  // Whether this load already confirmed the return, so React's double effect
+  // run in development (and a re-render before the address is cleaned)
+  // confirms it once.
+  const confirmed = useRef(false)
 
   // Reads the account again. Once it is no longer locked the app swaps to its
   // full layout by itself; until then the page says access is being switched on.
@@ -78,7 +79,7 @@ export default function SubscriptionSettings() {
   )
 
   // An action the server turned down. A 409 means the subscription changed
-  // meanwhile (a payment in another tab, a late notice from Paystack), so the
+  // meanwhile (a payment in another tab, a late notice from the provider), so the
   // page shows what the server now says before the message.
   const turnedDown = useCallback(
     async (e: unknown) => {
@@ -90,18 +91,17 @@ export default function SubscriptionSettings() {
   )
 
   useEffect(() => {
-    const reference = returnReference(location.search)
-    if (!reference) {
+    if (!isCheckoutReturn(location.search)) {
       // After a return the confirm answer is already showing; do not replace it or its message.
-      if (confirmed.current === null) void load()
+      if (!confirmed.current) void load()
       return
     }
-    if (confirmed.current === reference) return
-    confirmed.current = reference
+    if (confirmed.current) return
+    confirmed.current = true
     setBusy(true)
     setNotice(null)
     api
-      .confirmCheckout(reference)
+      .confirmCheckout()
       .then(async (s) => {
         setSub(s)
         navigate(location.pathname, { replace: true })
@@ -114,7 +114,7 @@ export default function SubscriptionSettings() {
       .finally(() => setBusy(false))
   }, [location.search, location.pathname, navigate, load, syncUser, turnedDown])
 
-  // Coming back to the tab (from Paystack's card page, say) reads the
+  // Coming back to the tab (from the provider's card page, say) reads the
   // subscription again, and lets a locked account in once it has paid. A
   // message stays: closing the card tab after a failed link brings the focus
   // back too, and that message is still news. It goes only when the page had

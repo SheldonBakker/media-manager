@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { Subscription, SubscriptionStatus } from './api.ts'
-import { accessState, planLine, refusal, returnReference, subscriptionActions } from './subscriptionView.ts'
+import { accessState, isCheckoutReturn, planLine, refusal, subscriptionActions } from './subscriptionView.ts'
 
 const sub = (status: SubscriptionStatus, complimentary = false): Subscription => ({
   status,
@@ -25,11 +25,12 @@ test('a complimentary member has nothing to do, whatever the status', () => {
   }
 })
 
-test('the return reference is read from reference, then trxref', () => {
-  assert.equal(returnReference('?trxref=a&reference=a'), 'a')
-  assert.equal(returnReference('?trxref=b'), 'b')
-  assert.equal(returnReference(''), null)
-  assert.equal(returnReference('?reference='), null)
+test('the return from the payment page is recognised by checkout=return', () => {
+  assert.equal(isCheckoutReturn('?checkout=return'), true)
+  assert.equal(isCheckoutReturn('?checkout=return&trxref=a&reference=a'), true)
+  assert.equal(isCheckoutReturn(''), false)
+  assert.equal(isCheckoutReturn('?reference=a'), false)
+  assert.equal(isCheckoutReturn('?checkout=other'), false)
 })
 
 test('the plan reads as price and interval, in the reader\'s locale', () => {

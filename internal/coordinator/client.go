@@ -7,7 +7,6 @@
 package coordinator
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -62,7 +61,7 @@ func New(baseURL, token string) *Client {
 // returns the Coordinator's status and body untouched. path is what follows
 // the member's subscription address: "" or "/checkout", for example. A
 // Coordinator that cannot be reached gives an error that is safe to log.
-func (c *Client) Forward(ctx context.Context, method, subject, path string, body []byte) (int, []byte, error) {
+func (c *Client) Forward(ctx context.Context, method, subject, path string) (int, []byte, error) {
 	timeout := c.writeTimeout
 	if method == http.MethodGet {
 		timeout = c.readTimeout
@@ -70,7 +69,7 @@ func (c *Client) Forward(ctx context.Context, method, subject, path string, body
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	target := c.baseURL + "/api/v1/members/" + url.PathEscape(subject) + "/subscription" + path
-	req, err := http.NewRequestWithContext(ctx, method, target, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, method, target, nil)
 	if err != nil {
 		return 0, nil, ErrUnavailable
 	}

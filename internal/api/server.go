@@ -513,7 +513,7 @@ func (s *Server) protectedRoutes() *routeTable {
 	member.HandleFunc("DELETE /api/auth/oidc/link", s.handleOIDCUnlink)
 	member.HandleFunc("GET /api/subscription", s.forwardTo(""))
 	member.HandleFunc("POST /api/subscription/checkout", s.forwardTo("/checkout"))
-	member.HandleFunc("POST /api/subscription/confirm", s.handleSubscriptionConfirm)
+	member.HandleFunc("POST /api/subscription/confirm", s.forwardTo("/checkout/confirm"))
 	member.HandleFunc("POST /api/subscription/manage-link", s.forwardTo("/manage-link"))
 	member.HandleFunc("POST /api/subscription/cancel", s.forwardTo("/cancel"))
 

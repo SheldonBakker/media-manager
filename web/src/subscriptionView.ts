@@ -4,8 +4,8 @@ import { locale, t } from './i18n.ts'
 export type SubscriptionAction = 'subscribe' | 'payNow' | 'updateCard' | 'cancel'
 
 // The buttons the Subscription page shows. A complimentary member has nothing
-// to pay or cancel; Paystack cannot resume a cancelled subscription, so while
-// one is ending the only way back is to subscribe again after it ends.
+// to pay or cancel; a cancelled subscription cannot be resumed, so while one
+// is ending the only way back is to subscribe again after it ends.
 export function subscriptionActions(s: Subscription): SubscriptionAction[] {
   if (s.complimentary) return []
   switch (s.status) {
@@ -20,11 +20,11 @@ export function subscriptionActions(s: Subscription): SubscriptionAction[] {
   }
 }
 
-// The payment reference Paystack puts on the address when it sends the person
-// back: `reference`, or `trxref` when that is missing.
-export function returnReference(search: string): string | null {
-  const q = new URLSearchParams(search)
-  return q.get('reference') || q.get('trxref') || null
+// Whether the person has just come back from the payment page: the
+// Coordinator adds checkout=return to the address it sends them back to,
+// whatever else the payment provider puts there.
+export function isCheckoutReturn(search: string): boolean {
+  return new URLSearchParams(search).get('checkout') === 'return'
 }
 
 // How often a plan is charged, as the words after the price.
