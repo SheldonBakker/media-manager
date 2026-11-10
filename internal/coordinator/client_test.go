@@ -31,7 +31,7 @@ func TestForwardTimesOut(t *testing.T) {
 	c := New(srv.URL, "a-service-token-of-some-length-1234")
 	c.readTimeout = 50 * time.Millisecond
 	start := time.Now()
-	_, _, err := c.Forward(context.Background(), http.MethodGet, "sam", "", nil)
+	_, _, err := c.Forward(context.Background(), http.MethodGet, "sam", "")
 	if err == nil {
 		t.Fatal("a Coordinator that never answers gave no error")
 	}
@@ -56,10 +56,10 @@ func TestForwardGivesAPostLongerThanAGet(t *testing.T) {
 		t.Errorf("timeouts = %s for a GET and %s for a POST, want 15s and 30s", c.readTimeout, c.writeTimeout)
 	}
 	c.readTimeout, c.writeTimeout = 50*time.Millisecond, 5*time.Second
-	if _, _, err := c.Forward(context.Background(), http.MethodGet, "sam", "", nil); !errors.Is(err, ErrTimedOut) {
+	if _, _, err := c.Forward(context.Background(), http.MethodGet, "sam", ""); !errors.Is(err, ErrTimedOut) {
 		t.Errorf("a slow GET: %v, want ErrTimedOut", err)
 	}
-	if status, _, err := c.Forward(context.Background(), http.MethodPost, "sam", "/checkout/confirm", nil); err != nil || status != http.StatusOK {
+	if status, _, err := c.Forward(context.Background(), http.MethodPost, "sam", "/checkout/confirm"); err != nil || status != http.StatusOK {
 		t.Errorf("a POST as slow: %d %v, want 200", status, err)
 	}
 }
@@ -74,7 +74,7 @@ func TestForwardRefusesAnAnswerOverTheCap(t *testing.T) {
 			_, _ = w.Write(bytes.Repeat([]byte("x"), tc.size))
 		}))
 		c := New(srv.URL, "a-service-token-of-some-length-1234")
-		_, payload, err := c.Forward(context.Background(), http.MethodGet, "sam", "", nil)
+		_, payload, err := c.Forward(context.Background(), http.MethodGet, "sam", "")
 		srv.Close()
 		if tc.ok && (err != nil || len(payload) != tc.size) {
 			t.Errorf("%d bytes: %d bytes, %v; want the whole answer", tc.size, len(payload), err)
